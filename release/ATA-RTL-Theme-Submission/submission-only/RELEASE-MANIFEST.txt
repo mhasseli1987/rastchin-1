@@ -1,0 +1,26 @@
+RELEASE-MANIFEST — ATA-RTL-Theme-Submission
+Product: آتا | ATA: AI Telegram Admin (slug: ata-telegram-ai-admin)
+Version: 1.0.0-MVP
+Git HEAD: c84734d
+Build date: 2026-10-11 06:45 UTC
+
+== File hashes (SHA-256, generated from disk) ==
+da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11  51880 bytes  ./ata-telegram-ai-admin-1.0.0-MVP-rc1.zip
+214ce0f86ed7d5e0d055fd48c7ac34df216d676628c9060f45d40d6719499543  3785 bytes  ./customer/CHANGELOG.md
+7367fb1441b39e6b8a86a76e74cf79f44f0e36f1ee95d651797e6f36532a7469  1725 bytes  ./customer/COMPATIBILITY.md
+7f2e5ddf6974b745d419c76b7a0adf17035a0b463cd5f3c680eed27f4f019b54  3887 bytes  ./customer/FAQ-FA.md
+f9739c6525dc038b9a63db61f771988baa7ffdda42bf92c76729f16febbf8bc1  2403 bytes  ./customer/PRIVACY.md
+30fec50532aee0f7cb5541a39f67d4a7b9d0b9681849517d826915f4c32cec3f  14877 bytes  ./customer/README-FA.md
+a2ca6c61a7ec58d0c9f09e7fcfbca66e09b86ad33cad6a2d43ff61c52db6b183  3293 bytes  ./customer/SECURITY.md
+127e2d82db353870cafcc1fead9f02df32fc0ac66d3aebabf199dba48b6c58ea  1997 bytes  ./customer/SUPPORT-POLICY-FA.md
+5490a76763a57b31b14e56451bd58aec312796bada22006612ee8c4b110fb8e0  3669 bytes  ./customer/TROUBLESHOOTING.md
+382df5ead1e61bb0ad65a2dee2fa967d32094c489233dd160f43eb0b8d5eeb48  4977 bytes  ./customer/USER-GUIDE-FA.md
+e9716e2f9f06b2e76ca8cecd447695fe71a17b09719afb4009aba52dcd03590d  3379 bytes  ./submission-only/FINAL-DELIVERY-REPORT-FA.md
+eb76571a39c0c878029abac5b2dea823aa2f8c29708a99d0fad8650789bb2d07  10681 bytes  ./submission-only/RTL-PRODUCT-LISTING-FA.md
+bf18bf5175ba826e67936b847848d228af6b779474f1c6561eef9860c4e14f52  2910 bytes  ./submission-only/RTL-SELLER-STEPS-FA.md
+426aea4604e0b8ad94f99405c66700e238647785364e88ec8daa8fc49ea4ef24  3449 bytes  ./submission-only/RTL-SUBMISSION-CHECKLIST-FA.md
+e130d06d96342a18d55ad25dc223e77d9dce43128accc4d2d01f6cb843d8a0a8  4378 bytes  ./submission-only/RTL-VISUAL-PLAN-FA.md
+
+== Final package ==
+ATA-RTL-Theme-Submission-package.zip  SHA-256: 6a1803d00e374d3e37b00b62229b2a986e6a2aff98735a64b3eb1014ab6076ea
+(نکته: هش بالا هش zipِ بیرونی است؛ با این مانیفست + محتوا قابل بازتولید و تطبیق است)
