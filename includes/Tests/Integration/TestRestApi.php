@@ -488,6 +488,118 @@ class TestRestApi extends IntegrationTestCase
         ) ?: null;
     }
 
+    // --------------------------------------------------------------- New v1.1 Endpoints
+
+    public function test_list_posts_returns_and_filters(): void
+    {
+        $draft = $this->createTestPost(['status' => 'draft']);
+        $pub = $this->createTestPost(['status' => 'published']);
+
+        $all = $this->restRequest('GET', '/ata/v1/posts', [], $this->adminUserId);
+        $this->assertEquals(true, $all['success']);
+        // wpdb returns ids as strings — normalize before strict assertions.
+        $ids = array_map('intval', array_column($all['posts'], 'id'));
+        $this->assertContains($draft, $ids);
+        $this->assertContains($pub, $ids);
+
+        $req = new WP_REST_Request('GET', '/ata/v1/posts');
+        $req->set_query_params(['status' => 'draft']);
+        wp_set_current_user($this->adminUserId);
+        $drafts = rest_do_request($req)->get_data();
+        wp_set_current_user(0);
+        $drafts = is_array($drafts) ? $drafts : [];
+        $this->assertEquals(true, $drafts['success'] ?? null);
+        foreach ($drafts['posts'] as $row) {
+            $this->assertEquals('draft', $row['status']);
+        }
+        $draftIds = array_map('intval', array_column($drafts['posts'], 'id'));
+        $this->assertContains($draft, $draftIds);
+        $this->assertNotContains($pub, $draftIds);
+    }
+
+    public function test_update_post_edits_fields(): void
+    {
+        $postId = $this->createTestPost(['status' => 'draft']);
+
+        $response = $this->restRequest('POST', "/ata/v1/posts/$postId", [
+            'title' => 'Updated Title',
+            'body'  => 'Updated body text',
+        ], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+
+        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $post = $repo->find($postId);
+        $this->assertEquals('Updated Title', $post['title']);
+        $this->assertEquals('Updated body text', $post['body']);
+    }
+
+    public function test_update_post_rejects_published(): void
+    {
+        $postId = $this->createTestPost(['status' => 'published']);
+
+        $response = $this->restRequest('POST', "/ata/v1/posts/$postId", [
+            'body' => 'should not apply',
+        ], $this->adminUserId);
+        $this->assertEquals(false, $response['success']);
+    }
+
+    public function test_update_post_requires_existing_post(): void
+    {
+        $response = $this->restRequest('POST', '/ata/v1/posts/999999', [
+            'body' => 'x',
+        ], $this->adminUserId);
+        $this->assertEquals(false, $response['success']);
+    }
+
+    public function test_add_channel_registers_and_rejects_duplicate(): void
+    {
+        $response = $this->restRequest('POST', '/ata/v1/channels', [
+            'chat_id'  => -100555444333,
+            'title'    => 'کانال تست',
+            'username' => '@test_channel',
+        ], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+
+        global $wpdb;
+        $row = $wpdb->get_row(
+            "SELECT * FROM {$wpdb->prefix}ata_channels WHERE chat_id = -100555444333",
+            ARRAY_A
+        );
+        $this->assertNotNull($row);
+        $this->assertEquals('connected', $row['status']);
+        $this->assertEquals('channel', $row['chat_type']);
+
+        $dup = $this->restRequest('POST', '/ata/v1/channels', [
+            'chat_id' => -100555444333,
+            'title'   => 'دوباره',
+        ], $this->adminUserId);
+        $this->assertEquals(false, $dup['success']);
+    }
+
+    public function test_add_channel_requires_chat_id_and_title(): void
+    {
+        $noChat = $this->restRequest('POST', '/ata/v1/channels', ['title' => 'بدون شناسه'], $this->adminUserId);
+        $this->assertEquals(false, $noChat['success']);
+
+        $noTitle = $this->restRequest('POST', '/ata/v1/channels', ['chat_id' => -100111], $this->adminUserId);
+        $this->assertEquals(false, $noTitle['success']);
+    }
+
+    public function test_telegram_status_reflects_secret_presence(): void
+    {
+        $secrets = $this->container->make(\ATA\Contracts\SecretStoreInterface::class);
+        $secrets->delete('telegram_bot_token');
+
+        $off = $this->restRequest('GET', '/ata/v1/telegram/status', [], $this->adminUserId);
+        $this->assertEquals(true, $off['success']);
+        $this->assertFalse((bool) $off['connected']);
+
+        $secrets->set('telegram_bot_token', '123456789:TESTTOKENTESTTOKENTESTTOKEN1');
+        $on = $this->restRequest('GET', '/ata/v1/telegram/status', [], $this->adminUserId);
+        $this->assertTrue((bool) $on['connected']);
+        $secrets->delete('telegram_bot_token');
+    }
+
     private function createLogEntry(string $level, string $message): int
     {
         $this->wpdb->insert(

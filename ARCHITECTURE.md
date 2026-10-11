@@ -6,7 +6,7 @@
 
 ```
 Admin UI (SPA + کلاسیک)
-        │ REST /ata/v1 (24 endpoint, manage_options)
+        │ REST /ata/v1 (28 endpoint, manage_options)
         ▼
 ┌─────────────────────────── includes/ ───────────────────────────┐
 │ Admin/   RestApi, MenuProvider (Entry Points)                    │
@@ -68,8 +68,7 @@ Runner::handle (cron دقیقه‌ای) │ claim اتمیک:
 - ۱۶۲ تست / ۴۵۸ assertion: یکپارچه (REST، صف، تلگرام/AI با HTTP موک، لایسنس/آپدیتر، چک‌لیست ۱۴ موردی RC) + واحد (Logger، SecretStore، LicenseManager، Runner)
 - HTTP موک در سطح `HttpClientInterface` — هیچ درخواست واقعی در تست‌ها
 
-## محدودیت‌های شناخته‌شده MVP
+## محدودیت‌های شناخته‌شده (v1.1)
 
-- رابط SPA کامل فقط داشبورد/تلگرام؛ بقیه از REST
 - بدون Multisite، آلبوم، ویدیو، چند-ربات
 - امضای بسته آپدیت در نقشه راه

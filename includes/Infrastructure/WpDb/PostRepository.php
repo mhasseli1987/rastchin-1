@@ -87,4 +87,23 @@ class PostRepository
         }
         return $out;
     }
+
+    /** List posts newest-first, optionally filtered by status. */
+    public function list(int $limit = 100, string $status = ''): array
+    {
+        $limit = max(1, min(200, $limit));
+        if ($status !== '') {
+            $rows = $this->wpdb->get_results($this->wpdb->prepare(
+                "SELECT * FROM {$this->table()} WHERE status = %s ORDER BY id DESC LIMIT %d",
+                $status,
+                $limit
+            ), ARRAY_A);
+        } else {
+            $rows = $this->wpdb->get_results(
+                "SELECT * FROM {$this->table()} ORDER BY id DESC LIMIT {$limit}",
+                ARRAY_A
+            );
+        }
+        return $rows ?: [];
+    }
 }

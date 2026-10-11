@@ -55,7 +55,7 @@ class Updater
     {
         try {
             $http = Container::instance()->make(HttpClientInterface::class);
-            $resp = $http->request(LicenseManager::UPDATE_CHECK_URL, [
+            $resp = $http->request(LicenseManager::updateCheckUrl(), [
                 'method'  => 'POST',
                 'body'    => [
                     'license_key' => (string) (LicenseManager::status()['key'] ?? ''),

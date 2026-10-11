@@ -13,10 +13,22 @@ class LicenseManager
 {
     private const OPTION_KEY = 'ata_license';
     private const GRACE_DAYS = 30;
-    private const VERIFY_URL = 'https://rtl-theme.com/verify-license.php';
+    private const DEFAULT_VERIFY_URL = 'https://rtl-theme.com/verify-license.php';
     /** Phase 15: update/version check endpoint consumed by Updater. */
-    public const UPDATE_CHECK_URL = 'https://rtl-theme.com/update-check.php';
+    public const DEFAULT_UPDATE_CHECK_URL = 'https://rtl-theme.com/update-check.php';
     public const PRODUCT = 'ai-telegram-admin';
+
+    /** Verification endpoint — overridable for self-hosted license servers. */
+    public static function verifyUrl(): string
+    {
+        return (string) apply_filters('ata_license_verify_url', self::DEFAULT_VERIFY_URL);
+    }
+
+    /** Update-check endpoint — overridable for self-hosted license servers. */
+    public static function updateCheckUrl(): string
+    {
+        return (string) apply_filters('ata_license_update_check_url', self::DEFAULT_UPDATE_CHECK_URL);
+    }
 
     /** @return array<string,mixed> */
     public static function status(): array
@@ -79,7 +91,7 @@ class LicenseManager
 
         try {
             $http = \ATA\Core\Container::instance()->make(\ATA\Contracts\HttpClientInterface::class);
-            $resp = $http->request(self::VERIFY_URL, [
+            $resp = $http->request(self::verifyUrl(), [
                 'method'  => 'POST',
                 'body'    => [
                     'license_key' => $key,

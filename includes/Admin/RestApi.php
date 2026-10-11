@@ -33,7 +33,9 @@ class RestApi
             [$base, '/telegram/connect', 'POST', 'telegramConnect'],
             [$base, '/telegram/disconnect', 'POST', 'telegramDisconnect'],
             [$base, '/telegram/test', 'POST', 'telegramTest'],
+            [$base, '/telegram/status', 'GET', 'telegramStatus'],
             [$base, '/channels', 'GET', 'listChannels'],
+            [$base, '/channels', 'POST', 'addChannel'],
             // GET list + POST add share one path — WP merges same-route
             // registrations, so a method dispatcher keeps both alive.
             [$aiNs, '/providers', ['GET', 'POST'], 'providers'],
@@ -44,7 +46,9 @@ class RestApi
             // NOTE: register_rest_route() silently rejects an empty route
             // string, so collection endpoints must use '/name' under $base
             // (registering them under "$base/name" with route '' registered nothing).
+            [$base, '/posts', 'GET', 'listPosts'],
             [$base, '/posts', 'POST', 'createPost'],
+            [$base, '/posts/(?P<id>\d+)', 'POST', 'updatePost'],
             [$base, '/posts/(?P<id>\d+)/preview', 'POST', 'previewPost'],
             [$base, '/posts/(?P<id>\d+)/approve', 'POST', 'approvePost'],
             [$base, '/posts/(?P<id>\d+)/schedule', 'POST', 'schedulePost'],
@@ -163,12 +167,62 @@ class RestApi
         return $resp;
     }
 
+    /** Connection status without calling the Telegram API (cheap GET for the SPA). */
+    public static function telegramStatus(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $connected = self::container()->make(SecretStoreInterface::class)
+            ->get('telegram_bot_token') !== null;
+        return self::ok([
+            'connected'    => $connected,
+            'bot_username' => get_option('ata_bot_username', ''),
+            'bot_id'       => (int) get_option('ata_bot_id', 0),
+        ]);
+    }
+
     public static function listChannels(\WP_REST_Request $r): \WP_REST_Response
     {
         global $wpdb;
         $table = $wpdb->prefix . 'ata_channels';
         $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY id DESC LIMIT 200", ARRAY_A) ?: [];
         return self::ok(['channels' => $rows]);
+    }
+
+    /** Manual channel registration (chat_id comes from the admin; bot auto-discovery is roadmap). */
+    public static function addChannel(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $b = self::body($r);
+        $chatId = (int) ($b['chat_id'] ?? 0);
+        $title = sanitize_text_field((string) ($b['title'] ?? ''));
+        if ($chatId === 0) {
+            return self::fail('chat_id الزامی است (شناسه عددی کانال تلگرام).');
+        }
+        if ($title === '') {
+            return self::fail('عنوان کانال الزامی است.');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'ata_channels';
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE chat_id = %d", $chatId));
+        if ($exists) {
+            return self::fail('این کانال قبلاً ثبت شده است.', 409, 'duplicate_channel');
+        }
+
+        $wpdb->insert($table, [
+            'chat_id'    => $chatId,
+            'username'   => sanitize_text_field((string) ($b['username'] ?? '')),
+            'title'      => $title,
+            'chat_type'  => sanitize_key((string) ($b['chat_type'] ?? 'channel')),
+            'status'     => 'connected',
+            'created_at' => current_time('mysql', 1),
+        ]);
+
+        self::container()->make(LoggerInterface::class)->info('Channel registered', [
+            'scope'    => 'telegram',
+            'chat_id'  => $chatId,
+            'title'    => $title,
+        ]);
+
+        return self::ok(['id' => (int) $wpdb->insert_id], 201);
     }
 
     // ------------------------------------------------------------ AI providers
@@ -432,6 +486,63 @@ class RestApi
     private static function findPost(int $id): ?array
     {
         return self::container()->make(PostRepository::class)->find($id);
+    }
+
+    public static function listPosts(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $status = sanitize_key((string) $r->get_param('status'));
+        $posts = self::container()->make(PostRepository::class)
+            ->list(200, $status !== 'all' ? $status : '');
+        return self::ok(['posts' => $posts]);
+    }
+
+    public static function updatePost(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $id = (int) $r['id'];
+        $post = self::findPost($id);
+        if (!$post) {
+            return self::fail('پست یافت نشد.', 404, 'not_found');
+        }
+        if (in_array($post['status'], ['published', 'cancelled'], true)) {
+            return self::fail('پست‌های منتشرشده یا لغوشده قابل ویرایش نیستند.');
+        }
+
+        $b = self::body($r);
+        $fields = [];
+        if (isset($b['title'])) {
+            $fields['title'] = sanitize_text_field((string) $b['title']);
+        }
+        if (isset($b['body'])) {
+            $body = trim((string) $b['body']);
+            if ($body === '') {
+                return self::fail('متن پست نمی‌تواند خالی باشد.');
+            }
+            $fields['body'] = $body;
+        }
+        if (isset($b['channel_id'])) {
+            $fields['channel_id'] = (int) $b['channel_id'];
+        }
+        if (isset($b['image_id'])) {
+            $fields['image_id'] = !empty($b['image_id']) ? (int) $b['image_id'] : null;
+        }
+        if (!$fields) {
+            return self::fail('هیچ فیلدی برای به‌روزرسانی ارسال نشده است.');
+        }
+
+        // nulls must survive update() — repository filters nulls internally,
+        // so image_id=0 → null is applied via a dedicated branch here.
+        if (array_key_exists('image_id', $fields) && $fields['image_id'] === null) {
+            global $wpdb;
+            $wpdb->update($wpdb->prefix . 'ata_posts', [
+                'image_id'   => null,
+                'updated_at' => current_time('mysql', 1),
+            ], ['id' => $id]);
+            unset($fields['image_id']);
+        }
+        if ($fields) {
+            self::container()->make(PostRepository::class)->update($id, $fields);
+        }
+        return self::ok(['post' => self::findPost($id)]);
     }
 
     public static function createPost(\WP_REST_Request $r): \WP_REST_Response

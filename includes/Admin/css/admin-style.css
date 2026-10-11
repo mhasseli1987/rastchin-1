@@ -1,4 +1,260 @@
-.ata-admin-wrap { display: flex; min-height: 100vh; }
-.ata-sidebar { width: 220px; background: #f1f1f1; padding: 16px; }
-.ata-sidebar .components-button { display: block; margin-bottom: 8px; width: 100%; }
-.ata-main { flex: 1; padding: 24px; }
+/* ATA Admin UI — v1.1.0 (RTL, brand: navy + teal) */
+
+.ata-admin-wrap {
+  display: flex;
+  min-height: 100vh;
+  direction: rtl;
+  margin: 0 -20px -20px -20px; /* cancel WP #wpcontent padding */
+  font-size: 13px;
+}
+
+/* ------------------------------- Sidebar ------------------------------- */
+.ata-sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #12314d 0%, #0d2338 100%);
+  padding: 0;
+  color: #e6eef6;
+}
+.ata-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ata-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #14b8a6, #0e7490);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.35);
+}
+.ata-brand-name { font-size: 17px; font-weight: 700; line-height: 1.2; }
+.ata-brand-sub { font-size: 10px; opacity: 0.65; letter-spacing: 0.3px; direction: ltr; text-align: right; }
+.ata-sidebar .ata-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 16px;
+  background: none;
+  border: none;
+  border-right: 3px solid transparent;
+  color: #b8c8d8;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: right;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ata-sidebar .ata-nav-btn:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.ata-sidebar .ata-nav-btn.ata-nav-active {
+  background: rgba(20, 184, 166, 0.15);
+  border-right-color: #14b8a6;
+  color: #fff;
+  font-weight: 600;
+}
+.ata-sidebar .dashicons { font-size: 17px; width: 17px; height: 17px; opacity: 0.85; }
+
+/* -------------------------------- Main --------------------------------- */
+.ata-main { flex: 1; padding: 20px 24px; background: #f0f2f5; }
+.ata-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ata-page-header h2 { margin: 0 0 4px; padding: 0; font-size: 21px; }
+.ata-page-desc { margin: 0; color: #64748b; font-size: 12.5px; }
+.ata-h3 { margin: 22px 0 10px; font-size: 15px; }
+
+/* ------------------------------ Stat cards ----------------------------- */
+.ata-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.ata-stat {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(15, 42, 67, 0.05);
+  overflow: hidden;
+}
+.ata-stat .dashicons {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  line-height: 34px;
+  text-align: center;
+  border-radius: 8px;
+}
+.stat-teal .dashicons { background: #ccfbf1; color: #0f766e; }
+.stat-blue .dashicons { background: #dbeafe; color: #1d4ed8; }
+.stat-purple .dashicons { background: #ede9fe; color: #6d28d9; }
+.stat-gray .dashicons { background: #f1f5f9; color: #475569; }
+.ata-stat-value { font-size: 26px; font-weight: 700; color: #0f2a43; line-height: 1.2; }
+.ata-stat-label { color: #64748b; font-size: 12px; margin-top: 2px; }
+.ata-stat-sub { color: #94a3b8; font-size: 11px; margin-top: 6px; }
+
+/* -------------------------------- Table -------------------------------- */
+.ata-main { overflow-x: auto; }
+.ata-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 42, 67, 0.05);
+}
+.ata-table code { white-space: nowrap; }
+.ata-table th {
+  text-align: right;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+.ata-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.ata-table tr:last-child td { border-bottom: none; }
+.ata-table tr:hover td { background: #f8fafc; }
+.ata-cell-sub { color: #64748b; font-size: 11.5px; margin-top: 2px; }
+
+/* -------------------------------- Badges ------------------------------- */
+.ata-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-green { background: #dcfce7; color: #15803d; }
+.badge-blue { background: #dbeafe; color: #1d4ed8; }
+.badge-purple { background: #ede9fe; color: #6d28d9; }
+.badge-yellow { background: #fef9c3; color: #a16207; }
+.badge-red { background: #fee2e2; color: #b91c1c; }
+.badge-gray { background: #f1f5f9; color: #475569; }
+
+/* --------------------------- Buttons / rows ---------------------------- */
+.ata-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ata-btn-row .components-button { margin: 0; }
+.ata-filter-row { display: flex; gap: 16px; margin-bottom: 14px; max-width: 480px; }
+.ata-filter-row .components-base-control { flex: 1; }
+
+/* ------------------------------ Modals etc ----------------------------- */
+.ata-modal-actions { display: flex; gap: 8px; justify-content: flex-start; margin-top: 16px; }
+.ata-ol { padding-right: 18px; }
+.ata-ol li { margin-bottom: 6px; }
+.ata-hint { color: #64748b; font-size: 11.5px; margin-top: 10px; }
+.ata-error-text { color: #b91c1c; }
+.ata-code-sm { font-size: 11px; }
+.ata-code-block {
+  display: block;
+  direction: ltr;
+  text-align: left;
+  background: #0f2a43;
+  color: #7dd3fc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-top: 8px;
+  overflow-x: auto;
+}
+.ata-json {
+  direction: ltr;
+  text-align: left;
+  background: #0f2a43;
+  color: #a5f3fc;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  max-height: 260px;
+  overflow: auto;
+  margin-top: 10px;
+}
+.ata-loading { padding: 30px 0; text-align: center; }
+.ata-empty {
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 36px 16px;
+  text-align: center;
+  color: #94a3b8;
+}
+.ata-empty .dashicons { font-size: 34px; width: 34px; height: 34px; display: block; margin: 0 auto 8px; }
+.ata-pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 12px;
+}
+.ata-datetime { padding: 4px 8px; border: 1px solid #949494; border-radius: 3px; }
+
+/* --------------------- Telegram-style preview card --------------------- */
+.ata-tg-preview {
+  max-width: 420px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15, 42, 67, 0.08);
+}
+.ata-tg-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #517da2; color: #fff; }
+.ata-tg-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px;
+}
+.ata-tg-title { font-weight: 700; font-size: 13px; }
+.ata-tg-user { font-size: 11px; opacity: 0.8; direction: ltr; text-align: right; }
+.ata-tg-title-text { padding: 12px 14px 0; font-weight: 700; color: #0f2a43; }
+.ata-tg-body { padding: 8px 14px 12px; line-height: 1.9; white-space: pre-wrap; word-break: break-word; }
+.ata-tg-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #f8fafc;
+  color: #94a3b8;
+  font-size: 11px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* ------------------------------ Two-column ----------------------------- */
+.ata-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .ata-two-col { grid-template-columns: 1fr; }
+}
+
+/* wp-components tuning inside our wrap */
+.ata-main .components-notice { margin: 0 0 14px; }
+.ata-main .components-card { border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(15, 42, 67, 0.05); }

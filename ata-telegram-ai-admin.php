@@ -3,7 +3,7 @@
  * Plugin Name:       AI Telegram Admin
  * Plugin URI:        https://rtl-theme.com/plugins/ai-telegram-admin
  * Description:       مدیریت هوشمند کانال‌ها و محتوای تلگرام با AI — تولید، بازنویسی، ترجمه، خلاصه، زمان‌بندی و صف انتشار.
- * Version:           1.0.0-MVP
+ * Version:           1.1.0
  * Author:            RTL-Theme
  * Author URI:        https://rtl-theme.com
  * License:           GPL-2.0+
@@ -17,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-define('ATA_VERSION', '1.0.0-MVP');
+define('ATA_VERSION', '1.1.0');
 define('ATA_FILE', __FILE__);
 define('ATA_DIR', plugin_dir_path(__FILE__));
 define('ATA_URL', plugin_dir_url(__FILE__));

@@ -348,9 +348,14 @@ class TestLicenseVerification extends IntegrationTestCase
 
     public function test_verify_url_is_configurable(): void
     {
-        $reflection = new ReflectionClass(\ATA\License\LicenseManager::class);
-        $constant = $reflection->getConstant('VERIFY_URL');
-        $this->assertStringContainsString('rtl-theme.com', $constant);
+        // Default points at RTL-Theme; filters allow self-hosted servers.
+        $this->assertStringContainsString('rtl-theme.com', \ATA\License\LicenseManager::verifyUrl());
+        $this->assertStringContainsString('rtl-theme.com', \ATA\License\LicenseManager::updateCheckUrl());
+
+        $override = 'https://license.example.com/verify-license.php';
+        add_filter('ata_license_verify_url', fn() => $override, 10, 0);
+        $this->assertEquals($override, \ATA\License\LicenseManager::verifyUrl());
+        remove_all_filters('ata_license_verify_url');
     }
 
     public function test_license_product_name(): void
