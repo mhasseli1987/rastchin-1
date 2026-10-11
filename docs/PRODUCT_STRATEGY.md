@@ -1,4 +1,4 @@
-# استراتژی محصول — AI Telegram Admin (ATA)
+# استراتژی محصول — AI Telegram Admin (ENZO)
 
 | مشخصه | مقدار |
 | --- | --- |

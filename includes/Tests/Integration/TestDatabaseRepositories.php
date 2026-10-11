@@ -12,12 +12,12 @@ class TestDatabaseRepositories extends IntegrationTestCase
         parent::setUp();
 
         // Publish flows through the queue need a configured bot token.
-        (new \ATA\Security\SecretStore())->set('telegram_bot_token', '123456:TEST-TOKEN');
+        (new \ENZO\Security\SecretStore())->set('telegram_bot_token', '123456:TEST-TOKEN');
     }
 
     protected function tearDown(): void
     {
-        (new \ATA\Security\SecretStore())->delete('telegram_bot_token');
+        (new \ENZO\Security\SecretStore())->delete('telegram_bot_token');
         parent::tearDown();
     }
 
@@ -25,7 +25,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_insert_returns_id(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         $id = $repo->insert([
             'title'      => 'Test Post',
@@ -40,7 +40,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_insert_sets_timestamps(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         $id = $repo->insert([
             'title'      => 'Test',
@@ -56,7 +56,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_insert_handles_nulls(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         // scheduled_at and published_at are null - should use DB defaults
         $id = $repo->insert([
@@ -77,7 +77,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_find_returns_null_for_missing(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         $post = $repo->find(999999);
         $this->assertNull($post);
@@ -85,7 +85,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_update_changes_fields(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         $id = $repo->insert([
             'title'      => 'Original',
@@ -109,7 +109,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_update_ignores_invalid_fields(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         $id = $repo->insert([
             'title'      => 'Test',
@@ -128,7 +128,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_post_repository_count_by_status(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
 
         $repo->insert(['title' => 'Draft 1', 'body' => 'C', 'channel_id' => 1, 'status' => 'draft']);
         $repo->insert(['title' => 'Draft 2', 'body' => 'C', 'channel_id' => 1, 'status' => 'draft']);
@@ -146,7 +146,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_log_repository_insert(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\LogRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\LogRepository::class);
 
         $id = $repo->insert([
             'scope'    => 'test',
@@ -161,7 +161,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_log_repository_find(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\LogRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\LogRepository::class);
 
         $id = $repo->insert([
             'scope'   => 'test',
@@ -177,7 +177,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_log_repository_all_with_limit(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\LogRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\LogRepository::class);
 
         for ($i = 0; $i < 5; $i++) {
             $repo->insert([
@@ -193,7 +193,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_log_repository_count(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\LogRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\LogRepository::class);
 
         $repo->insert(['scope' => 'a', 'level' => 'info', 'message' => '1']);
         $repo->insert(['scope' => 'b', 'level' => 'error', 'message' => '2']);
@@ -205,10 +205,10 @@ class TestDatabaseRepositories extends IntegrationTestCase
 
     public function test_log_repository_deletes_old(): void
     {
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\LogRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\LogRepository::class);
 
         // Insert old log (manually set old date)
-        $this->wpdb->insert($this->wpdb->prefix . 'ata_logs', [
+        $this->wpdb->insert($this->wpdb->prefix . 'enzo_logs', [
             'scope'      => 'old',
             'level'      => 'info',
             'message'    => 'Old log',
@@ -231,7 +231,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
     public function test_full_post_lifecycle_via_rest(): void
     {
         // 1. Create post
-        $response = $this->restRequest('POST', '/ata/v1/posts', [
+        $response = $this->restRequest('POST', '/enzo/v1/posts', [
             'title'      => 'Lifecycle Test',
             'body'       => 'Full lifecycle content',
             'channel_id' => 1,
@@ -241,19 +241,19 @@ class TestDatabaseRepositories extends IntegrationTestCase
         $postId = $response['id'];
 
         // 2. Verify in DB
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
         $post = $repo->find($postId);
         $this->assertEquals('draft', $post['status']);
         $this->assertEquals('Lifecycle Test', $post['title']);
 
         // 3. Approve
-        $this->restRequest('POST', "/ata/v1/posts/$postId/approve", [], $this->adminUserId);
+        $this->restRequest('POST', "/enzo/v1/posts/$postId/approve", [], $this->adminUserId);
         $post = $repo->find($postId);
         $this->assertEquals('approved', $post['status']);
 
         // 4. Schedule
         $future = gmdate('Y-m-d H:i:s', time() + 7200);
-        $this->restRequest('POST', "/ata/v1/posts/$postId/schedule", ['scheduled_at' => $future], $this->adminUserId);
+        $this->restRequest('POST', "/enzo/v1/posts/$postId/schedule", ['scheduled_at' => $future], $this->adminUserId);
         $post = $repo->find($postId);
         $this->assertEquals('scheduled', $post['status']);
         $this->assertEquals($future, $post['scheduled_at']);
@@ -266,7 +266,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => $postId]),
         ]);
 
-        $this->restRequest('POST', "/ata/v1/queue/$queueId/run", [], $this->adminUserId);
+        $this->restRequest('POST', "/enzo/v1/queue/$queueId/run", [], $this->adminUserId);
 
         $post = $repo->find($postId);
         $this->assertEquals('published', $post['status']);
@@ -278,7 +278,7 @@ class TestDatabaseRepositories extends IntegrationTestCase
         // Create a test attachment
         $attachmentId = $this->factory->attachment->create_upload_object(DIR_TESTDATA . '/images/canola.jpg');
 
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
         $id = $repo->insert([
             'title'      => 'With Image',
             'body'       => 'Content with image',

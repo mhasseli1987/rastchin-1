@@ -1,6 +1,6 @@
-# سرور لایسنس آتا — پیاده‌سازی مرجع (Reference Implementation)
+# سرور لایسنس انزو — پیاده‌سازی مرجع (Reference Implementation)
 
-این پوشه یک **سرور لایسنس + به‌روزرسانی کامل و مستقل** برای افزونه «آتا» است:
+این پوشه یک **سرور لایسنس + به‌روزرسانی کامل و مستقل** برای افزونه «انزو» است:
 صدور لایسنس، تأیید فعال‌سازی، قید دامنه، لغو، انتشار بسته به‌روزرسانی و دانلود امنِ gated — همه در **یک فایل PHP + SQLite**، بدون نیاز به MySQL.
 
 > ⚠️ **صادقانه:** این «پیاده‌سازی مرجع» است — قبل از استفاده عملیاتی، هاردنینگ بخش «امنیت» را انجام دهید. اگر محصول را از طریق بازارچه RTL-Theme می‌فروشید، اولویت با **سرویس لایسنس خود RTL-Theme** است (مطابق قوانین فروشندگان، لایسنس/انکودینگ فقط از طریق خدمات RTL-Theme). این سرور برای فروش مستقیم یا تست داخلی است.
@@ -18,18 +18,18 @@
 
 ```php
 <?php
-/** mu-plugin: اتصال آتا به سرور لایسنس مستقل */
-add_filter('ata_license_verify_url', fn() => 'https://license.YOUR-SITE.com/verify-license.php');
-add_filter('ata_license_update_check_url', fn() => 'https://license.YOUR-SITE.com/update-check.php');
+/** mu-plugin: اتصال انزو به سرور لایسنس مستقل */
+add_filter('enzo_license_verify_url', fn() => 'https://license.YOUR-SITE.com/verify-license.php');
+add_filter('enzo_license_update_check_url', fn() => 'https://license.YOUR-SITE.com/update-check.php');
 ```
 
-این فایل را در `wp-content/mu-plugins/ata-license-server.php` بگذارید.
+این فایل را در `wp-content/mu-plugins/enzo-license-server.php` بگذارید.
 
 ## نصب (۵ دقیقه)
 
 1. پوشه `license-server/` را روی هر میزبان PHP 8.1+ (cPanel/لیت‌اسپید/…) آپلود کنید.
 2. کلید ادمین را تنظیم کنید — یکی از این دو:
-   - متغیر محیطی: `ATA_LICENSE_ADMIN_KEY` (توصیه‌شده)، یا
+   - متغیر محیطی: `ENZO_LICENSE_ADMIN_KEY` (توصیه‌شده)، یا
    - ویرایش `$CONFIG['admin_key']` در `index.php`.
 3. مطمئن شوید PHP به `pdo_sqlite` دسترسی دارد (تقریباً همه میزبان‌ها دارند) و پوشه `data/` قابل نوشتن است (خودکار ساخته می‌شود).
 4. `/admin.php?k=کلید-ادمین` را باز کنید → لایسنس صادر کنید.

@@ -38,12 +38,12 @@ bcf56d95e5d72eb788d2b9bb211c8ead903616b031d9b54eb96ca8a2c2f52ca8  visuals/08-wor
 5cb23da968e09eed8874b1af3302653fa2eaa8881b23879d2efd94d8a62822a1  visuals/ai-generate.png
 deffd3d53f9978201c4c7aa135b44393e13714171c23f5b90f3860975bbfce45  visuals/channels.png
 d64ab44ce3f5846e272a6c1734b066c7c5a9cb1ecaeb17ff7d2e372240a1d917  visuals/content-create.png
-1bf6d6fe8a58cb6f97bd6b6ab9c1241984f7234b333ea0dba2d0a61751a89acc  visuals/cover-ata.png
+1bf6d6fe8a58cb6f97bd6b6ab9c1241984f7234b333ea0dba2d0a61751a89acc  visuals/cover-enzo.png
 fcd4a0125ac5d93c83b075a5d60571e0a6d751b82850311e6f30a671ae2b1a0a  visuals/extra-provider-modal.png
 05fb908f62ccbdc658305585e1e7054cd9957ac17fd0b43aaf395df0726a66f6  visuals/help.png
 81e2caa00eba18e68d770b49d50cf59185043212960acb8497486dfd99a98849  visuals/scheduler.png
 454ae795b4974925d45e75108d31a0ff2e84c9fbd3b903e200cfca8b5e491ffa  visuals/settings.png
 
 # بسته‌های اصلی (خارج از این پوشه):
-a9dbeb465cb99e091b4212d541f53931d6b1599a84c9d2ff0136bc0a0a2c5f53  افزونه نصب‌شونده v1.1.0: dist/ata-telegram-ai-admin-1.1.0.zip
+a9dbeb465cb99e091b4212d541f53931d6b1599a84c9d2ff0136bc0a0a2c5f53  افزونه نصب‌شونده v1.1.0: dist/enzo-telegram-ai-admin-1.1.0.zip
 e2bed4baf55b48037f17631585ab9e669b2f8f41c2ee650a5d8937d0e9891113  این بسته (self-hash بعد از ساخت نامعتبر است): dist/ATA-RTL-Theme-Submission-package.zip

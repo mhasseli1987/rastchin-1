@@ -1,9 +1,9 @@
 <?php
-namespace ATA\Telegram;
+namespace ENZO\Telegram;
 
-use ATA\Contracts\Telegram\TelegramProviderInterface;
-use ATA\Contracts\HttpClientInterface;
-use ATA\Logging\Logger;
+use ENZO\Contracts\Telegram\TelegramProviderInterface;
+use ENZO\Contracts\HttpClientInterface;
+use ENZO\Logging\Logger;
 
 defined('ABSPATH') || exit;
 
@@ -29,7 +29,7 @@ class BotApiTelegramProvider implements TelegramProviderInterface
      */
     public static function getInstance(): self
     {
-        $container = \ATA\Core\Container::instance();
+        $container = \ENZO\Core\Container::instance();
         return $container->make(self::class);
     }
 
@@ -45,8 +45,8 @@ class BotApiTelegramProvider implements TelegramProviderInterface
     private function getActiveToken(): string
     {
         // SecretStore lookup — never logged.
-        $container = \ATA\Core\Container::instance();
-        $store = $container->make(\ATA\Contracts\SecretStoreInterface::class);
+        $container = \ENZO\Core\Container::instance();
+        $store = $container->make(\ENZO\Contracts\SecretStoreInterface::class);
         $token = $store->get('telegram_bot_token');
         if ($token === null || $token === '') {
             throw new \RuntimeException('Telegram bot token not configured.');

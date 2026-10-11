@@ -1,7 +1,7 @@
 <?php
-namespace ATA\Core;
+namespace ENZO\Core;
 
-use ATA\Settings\SettingsRegistry;
+use ENZO\Settings\SettingsRegistry;
 
 defined('ABSPATH') || exit;
 
@@ -13,7 +13,7 @@ class SettingsRegistrar
 {
     public static function register(SettingsRegistry $registry): void
     {
-        $registry->register('ata_default_tone', [
+        $registry->register('enzo_default_tone', [
             'default'   => 'friendly',
             'type'      => 'string',
             'sanitize'  => 'sanitize_text_field',
@@ -21,7 +21,7 @@ class SettingsRegistrar
             'description' => 'Default tone for AI-generated content.',
         ]);
 
-        $registry->register('ata_default_language', [
+        $registry->register('enzo_default_language', [
             'default'   => 'fa',
             'type'      => 'string',
             'sanitize'  => 'sanitize_text_field',
@@ -29,7 +29,7 @@ class SettingsRegistrar
             'description' => 'Default output language (fa=Persian, en=English).',
         ]);
 
-        $registry->register('ata_post_template', [
+        $registry->register('enzo_post_template', [
             'default'   => '',
             'type'      => 'textarea',
             'sanitize'  => 'sanitize_textarea_field',
@@ -37,7 +37,7 @@ class SettingsRegistrar
             'description' => 'Optional custom template for AI content generation.',
         ]);
 
-        $registry->register('ata_auto_preview', [
+        $registry->register('enzo_auto_preview', [
             'default'   => '1',
             'type'      => 'boolean',
             'sanitize'  => 'rest_sanitize_boolean',
@@ -45,7 +45,7 @@ class SettingsRegistrar
             'description' => 'Show Telegram preview after generation.',
         ]);
 
-        $registry->register('ata_log_retention_days', [
+        $registry->register('enzo_log_retention_days', [
             'default'   => 30,
             'type'      => 'integer',
             'sanitize'  => 'absint',
@@ -53,7 +53,7 @@ class SettingsRegistrar
             'description' => 'Log retention in days.',
         ]);
 
-        $registry->register('ata_license_key', [
+        $registry->register('enzo_license_key', [
             'default'   => '',
             'type'      => 'string',
             'sanitize'  => 'sanitize_text_field',
@@ -61,7 +61,7 @@ class SettingsRegistrar
             'description' => 'License key (stored encrypted).',
         ]);
 
-        $registry->register('ata_license_site', [
+        $registry->register('enzo_license_site', [
             'default'   => '',
             'type'      => 'string',
             'sanitize'  => 'sanitize_text_field',
@@ -69,7 +69,7 @@ class SettingsRegistrar
             'description' => 'Site URL registered with license.',
         ]);
 
-        $registry->register('ata_license_status', [
+        $registry->register('enzo_license_status', [
             'default'   => 'inactive',
             'type'      => 'string',
             'sanitize'  => 'sanitize_text_field',
@@ -77,7 +77,7 @@ class SettingsRegistrar
             'description' => 'Current license status.',
         ]);
 
-        $registry->register('ata_license_expiry', [
+        $registry->register('enzo_license_expiry', [
             'default'   => '',
             'type'      => 'string',
             'sanitize'  => 'sanitize_text_field',
@@ -85,7 +85,7 @@ class SettingsRegistrar
             'description' => 'License expiry date (Y-m-d).',
         ]);
 
-        $registry->register('ata_grace_period_days', [
+        $registry->register('enzo_grace_period_days', [
             'default'   => 7,
             'type'      => 'integer',
             'sanitize'  => 'absint',

@@ -1,4 +1,4 @@
-# گزارش طراحی فازهای ۰ تا ۷ — AI Telegram Admin (ATA)
+# گزارش طراحی فازهای ۰ تا ۷ — AI Telegram Admin (ENZO)
 
 | مشخصه | مقدار |
 | --- | --- |
@@ -24,7 +24,7 @@
 | ۶ معماری AI | `docs/AI_ARCHITECTURE.md` | ✅ produced + self-gated | معیارهای Gate در بخش ۱۲ سند |
 | ۷ موتور پرامپت | `docs/PROMPT_ENGINE.md` | ✅ produced + self-gated | معیارهای Gate در بخش ۱۳ سند |
 
-همه‌ی اسناد در مخزن `github.com/mhasseli1987/ai-telegram-admin` (شاخه main) commit شده‌اند.
+همه‌ی اسناد در مخزن `github.com/mhasseli1987/enzo` (شاخه main) commit شده‌اند.
 
 ---
 
@@ -50,8 +50,8 @@
 
 ## ۳. تصمیم‌های کلیدی سراسری (آنچه توسعه باید بداند)
 
-1. **Ports & Adapters سخت‌گیرانه:** هسته فقط با Interface حرف می‌زند (`ARCHITECTURE.md:70`). در کدنویسی فاز ۸، هر `use Ata\Telegram\...` یا `use Ata\AI\...` داخل `Ata\Application` = تخلف معماری.
-2. **هسته WP-agnostic:** بدون `$wpdb`/`get_option`/`wp_remote_*` در `Ata\Application`؛ همه در `Ata\Infrastructure\Wp*` (D-3). این پیش‌شرط تست‌پذیری فاز ۱۲ است.
+1. **Ports & Adapters سخت‌گیرانه:** هسته فقط با Interface حرف می‌زند (`ARCHITECTURE.md:70`). در کدنویسی فاز ۸، هر `use Enzo\Telegram\...` یا `use Enzo\AI\...` داخل `Enzo\Application` = تخلف معماری.
+2. **هسته WP-agnostic:** بدون `$wpdb`/`get_option`/`wp_remote_*` در `Enzo\Application`؛ همه در `Enzo\Infrastructure\Wp*` (D-3). این پیش‌شرط تست‌پذیری فاز ۱۲ است.
 3. **SecretStore تنها منبع secret:** توکن تلگرام و کلید AI فقط رمزنگاری‌شده؛ فقط در مرز HTTP خوانده می‌شوند؛ mask/redaction در سه لایه (T-3، D-9، D-15).
 4. **SSRF-Gate متمرکز** در `HttpClientInterface` برای هر خروجی با URL کاربر (D-8) — حیاتی برای BYOK.
 5. **Custom Tables برای داده تراکنشی** (posts/channels/providers/queue/logs/templates) با دلیل «نیاز واقعی» ثبت‌شده (D-2، P-1)؛ Options/Transients برای تنظیمات و داده کوتاه‌عمر.
@@ -59,7 +59,7 @@
 7. **UTC در DB، timezone سایت فقط در مرز I/O** (D-14).
 8. **approve انسانی غیرقابل دورزدن** و **خروجی AI غیرقابل‌اعتماد** (D-18، A-7/A-9) — زنجیره‌ی Preview→Approve تنها مسیر انتشار است.
 9. **Fail-Open با Grace Period برای لایسنس** (D-10) — هرگز سایت مشتری را نمی‌شکند.
-10. **Namespace `Ata`** و ساختار پوشه طبق گفتار ششم `ARCHITECTURE.md`.
+10. **Namespace `Enzo`** و ساختار پوشه طبق گفتار ششم `ARCHITECTURE.md`.
 
 ---
 
@@ -72,7 +72,7 @@
 | مرز PromptBuilder (فاز ۶ ↔ ۷) | سازگار: آداپتر prompt نمی‌سازد؛ تعویض Default→Template فقط در Composition Root |
 | محدودیت ۱۰۲۴ caption در سه لایه (template/validator/telegram) | سازگار و لایه‌ای (دفاع چندگانه) |
 | اسکوپ MVP (فاز ۲) در برابر قابلیت‌های فاز ۵–۷ | سازگار: streaming/fallback/تمپلیت-اختصاصی/inline-buttons همه با تصمیم مستند در V1 |
-| جدول جدید `ata_templates` در برابر استراتژی DB معماری سیستم | افزودنی سازگار با D-2 (همان دلیل «نیاز واقعی»)؛ در فاز ۱۱ به فهرست جدول‌ها اضافه شود |
+| جدول جدید `enzo_templates` در برابر استراتژی DB معماری سیستم | افزودنی سازگار با D-2 (همان دلیل «نیاز واقعی»)؛ در فاز ۱۱ به فهرست جدول‌ها اضافه شود |
 | ارجاعات متقابل (خط/بخش) بین اسناد | نمونه‌برداری شد؛ ارجاعات کلیدی معتبرند. بازبینی کامل ارجاعات = بازخوان مستقل پس از رفع قطعی ایجنت‌ها |
 
 **تناقض بازِ ثبت‌شده:** `PRODUCT_SPEC/STRATEGY` در محصول خواهر fallback خودکار provider را مزیت می‌دانستند؛ فاز ۶ آن را از MVP خارج کرد (A-6) با ارجاع به اولویت‌بندی `PRODUCT_STRATEGY.md`. این تصمیم در فاز ۸ لازم‌الاجراست مگر استراتژی رسماً تغییر کند.
@@ -98,8 +98,8 @@
 
 **نتیجه‌ی گیت نهایی طراحی: PASS — شروع فاز ۸ مجاز است** با رعایت این ترتیب پیشنهادی (هم‌راستا با `SPECIFICATION.md:397+` و وابستگی‌های معماری):
 
-1. **اسکلت:** فایل اصلی پلاگین + `Ata\Plugin`/`Bootstrap` + ساختار پوشه (گفتار ششم ARCHITECTURE) + activate/deactivate/uninstall.
-2. **Infrastructure پایه:** `HttpClientInterface`/`WpHttpTransport` با SSRF-Gate، `SecretStore`، `Logger` با redaction، مهاجرت DB (`dbDelta` پنج جدول + `ata_templates`).
+1. **اسکلت:** فایل اصلی پلاگین + `Enzo\Plugin`/`Bootstrap` + ساختار پوشه (گفتار ششم ARCHITECTURE) + activate/deactivate/uninstall.
+2. **Infrastructure پایه:** `HttpClientInterface`/`WpHttpTransport` با SSRF-Gate، `SecretStore`، `Logger` با redaction، مهاجرت DB (`dbDelta` پنج جدول + `enzo_templates`).
 3. **Settings + AI Provider CRUD + testConnection** (فلو ۴ UX) — چون همه‌چیز به آن وابسته است.
 4. **Telegram connect + channel discovery** (فلوهای ۳ و ۵ UX).
 5. **مسیر محتوا:** Draft→Preview→Approve→Publish فوری با `DefaultPromptBuilder` و شش عملیات AI.

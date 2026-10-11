@@ -1,5 +1,5 @@
 <?php
-namespace ATA\License;
+namespace ENZO\License;
 
 defined('ABSPATH') || exit;
 
@@ -11,23 +11,23 @@ defined('ABSPATH') || exit;
  */
 class LicenseManager
 {
-    private const OPTION_KEY = 'ata_license';
+    private const OPTION_KEY = 'enzo_license';
     private const GRACE_DAYS = 30;
     private const DEFAULT_VERIFY_URL = 'https://rtl-theme.com/verify-license.php';
     /** Phase 15: update/version check endpoint consumed by Updater. */
     public const DEFAULT_UPDATE_CHECK_URL = 'https://rtl-theme.com/update-check.php';
-    public const PRODUCT = 'ai-telegram-admin';
+    public const PRODUCT = 'enzo';
 
     /** Verification endpoint — overridable for self-hosted license servers. */
     public static function verifyUrl(): string
     {
-        return (string) apply_filters('ata_license_verify_url', self::DEFAULT_VERIFY_URL);
+        return (string) apply_filters('enzo_license_verify_url', self::DEFAULT_VERIFY_URL);
     }
 
     /** Update-check endpoint — overridable for self-hosted license servers. */
     public static function updateCheckUrl(): string
     {
-        return (string) apply_filters('ata_license_update_check_url', self::DEFAULT_UPDATE_CHECK_URL);
+        return (string) apply_filters('enzo_license_update_check_url', self::DEFAULT_UPDATE_CHECK_URL);
     }
 
     /** @return array<string,mixed> */
@@ -90,14 +90,14 @@ class LicenseManager
         }
 
         try {
-            $http = \ATA\Core\Container::instance()->make(\ATA\Contracts\HttpClientInterface::class);
+            $http = \ENZO\Core\Container::instance()->make(\ENZO\Contracts\HttpClientInterface::class);
             $resp = $http->request(self::verifyUrl(), [
                 'method'  => 'POST',
                 'body'    => [
                     'license_key' => $key,
                     'product'     => self::PRODUCT,
                     'domain'      => self::currentDomain(),
-                    'version'     => defined('ATA_VERSION') ? ATA_VERSION : '',
+                    'version'     => defined('ENZO_VERSION') ? ENZO_VERSION : '',
                 ],
                 'timeout' => 15,
             ]);
@@ -133,15 +133,15 @@ class LicenseManager
         return ['success' => true, 'message' => 'لایسنس غیرفعال شد.'];
     }
 
-    /** Register the License submenu under the ATA parent menu. */
+    /** Register the License submenu under the ENZO parent menu. */
     public static function registerMenu(): void
     {
         add_submenu_page(
-            'ata-telegram-ai-admin',
-            'لایسنس ATA',
+            'enzo-telegram-ai-admin',
+            'لایسنس ENZO',
             'لایسنس',
             'manage_options',
-            'ata-license',
+            'enzo-license',
             [self::class, 'adminPage']
         );
     }
@@ -155,10 +155,10 @@ class LicenseManager
 
         $message = '';
         $error = false;
-        if (isset($_POST['ata_license_activate']) || isset($_POST['ata_license_deactivate'])) {
-            check_admin_referer('ata_license_action', 'ata_license_nonce');
-            if (isset($_POST['ata_license_activate'])) {
-                $key = isset($_POST['ata_license_key']) ? sanitize_text_field(wp_unslash((string) $_POST['ata_license_key'])) : '';
+        if (isset($_POST['enzo_license_activate']) || isset($_POST['enzo_license_deactivate'])) {
+            check_admin_referer('enzo_license_action', 'enzo_license_nonce');
+            if (isset($_POST['enzo_license_activate'])) {
+                $key = isset($_POST['enzo_license_key']) ? sanitize_text_field(wp_unslash((string) $_POST['enzo_license_key'])) : '';
                 $result = self::activate($key);
                 $message = $result['message'];
                 $error = !$result['success'];
@@ -171,22 +171,22 @@ class LicenseManager
         $status = self::status();
         ?>
         <div class="wrap">
-            <h2>لایسنس ATA: AI Telegram Admin</h2>
+            <h2>لایسنس ENZO: AI Telegram Admin</h2>
             <?php if ($message): ?>
                 <div class="notice notice-<?php echo $error ? 'error' : 'success'; ?>"><p><?php echo esc_html($message); ?></p></div>
             <?php endif; ?>
             <form method="post" action="">
-                <?php wp_nonce_field('ata_license_action', 'ata_license_nonce'); ?>
+                <?php wp_nonce_field('enzo_license_action', 'enzo_license_nonce'); ?>
                 <table class="form-table">
                     <tr>
-                        <th><label for="ata_license_key">کلید لایسنس</label></th>
-                        <td><input type="text" name="ata_license_key" id="ata_license_key" class="large-text" value="<?php echo esc_attr($status['key']); ?>" required></td>
+                        <th><label for="enzo_license_key">کلید لایسنس</label></th>
+                        <td><input type="text" name="enzo_license_key" id="enzo_license_key" class="large-text" value="<?php echo esc_attr($status['key']); ?>" required></td>
                     </tr>
                 </table>
                 <?php if (!$status['activated']): ?>
-                    <p class="submit"><input type="submit" name="ata_license_activate" class="button button-primary" value="فعال کردن"></p>
+                    <p class="submit"><input type="submit" name="enzo_license_activate" class="button button-primary" value="فعال کردن"></p>
                 <?php else: ?>
-                    <p class="submit"><input type="submit" name="ata_license_deactivate" class="button" value="حذف لایسنس"></p>
+                    <p class="submit"><input type="submit" name="enzo_license_deactivate" class="button" value="حذف لایسنس"></p>
                 <?php endif; ?>
             </form>
             <p><strong>وضعیت:</strong> <?php echo $status['activated'] && $status['valid'] ? 'فعال' : ($status['expired'] ? 'منقضی' : 'غیرفعال'); ?></p>

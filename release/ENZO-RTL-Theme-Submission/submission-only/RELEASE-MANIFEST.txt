@@ -1,11 +1,11 @@
 RELEASE-MANIFEST — ATA-RTL-Theme-Submission
-Product: آتا | ATA: AI Telegram Admin (slug: ata-telegram-ai-admin)
+Product: انزو | ENZO: AI Telegram Admin (slug: enzo-telegram-ai-admin)
 Version: 1.0.0-MVP
 Git HEAD: c84734d
 Build date: 2026-10-11 06:45 UTC
 
 == File hashes (SHA-256, generated from disk) ==
-da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11  51880 bytes  ./ata-telegram-ai-admin-1.0.0-MVP-rc1.zip
+da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11  51880 bytes  ./enzo-telegram-ai-admin-1.0.0-MVP-rc1.zip
 214ce0f86ed7d5e0d055fd48c7ac34df216d676628c9060f45d40d6719499543  3785 bytes  ./customer/CHANGELOG.md
 7367fb1441b39e6b8a86a76e74cf79f44f0e36f1ee95d651797e6f36532a7469  1725 bytes  ./customer/COMPATIBILITY.md
 7f2e5ddf6974b745d419c76b7a0adf17035a0b463cd5f3c680eed27f4f019b54  3887 bytes  ./customer/FAQ-FA.md

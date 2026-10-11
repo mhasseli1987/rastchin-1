@@ -1,5 +1,5 @@
 {
-    "name": "rtl-theme/ai-telegram-admin",
+    "name": "rtl-theme/enzo",
     "description": "AI Telegram Admin Plugin for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0+",
@@ -25,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "ATA\\": "includes/"
+            "ENZO\\": "includes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ATA\\Tests\\": "includes/Tests/"
+            "ENZO\\Tests\\": "includes/Tests/"
         }
     },
     "scripts": {

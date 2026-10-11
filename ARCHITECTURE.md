@@ -1,4 +1,4 @@
-# Architecture — ATA: AI Telegram Admin
+# Architecture — ENZO: AI Telegram Admin
 
 معماری اجراشده نسخه 1.0-MVP (سند طراحی کامل: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md))
 
@@ -6,7 +6,7 @@
 
 ```
 Admin UI (SPA + کلاسیک)
-        │ REST /ata/v1 (28 endpoint, manage_options)
+        │ REST /enzo/v1 (28 endpoint, manage_options)
         ▼
 ┌─────────────────────────── includes/ ───────────────────────────┐
 │ Admin/   RestApi, MenuProvider (Entry Points)                    │
@@ -40,7 +40,7 @@ Admin UI (SPA + کلاسیک)
 ## جریان انتشار (مسیر بحرانی)
 
 ```
-schedulePost (REST) ──► ata_queue (pending, next_run_at UTC)
+schedulePost (REST) ──► enzo_queue (pending, next_run_at UTC)
                               │
 Runner::handle (cron دقیقه‌ای) │ claim اتمیک:
         UPDATE queue SET status='running', lock_token=…

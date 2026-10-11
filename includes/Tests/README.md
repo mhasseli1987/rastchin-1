@@ -1,6 +1,6 @@
-# ATA Unit Tests
+# ENZO Unit Tests
 
-This directory contains PHPUnit-compatible unit tests for the ATA plugin.
+This directory contains PHPUnit-compatible unit tests for the ENZO plugin.
 
 ## Test Files
 - `TestCase.php` — Base test case class

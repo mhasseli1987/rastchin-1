@@ -1,4 +1,4 @@
-# معماری تلگرام (Telegram Architecture) — AI Telegram Admin (ATA)
+# معماری تلگرام (Telegram Architecture) — AI Telegram Admin (ENZO)
 
 | مشخصه | مقدار |
 | --- | --- |
@@ -25,9 +25,9 @@
 Application Layer (PublishService, ChannelService)
         │ فقط Interface + DTO خنثی
         ▼
-Ata\Contracts\Telegram\TelegramProviderInterface      ◄── پورت (این سند، بخش ۳)
+Enzo\Contracts\Telegram\TelegramProviderInterface      ◄── پورت (این سند، بخش ۳)
         ▲ implements
-Ata\Telegram\BotApiTelegramProvider                   ◄── آداپتر (این سند، بخش ۴)
+Enzo\Telegram\BotApiTelegramProvider                   ◄── آداپتر (این سند، بخش ۴)
         │
         ├─ SecretStore (خواندن Token — هرگز log نمی‌شود)
         ├─ RateLimitGuard (429/retry-after)
@@ -36,7 +36,7 @@ Ata\Telegram\BotApiTelegramProvider                   ◄── آداپتر (ا
 ```
 
 قوانین جهت وابستگی (از `ARCHITECTURE.md:70`، تکرار الزامی):
-- `Ata\Telegram` **فقط** از `TelegramProviderInterface`، DTOهای سطح خودش و `HttpClientInterface` استفاده می‌کند — نه از `Ata\Application`، نه `Ata\Admin`، نه `Ata\Queue`.
+- `Enzo\Telegram` **فقط** از `TelegramProviderInterface`، DTOهای سطح خودش و `HttpClientInterface` استفاده می‌کند — نه از `Enzo\Application`، نه `Enzo\Admin`، نه `Enzo\Queue`.
 - Business Logic (زمان‌بندی، وضعیت پست، صف) **خارج** از این لایه است؛ Scheduling/Publishing در این سند یعنی «قرارداد لایه‌ی تلگرام با آن‌ها»، نه پیاده‌سازی زمان‌بندی.
 - هیچ تایپ تلگرامی (update, message, chat JSON) به هسته نشت نمی‌کند — Mapper آن‌ها را به DTO خنثی تبدیل می‌کند (D-18: ورودی تلگرام هم غیرقابل‌اعتماد است).
 
@@ -139,8 +139,8 @@ BotApiTelegramProvider
 ## ۵. پوشش ۱۳ قابلیت خواسته‌شده (`SPECIFICATION.md:296-310`)
 
 ### ۵.۱ Bot Token
-- ورودی: فیلد `type=password` در صفحه‌ی Settings (فلوی «اتصال Telegram») → REST `POST ata/v1/telegram/connect` (معماری سیستم ۳.۱۲).
-- ذخیره: `SecretStore` (AES-256-GCM، `ARCHITECTURE.md:281`)؛ در جدول `ata_providers` فقط `secret_ref` ذخیره می‌شود، نه مقدار.
+- ورودی: فیلد `type=password` در صفحه‌ی Settings (فلوی «اتصال Telegram») → REST `POST enzo/v1/telegram/connect` (معماری سیستم ۳.۱۲).
+- ذخیره: `SecretStore` (AES-256-GCM، `ARCHITECTURE.md:281`)؛ در جدول `enzo_providers` فقط `secret_ref` ذخیره می‌شود، نه مقدار.
 - اعتبارسنجی: فرمات `{digits}:{alphanum}` (بررسی سبک سمت کلاینت برای خطای سریع + بررسی واقعی با `getMe()` سمت سرور). **هرگز** با Token ذخیره‌شده‌ی قبلی در پاسخ API برنمی‌گردد؛ UI فقط «متصل به @botname» نشان می‌دهد.
 - چرخش/جایگزینی: ذخیره‌ی Token جدید = overwrite در SecretStore + `getMe()` مجدد؛ Token قدیمی پاک می‌شود (بدون تاریخچه‌ی secret).
 
@@ -149,10 +149,10 @@ BotApiTelegramProvider
   1. کاربر در فلوی «اتصال Channel» یکی از دو مسیر را انتخاب می‌کند: (الف) وارد کردن `@username` یا لینک `t.me/` کانال؛ (ب) «کشف خودکار» — ربات را ادمین کانال کند و منتظر بماند.
   2. مسیر الف: `getChat()` بلافاصله؛ اگر `type=channel` و `botStatus=administrator` → کانال ثبت می‌شود؛ اگر `left/kicked/member` → پیام انسانی دقیق («ربات را با حق Admin: Post Messages ادمین کنید») + لینک راهنما.
   3. مسیر ب: Webhook/Polling یک `my_chat_member` با `new_chat_member.status=administrator` دریافت می‌کند → کانال کشف و به فهرست «کانال‌های یافت‌شده» اضافه می‌شود → کاربر تأیید نهایی را در UI می‌زند (هیچ کانالی بدون تأیید انسانی ثبت فعال نمی‌شود).
-  4. هر کانال ثبت‌شده در `ata_channels` (معماری سیستم ۳.۶) با وضعیت `connected/error/disconnected`.
-- **Posts:** یک «پست» = رکورد `ata_posts` با وضعیت‌های ماشین حالت (معماری سیستم ۳.۳). لایه‌ی تلگرام در لحظه‌ی `Publishing` فقط یک بار `sendMessage`/`sendPhoto` صدا می‌خورد؛ نتیجه (`messageId`, `link`) روی پست ذخیره می‌شود.
+  4. هر کانال ثبت‌شده در `enzo_channels` (معماری سیستم ۳.۶) با وضعیت `connected/error/disconnected`.
+- **Posts:** یک «پست» = رکورد `enzo_posts` با وضعیت‌های ماشین حالت (معماری سیستم ۳.۳). لایه‌ی تلگرام در لحظه‌ی `Publishing` فقط یک بار `sendMessage`/`sendPhoto` صدا می‌خورد؛ نتیجه (`messageId`, `link`) روی پست ذخیره می‌شود.
 - **محدودیت‌های رسمی و رفتار ما:**
-  | محدودیت | مقدار رسمی | رفتار ATA |
+  | محدودیت | مقدار رسمی | رفتار ENZO |
   | --- | --- | --- |
   | طول متن پیام | ۴۰۹۶ کاراکتر | پیش‌نویس/تولید AI در هسته محدود و هشدار می‌دهد (قبل از approve)؛ در لحظه‌ی ارسال، متنِ بلندتر **خودکار نمی‌شکند** (یکپارچگی محتوا) → خطای انسانی «متن طولانی‌تر از حد تلگرام» با پیشنهاد ویرایش. شکستن خودکار = V1 (Feature با ارزش تجاری مثبت: رشته‌پست) |
   | طول caption | ۱۰۲۴ کاراکتر | همان رفتار بالا برای caption |
@@ -169,14 +169,14 @@ BotApiTelegramProvider
 
 ### ۵.۹ Scheduling و ۵.۱۰ Publishing (قرارداد لایه، نه پیاده‌سازی)
 - پیاده‌سازی زمان‌بندی/صف در معماری سیستم بسته شده (۳.۴/۳.۵، D-6/D-7، جریان B). قرارداد این لایه:
-  1. `Ata\Cron\Runner` → `JobQueueInterface.claim()` → `PublishService.publish(postId)`.
+  1. `Enzo\Cron\Runner` → `JobQueueInterface.claim()` → `PublishService.publish(postId)`.
   2. `PublishService` از `ChannelRepository` کانال را می‌گیرد و **فقط** `TelegramProviderInterface.sendMessage/sendPhoto` را صدا می‌کند.
   3. نتیجه: success → `messageId/link` روی پست + `complete`؛ خطای retryable → `retry` با backoff (بخش ۷)؛ خطای قطعی → `fail` با کد.
-  4. **Idempotency انتشار (تصمیم T-7):** قبل از ارسال، اگر `telegram_message_id` روی پست پر است → ارسال تکراری انجام نمی‌شود (محافظ در برابر double-publish بعد از crash بین «ارسال موفق» و «ثبت نتیجه»). اگر response تلگرام موفق ولی ثبت نتیجه ناموفق بود، اجراگر بعدی با دیدن نبودِ `message_id` ممکن است دوباره بفرستد → برای بستن این پنجره، `ata_queue.payload` شامل `idempotency_key` است و در سناریوی مشکوک، وضعیت پست به «نیازمند بررسی» می‌رود (یک رکورد لاگ + پیام به ادمین) به‌جای ارسال کور. دلیل فنی: هزینه‌ی پست تکراری در کانال عمومی (آبروی مشتری) از هزینه‌ی یک توقف دستی بیشتر است.
+  4. **Idempotency انتشار (تصمیم T-7):** قبل از ارسال، اگر `telegram_message_id` روی پست پر است → ارسال تکراری انجام نمی‌شود (محافظ در برابر double-publish بعد از crash بین «ارسال موفق» و «ثبت نتیجه»). اگر response تلگرام موفق ولی ثبت نتیجه ناموفق بود، اجراگر بعدی با دیدن نبودِ `message_id` ممکن است دوباره بفرستد → برای بستن این پنجره، `enzo_queue.payload` شامل `idempotency_key` است و در سناریوی مشکوک، وضعیت پست به «نیازمند بررسی» می‌رود (یک رکورد لاگ + پیام به ادمین) به‌جای ارسال کور. دلیل فنی: هزینه‌ی پست تکراری در کانال عمومی (آبروی مشتری) از هزینه‌ی یک توقف دستی بیشتر است.
 
 ### ۵.۱۱ Webhook
 از معماری سیستم ۳.۱۳ (D-17) با بسته‌شدن جزئیات:
-- **Endpoint:** `wp-json/ata/v1/webhook/telegram` (POST، عمومی، بدون cookie-auth).
+- **Endpoint:** `wp-json/enzo/v1/webhook/telegram` (POST، عمومی، بدون cookie-auth).
 - **Secret Token:** هنگام `setWebhook` مقدار `secret_token` تصادفی ۳۲+ کاراکتر تولید و در `SecretStore` ذخیره می‌شود؛ Telegram آن را در header `X-Telegram-Bot-Api-Secret-Token` برمی‌گرداند؛ مقایسه فقط با `hash_equals`. نبود/نادرستی header → ۴۰۳ بدون body اطلاعاتی.
 - **allow-list نوع update:** فقط `my_chat_member`، `chat_member`، `channel_post` (کشف کانال در فلوی اتصال). بقیه → ۲۰۰ و ignore (جلوگیری از retry طوفانی تلگرام).
 - **Idempotency:** `update_id` در Transient کوتاه‌مدت؛ تکراری → ۲۰۰ بدون پردازش.
@@ -190,7 +190,7 @@ BotApiTelegramProvider
 
 ```
 TelegramException {
-  code: string            // کد ماشین‌خوان ATA (جدول زیر)
+  code: string            // کد ماشین‌خوان ENZO (جدول زیر)
   apiCode: int            // error_code تلگرام
   isRetryable(): bool
   retryAfterSeconds(): ?int
@@ -199,7 +199,7 @@ TelegramException {
 }
 ```
 
-| code ATA | apiCode تلگرام | retryable | پیام انسانی (نمونه) |
+| code ENZO | apiCode تلگرام | retryable | پیام انسانی (نمونه) |
 | --- | --- | --- | --- |
 | `telegram_invalid_token` | 401 | نه | «توکن ربات نامعتبر است؛ از BotFather بررسی کنید» |
 | `telegram_not_found` | 404 | نه | «کانال/چت پیدا نشد؛ username را بررسی کنید» |
@@ -214,7 +214,7 @@ TelegramException {
 - **بدون نشت توکن در هیچ مسیری:** چون توکن فقط داخل URL سمت `HttpClient` است و `HttpClient` خودش mask می‌زند (T-3)، حتی exception های لایه‌ی HTTP هم URL خام را حمل نمی‌کنند.
 
 ### ۵.۱۳ Rate Limits
-- **محدودیت‌های رسمی (پایدار و مستند؛ اعداد دقیق: unconfirmed تا تست فاز ۱۱):** ~۳۰ پیام/ثانیه global، ~۱ پیام/ثانیه به یک chat، ~۲۰ پیام/دقیقه به یک گروه. کانال‌های ATA معمولاً یکی هستند پس قید اصلی: global و per-chat.
+- **محدودیت‌های رسمی (پایدار و مستند؛ اعداد دقیق: unconfirmed تا تست فاز ۱۱):** ~۳۰ پیام/ثانیه global، ~۱ پیام/ثانیه به یک chat، ~۲۰ پیام/دقیقه به یک گروه. کانال‌های ENZO معمولاً یکی هستند پس قید اصلی: global و per-chat.
 - **`RateLimitGuard` (T-4):**
   - state در Transient: `{global_window: [timestamps], per_chat: {chatId: last_sent_at}, retry_after_until: ts}`.
   - قبل از هر ارسال: اگر `retry_after_until > now` → رد با `telegram_rate_limit` و زمان باقی‌مانده (اجراگر صف آن را backoff می‌کند).
@@ -231,7 +231,7 @@ TelegramException {
 UI (فلو ۳ UX_SPEC) → POST /telegram/connect {token}
   → SecretStore.put(ref, token)  ► در حافظه، نه لاگ
   → Provider.testConnection() = getMe()
-      ├─ ok  → ata_providers: {driver: botapi, secret_ref, status: connected}
+      ├─ ok  → enzo_providers: {driver: botapi, secret_ref, status: connected}
       │        → setWebhook(url, secret_token)  ► ذخیره secret در SecretStore
       │        → پاسخ UI: «متصل شد: @botname» + وضعیت webhook
       └─ 401 → SecretStore.put لغو (rollback) → خطای انسانی telegram_invalid_token
@@ -264,7 +264,7 @@ PublishService.publish(postId)
 | 1 | توکن هرگز در Frontend/HTML/JS نیست | فیلد `type=password` یک‌طرفه؛ پاسخ API هرگز مقدار را برنمی‌گرداند | ۵.۱؛ `UX_SPEC.md:507-512` |
 | 2 | توکن هرگز در URL قابل‌لاگ (access log/query string) نیست | فقط در pathِ URL خروجی سمت سرور به api.telegram.org (ساختار رسمی `bot{token}/method`)؛ access log سایت ما هیچ‌وقت این URL را نمی‌بیند چون درخواست خروجی است؛ لاگ داخلی با mask `bot***` | T-3 |
 | 3 | توکن هرگز در لاگ/خطا نیست | SecretStore + mask در HttpClient + redaction خودکار Logger (دفاع دوم) | `ARCHITECTURE.md:299`؛ ۵.۱۲ |
-| 4 | توکن در DB plaintext نیست | AES-256-GCM در SecretStore؛ `ata_providers` فقط `secret_ref` | D-15 |
+| 4 | توکن در DB plaintext نیست | AES-256-GCM در SecretStore؛ `enzo_providers` فقط `secret_ref` | D-15 |
 | 5 | توکن در Exception/stack trace نیست | TelegramException هیچ فیلد request خام حمل نمی‌کند؛ context فقط redact‌شده | ۵.۱۲ |
 | 6 | Webhook بدون اعتبارسنجی پذیرفته نمی‌شود | secret_token + hash_equals + allow-list نوع + idempotency | ۵.۱۱، D-17 |
 | 7 | ورودی تلگرام غیرقابل‌اعتماد است | فیلد allow-list + escape در UI + دور ریختن بقیه | ۵.۱۱، D-18 |

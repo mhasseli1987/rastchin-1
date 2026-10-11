@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Infrastructure\WpDb;
+namespace ENZO\Infrastructure\WpDb;
 
 use wpdb;
 
@@ -24,7 +24,7 @@ class Installer
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
         $charset = $this->wpdb->get_charset_collate();
-        $table = $this->wpdb->prefix . 'ata_posts';
+        $table = $this->wpdb->prefix . 'enzo_posts';
         $sql = "CREATE TABLE $table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             title varchar(255) NOT NULL,
@@ -47,7 +47,7 @@ class Installer
 
         dbDelta($sql);
 
-        $table = $this->wpdb->prefix . 'ata_channels';
+        $table = $this->wpdb->prefix . 'enzo_channels';
         $sql = "CREATE TABLE $table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             chat_id bigint(20) NOT NULL,
@@ -62,7 +62,7 @@ class Installer
 
         dbDelta($sql);
 
-        $table = $this->wpdb->prefix . 'ata_providers';
+        $table = $this->wpdb->prefix . 'enzo_providers';
         $sql = "CREATE TABLE $table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             type varchar(32) NOT NULL,
@@ -78,7 +78,7 @@ class Installer
 
         dbDelta($sql);
 
-        $table = $this->wpdb->prefix . 'ata_queue';
+        $table = $this->wpdb->prefix . 'enzo_queue';
         $sql = "CREATE TABLE $table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             job_type varchar(128) NOT NULL,
@@ -100,7 +100,7 @@ class Installer
 
         dbDelta($sql);
 
-        $table = $this->wpdb->prefix . 'ata_logs';
+        $table = $this->wpdb->prefix . 'enzo_logs';
         $sql = "CREATE TABLE $table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             scope varchar(64) NOT NULL DEFAULT 'system',
@@ -116,17 +116,17 @@ class Installer
 
         dbDelta($sql);
 
-        update_option('ata_db_version', ATA_DB_VERSION);
+        update_option('enzo_db_version', ENZO_DB_VERSION);
     }
 
     public function uninstall(): void
     {
         $tables = [
-            $this->wpdb->prefix . 'ata_posts',
-            $this->wpdb->prefix . 'ata_channels',
-            $this->wpdb->prefix . 'ata_providers',
-            $this->wpdb->prefix . 'ata_queue',
-            $this->wpdb->prefix . 'ata_logs',
+            $this->wpdb->prefix . 'enzo_posts',
+            $this->wpdb->prefix . 'enzo_channels',
+            $this->wpdb->prefix . 'enzo_providers',
+            $this->wpdb->prefix . 'enzo_queue',
+            $this->wpdb->prefix . 'enzo_logs',
         ];
         foreach ($tables as $t) {
             $this->wpdb->query("DROP TABLE IF EXISTS $t");
@@ -134,23 +134,23 @@ class Installer
 
         // Load matching option names first, then delete each via delete_option()
         // (cache-aware). NOTE: a raw LIKE pattern must go through esc_like(),
-        // otherwise prepare()'s escaping turns 'ata\_%' into a pattern that
+        // otherwise prepare()'s escaping turns 'enzo\_%' into a pattern that
         // matches nothing and secrets silently survive uninstall.
         $options = $this->wpdb->options;
-        $like = $this->wpdb->esc_like('ata_') . '%';
+        $like = $this->wpdb->esc_like('enzo_') . '%';
         $names = $this->wpdb->get_col($this->wpdb->prepare("SELECT option_name FROM $options WHERE option_name LIKE %s", $like));
         foreach ($names as $name) {
             delete_option((string) $name);
         }
 
         // Transients live under _transient_* / _transient_timeout_* names.
-        foreach (['_transient_ata_', '_transient_timeout_ata_'] as $tPrefix) {
+        foreach (['_transient_enzo_', '_transient_timeout_enzo_'] as $tPrefix) {
             $tLike = $this->wpdb->esc_like($tPrefix) . '%';
             $this->wpdb->query($this->wpdb->prepare("DELETE FROM $options WHERE option_name LIKE %s", $tLike));
         }
 
         // Legacy prefix-named leftovers from very old builds (harmless if none).
-        $legacyLike = $this->wpdb->esc_like($this->wpdb->prefix . 'ata_') . '%';
+        $legacyLike = $this->wpdb->esc_like($this->wpdb->prefix . 'enzo_') . '%';
         $this->wpdb->query($this->wpdb->prepare("DELETE FROM $options WHERE option_name LIKE %s", $legacyLike));
 
         // Direct SQL deletes bypass WP's object cache — flush it so any
@@ -159,6 +159,6 @@ class Installer
         wp_cache_delete('alloptions', 'options');
         wp_cache_delete('notoptions', 'options');
 
-        delete_option('ata_db_version');
+        delete_option('enzo_db_version');
     }
 }

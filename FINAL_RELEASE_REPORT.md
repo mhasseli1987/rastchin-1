@@ -1,6 +1,7 @@
-# FINAL RELEASE REPORT — ATA: AI Telegram Admin 1.0.0-MVP
+# FINAL RELEASE REPORT — ENZO: AI Telegram Admin 1.0.0-MVP
 
-> **به‌روزرسانی 1.1.0 (2026-10-11):** محدودیت شمارهٔ ۱ (UI ناقص — فقط داشبورد/تلگرام) **برطرف شد**: هر ۱۳ بخش حالا UI تعاملی کامل دارند (CHANGELOG.md). ثبت کانال هم از UI انجام می‌شود (محدودیت SETUP قدیمی برطرف). سرور لایسنس مرجع در `license-server/` اضافه شد و endpointهای لایسنس افزونه با فیلتر `ata_license_verify_url` / `ata_license_update_check_url` قابل تغییرند. این سند برای نسخهٔ 1.0.0-MVP به‌صورت تاریخی حفظ شده است.
+> **به‌روزرسانی 1.2.0 (2026-10-11):** تغییر نام برند پروژه به **ENZO (انزو)** — همهٔ شناسه‌های فنی (پیشوندهای `enzo_*`، فضای‌نام `ENZO`، REST `enzo/v1` و…) یکجا به‌روزرسانی شدند و بستهٔ فعلی `enzo-telegram-ai-admin-1.2.0.zip` است (CHANGELOG.md). بقیهٔ این سند برای نسخهٔ 1.0.0-MVP به‌صورت تاریخی حفظ شده است.
+> **به‌روزرسانی 1.1.0 (2026-10-11):** محدودیت شمارهٔ ۱ (UI ناقص — فقط داشبورد/تلگرام) **برطرف شد**: هر ۱۳ بخش حالا UI تعاملی کامل دارند (CHANGELOG.md). ثبت کانال هم از UI انجام می‌شود (محدودیت SETUP قدیمی برطرف). سرور لایسنس مرجع در `license-server/` اضافه شد و endpointهای لایسنس افزونه با فیلتر `enzo_license_verify_url` / `enzo_license_update_check_url` قابل تغییرند. این سند برای نسخهٔ 1.0.0-MVP به‌صورت تاریخی حفظ شده است.
 
 **تاریخ انتشار:** 2026-10-10 | **گیت‌های SPEC فاز ۲۰:** همگی پاس (جزئیات زیر)
 
@@ -8,12 +9,12 @@
 
 ## Product Summary
 
-**ATA: AI Telegram Admin (آتا)** — افزونه وردپرس برای مدیران سایتی که کانال تلگرام فعال دارند: تولید/بازنویسی/خلاصه/ترجمه محتوا با هر سرویس سازگار OpenAI، پیش‌نمایش و تأیید انسانی، زمان‌بندی و انتشار تضمین‌شده با صف اتمیک، همه از داخل پیشخوان وردپرس و تمام‌فارسی.
+**ENZO: AI Telegram Admin (انزو)** — افزونه وردپرس برای مدیران سایتی که کانال تلگرام فعال دارند: تولید/بازنویسی/خلاصه/ترجمه محتوا با هر سرویس سازگار OpenAI، پیش‌نمایش و تأیید انسانی، زمان‌بندی و انتشار تضمین‌شده با صف اتمیک، همه از داخل پیشخوان وردپرس و تمام‌فارسی.
 
-- **برند:** آتا (ATA) | **Slug:** `ata-telegram-ai-admin` | **نسخه:** 1.0.0-MVP
-- **بسته:** `dist/ata-telegram-ai-admin-1.0.0-MVP-rc1.zip` — SHA-256 `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11`
-- **یادداشت بازسازی بسته (2026-10-11):** بستهٔ اولیه ناخواسته از پوشهٔ staging قدیمی (`dist/ata-telegram-ai-admin/` با اسنپ‌شات میانهٔ فاز ۱۷) ساخته شده بود و ۴ فایل اصلاح‌شدهٔ نهایی (Installer/RestApi/Runner/OpenAICompatibleProvider) را نداشت. بستهٔ فعلی مستقیماً از `git archive bc77d57` بازسازی و تفاوت صفر با کد تست‌شده تأیید شد؛ هش بالا جایگزین هش قبلی (`fc0802…c41`) است.
-- **مخزن:** github.com/mhasseli1987/ai-telegram-admin
+- **برند:** انزو (ENZO) | **Slug:** `enzo-telegram-ai-admin` | **نسخه:** 1.0.0-MVP
+- **بسته:** `dist/enzo-telegram-ai-admin-1.0.0-MVP-rc1.zip` — SHA-256 `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11`
+- **یادداشت بازسازی بسته (2026-10-11):** بستهٔ اولیه ناخواسته از پوشهٔ staging قدیمی (`dist/enzo-telegram-ai-admin/` با اسنپ‌شات میانهٔ فاز ۱۷) ساخته شده بود و ۴ فایل اصلاح‌شدهٔ نهایی (Installer/RestApi/Runner/OpenAICompatibleProvider) را نداشت. بستهٔ فعلی مستقیماً از `git archive bc77d57` بازسازی و تفاوت صفر با کد تست‌شده تأیید شد؛ هش بالا جایگزین هش قبلی (`fc0802…c41`) است.
+- **مخزن:** github.com/mhasseli1987/enzo
 
 ## Final Features
 
@@ -36,7 +37,7 @@ Ports & Adapters با Container DI سبک؛ همه ترافیک خروجی از 
 | ناحیه | وضعیت |
 | --- | --- |
 | Critical/High باز | **0 / 0** |
-| Secret at rest | XChaCha20-Poly1305-IETF + `ATA_ENCRYPTION_KEY` اختیاری |
+| Secret at rest | XChaCha20-Poly1305-IETF + `ENZO_ENCRYPTION_KEY` اختیاری |
 | SSRF | fail-closed، v4+v6، rebinding — تست‌شده با ۷ الگو |
 | AuthZ/AuthN | ۲۴/۲۴ endpoint با `manage_options`؛ 401 بدون لاگین (تست‌شده) |
 | SQL/XSS/CSRF | prepare سراسری، escaping، nonce + capability (تست‌شده) |
@@ -73,7 +74,7 @@ Ports & Adapters با Container DI سبک؛ همه ترافیک خروجی از 
 
 ## RTL Listing Recommendation
 
-- **تیتر صفحه فروش:** از PHASE-14-RTL-PREP.md (copy آماده) — برند «آتا»
+- **تیتر صفحه فروش:** از PHASE-14-RTL-PREP.md (copy آماده) — برند «انزو»
 - **جعبه افشا (الزامی طبق ممیزی فاز ۱۹):** محدودیت‌های ۱ و ۳ و ۴ بالا + توصیه OpenRouter/Groq برای دسترسی از ایران
 - **اسکرین‌شات‌ها:** طبق پلن ۸تایی فاز ۱۴؛ ویدئوهای آموزشی طبق پلن ۴تایی
 - **برچسب‌ها:** تلگرام، هوش مصنوعی، اتوماسیون محتوا، زمان‌بندی، صف انتشار
@@ -94,9 +95,9 @@ Ports & Adapters با Container DI سبک؛ همه ترافیک خروجی از 
 
 | File | Purpose | SHA-256 |
 | --- | --- | --- |
-| `ata-telegram-ai-admin-1.0.0-MVP-rc1.zip` | افزونهٔ نصب‌شونده (installable plugin) | `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11` |
-| `ata-telegram-ai-admin-1.0.0-MVP-customer-package.zip` | بستهٔ دانلود مشتری (customer download) | `83469cbc681e97d994f7fdddc278034453e702a56a47b4b64cd2ea4b426a8541` |
-| `ata-telegram-ai-admin-1.0.0-MVP-submission-bundle.zip` | بستهٔ ارسال به RTL-Theme (submission bundle) | `a3b771c7eb785288d7c9d4febf05d56f389c1142bf0c4969d069f59327341f70` |
+| `enzo-telegram-ai-admin-1.0.0-MVP-rc1.zip` | افزونهٔ نصب‌شونده (installable plugin) | `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11` |
+| `enzo-telegram-ai-admin-1.0.0-MVP-customer-package.zip` | بستهٔ دانلود مشتری (customer download) | `83469cbc681e97d994f7fdddc278034453e702a56a47b4b64cd2ea4b426a8541` |
+| `enzo-telegram-ai-admin-1.0.0-MVP-submission-bundle.zip` | بستهٔ ارسال به RTL-Theme (submission bundle) | `a3b771c7eb785288d7c9d4febf05d56f389c1142bf0c4969d069f59327341f70` |
 - Plugin zip rebuilt from commit `6b679a9` (SSRF test-determinism fix); verified byte-identical to HEAD (zero-diff), 30/30 PHP files lint-clean, and re-installed/activated/uninstalled cleanly on a fresh WordPress 6.5 install **from the zip itself** (zero leftovers).
 - **Customer download** = plugin zip + SETUP-INSTRUCTIONS.md, INSTALLATION.md, USER-GUIDE.md, FAQ.md, TROUBLESHOOTING.md, CHANGELOG.md.
 - **Submission-only** (not for customers) = FINAL_RELEASE_REPORT.md, ARCHITECTURE.md, SECURITY.md.

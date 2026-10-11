@@ -1,12 +1,12 @@
 <?php
-namespace ATA\Services;
+namespace ENZO\Services;
 
-use ATA\Contracts\Telegram\TelegramProviderInterface;
-use ATA\Contracts\AI\AIProviderInterface;
-use ATA\Contracts\AI\AIRequest;
-use ATA\Contracts\AI\AIResult;
-use ATA\Contracts\Log\LoggerInterface;
-use ATA\Infrastructure\WpDb\PostRepository;
+use ENZO\Contracts\Telegram\TelegramProviderInterface;
+use ENZO\Contracts\AI\AIProviderInterface;
+use ENZO\Contracts\AI\AIRequest;
+use ENZO\Contracts\AI\AIResult;
+use ENZO\Contracts\Log\LoggerInterface;
+use ENZO\Infrastructure\WpDb\PostRepository;
 
 defined('ABSPATH') || exit;
 

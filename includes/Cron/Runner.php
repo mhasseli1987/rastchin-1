@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Cron;
+namespace ENZO\Cron;
 
 defined('ABSPATH') || exit;
 
@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
  */
 class Runner
 {
-    public const HOOK = 'ata_due_queue';
+    public const HOOK = 'enzo_due_queue';
 
     private const MAX_JOBS_PER_RUN = 5;
     private const LOCK_TTL = 300; // 5 minutes.
@@ -18,7 +18,7 @@ class Runner
     public static function ensureScheduled(): void
     {
         if (!wp_next_scheduled(self::HOOK)) {
-            wp_schedule_event(time() + MINUTE_IN_SECONDS, 'ata_minute', self::HOOK);
+            wp_schedule_event(time() + MINUTE_IN_SECONDS, 'enzo_minute', self::HOOK);
         }
     }
 
@@ -39,7 +39,7 @@ class Runner
     private static function runNext(): bool
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
 
         // Generate the token first, then claim by conditional UPDATE.
         // (The old code relied on $wpdb->insert_id after an UPDATE, which is not reliable.)
@@ -83,7 +83,7 @@ class Runner
     private static function runPublish(array $job): void
     {
         global $wpdb;
-        $posts = $wpdb->prefix . 'ata_posts';
+        $posts = $wpdb->prefix . 'enzo_posts';
         $postId = (int) ($job['payload']['post_id'] ?? 0);
 
         // Old code passed $jobId as get_row() output-format arg — the query never bound.
@@ -107,8 +107,8 @@ class Runner
         }
 
         try {
-            $container = \ATA\Core\Container::instance();
-            $telegram = $container->make(\ATA\Contracts\Telegram\TelegramProviderInterface::class);
+            $container = \ENZO\Core\Container::instance();
+            $telegram = $container->make(\ENZO\Contracts\Telegram\TelegramProviderInterface::class);
 
             $imageId = (int) ($post['image_id'] ?? 0);
             $sent = null;
@@ -160,15 +160,15 @@ class Runner
     }
 
     /** Logger resolved lazily so the class stays testable without a container. */
-    public static function logger(): \ATA\Contracts\Log\LoggerInterface
+    public static function logger(): \ENZO\Contracts\Log\LoggerInterface
     {
-        return \ATA\Core\Container::instance()->make(\ATA\Contracts\Log\LoggerInterface::class);
+        return \ENZO\Core\Container::instance()->make(\ENZO\Contracts\Log\LoggerInterface::class);
     }
 
     private static function completeJob(int $jobId): void
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
         $wpdb->query($wpdb->prepare(
             "UPDATE $table SET status = 'done', locked_at = NULL, lock_token = NULL WHERE id = %d",
             $jobId
@@ -178,7 +178,7 @@ class Runner
     private static function failJob(int $jobId, string $code, string $reason): void
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
         $wpdb->query($wpdb->prepare(
             "UPDATE $table SET status = 'failed', last_error = %s, locked_at = NULL, lock_token = NULL WHERE id = %d",
             [$code . ': ' . $reason, $jobId]
@@ -188,7 +188,7 @@ class Runner
     private static function retryJob(int $jobId, string $error): void
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
 
         // Old code called get_row() with a raw "%d" query (never prepared).
         $job = $wpdb->get_row(
@@ -233,7 +233,7 @@ class Runner
     public static function runNow(int $jobId): bool
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
 
         $token = wp_generate_password(24, false, false);
         $now = current_time('mysql', 1);
@@ -267,7 +267,7 @@ class Runner
     public static function clearExpiredLocks(): void
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
         $expired = gmdate('Y-m-d H:i:s', time() - self::LOCK_TTL);
         $wpdb->query($wpdb->prepare(
             "UPDATE $table

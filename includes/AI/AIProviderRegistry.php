@@ -1,7 +1,7 @@
 <?php
-namespace ATA\AI;
+namespace ENZO\AI;
 
-use ATA\Contracts\AI\AIProviderInterface;
+use ENZO\Contracts\AI\AIProviderInterface;
 
 defined('ABSPATH') || exit;
 

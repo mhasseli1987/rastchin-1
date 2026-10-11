@@ -1,4 +1,4 @@
-# Market Research — AI Telegram Admin (ATA)
+# Market Research — AI Telegram Admin (ENZO)
 
 **فاز:** PHASE 1 — Market Research  
 **تاریخ:** 2026-10-08  
@@ -161,7 +161,7 @@
 
 اگر امروز این محصول ساخته شود، سه عامل منحصربه‌فرد باعث انتخاب آن نسبت به رقبا خواهد شد:
 
-1. **تنها حل‌المسئله‌ی یک‌پارچه‌ی AI + Content Pipeline + Scheduling داخل وردپرس:** رقبای فعلی (WP Telegram, Blog2Social, ParrotPoster) فقط notification یا auto-post ساده ارائه می‌دهند. هیچ‌کدام تولید محتوای AI + Preview/Approve + زمان‌بندی + RTL را ترکیب نکرده‌اند. مشتری باید ۳-۴ ابزار جدا مصرف کند (تولید محتوا → کپی → چسباندن → زمان‌بندی → ارسال). ATA همه را در یک پنل جمع می‌کند.
+1. **تنها حل‌المسئله‌ی یک‌پارچه‌ی AI + Content Pipeline + Scheduling داخل وردپرس:** رقبای فعلی (WP Telegram, Blog2Social, ParrotPoster) فقط notification یا auto-post ساده ارائه می‌دهند. هیچ‌کدام تولید محتوای AI + Preview/Approve + زمان‌بندی + RTL را ترکیب نکرده‌اند. مشتری باید ۳-۴ ابزار جدا مصرف کند (تولید محتوا → کپی → چسباندن → زمان‌بندی → ارسال). ENZO همه را در یک پنل جمع می‌کند.
 
 2. **تنها محصول RTL/فارسی‌زبان بومی با Provider-Agnostic AI:** رقبای خارجی انگلیسی هستند و ترجمه‌ی بعدی ندارند. RTL-Theme verified است که هیچ محصول تلگرامی ندارد. کلید API خودش (BYOK) → بدون قفل‌شدن در سرویس ماهانه → هزینه‌ی AI در کنترل کاربر.
 

@@ -1,4 +1,4 @@
-# معماری سیستم (System Architecture) — AI Telegram Admin (ATA)
+# معماری سیستم (System Architecture) — AI Telegram Admin (ENZO)
 
 | مشخصه | مقدار |
 | --- | --- |
@@ -41,8 +41,8 @@
 │                          ADMIN UI (wp-admin, RTL)                        │
 │  14 صفحه + AJAX/REST Client (فقط از طریق Application Services)         │
 └───────────────▲─────────────────────────────────────────────────────────┘
-                │ REST API (wp-json/ata/v1)  +  Legacy AJAX (admin-ajax)
-                │ Webhook entry (ata/v1/webhook/telegram) ──┐
+                │ REST API (wp-json/enzo/v1)  +  Legacy AJAX (admin-ajax)
+                │ Webhook entry (enzo/v1/webhook/telegram) ──┐
 ┌───────────────┴─────────────────────────────────────────────────────────┐
 │                       ╔══════════════════════════════╗                   │
 │  Contracts(ports)◄─── ─┤  APPLICATION LAYER (هسته)   │                     │
@@ -59,17 +59,17 @@
 │      └─────┬───────┘            └──────┬──────┘           │            │   │
 │     مشترک: Transport (WordPress HTTP)  │                  │            │    │
 │   ==== Infrastructure/Adapters ========│==================│=========== │    │
-│   Database {ata_posts, ata_queue, ...} ◄┘ (Repositories)   │            │    │
-│   Logging {ata_logs}   Security {SecretStore,Nonce,Cap}    │            │    │
+│   Database {enzo_posts, enzo_queue, ...} ◄┘ (Repositories)   │            │    │
+│   Logging {enzo_logs}   Security {SecretStore,Nonce,Cap}    │            │    │
 └──────────────────────────────────────────────────────────────────────────────┘
         خارج (Adapters/Infrastructure)  ←→  داخل (Core؛ ساخت WP-ناآگاه)
 ```
 
 **قانون جهت وابستگی (به‌صورت الزام معماری):**
 
-- `Ata\Telegram` و `Ata\AI` فقط از `Ata\Contracts\Telegram\TelegramProviderInterface` و قراردادهای سطح خود + `Ata\Http\HttpClientInterface` استفاده می‌کنند. **نه از `Ata\Application`، نه از `Ata\Admin`، نه از `Ata\Queue`** — این معنی الزام `SPECIFICATION.md:282-285` است.
-- `Ata\Application` فقط از Interfaceها (`*Interface`) استفاده می‌کند. پیاده‌سازی آن‌ها در `Ata\Infrastructure\Wp*` واقع است.
-- تنها نقطه‌ای که «چیزی به همه‌ی چیزها» وصل می‌شود، **Composition Root** است (`Ata\Plugin` + `Ata\Bootstrap`)، نه بدنه‌ی کلاس‌ها.
+- `Enzo\Telegram` و `Enzo\AI` فقط از `Enzo\Contracts\Telegram\TelegramProviderInterface` و قراردادهای سطح خود + `Enzo\Http\HttpClientInterface` استفاده می‌کنند. **نه از `Enzo\Application`، نه از `Enzo\Admin`، نه از `Enzo\Queue`** — این معنی الزام `SPECIFICATION.md:282-285` است.
+- `Enzo\Application` فقط از Interfaceها (`*Interface`) استفاده می‌کند. پیاده‌سازی آن‌ها در `Enzo\Infrastructure\Wp*` واقع است.
+- تنها نقطه‌ای که «چیزی به همه‌ی چیزها» وصل می‌شود، **Composition Root** است (`Enzo\Plugin` + `Enzo\Bootstrap`)، نه بدنه‌ی کلاس‌ها.
 
 ---
 
@@ -79,7 +79,7 @@
 
 **مسئولیت:** تمام تعاملات خروجی با Telegram Bot API — شناسایی ربات، ارسال پیام، ارسال تصویر، دریافت Chat، تست اتصال. شامل مدیریت Rate Limit و خطاهای Telegram.
 
-**قرارداد اصلی (پورت):** `Ata\Contracts\Telegram\TelegramProviderInterface`
+**قرارداد اصلی (پورت):** `Enzo\Contracts\Telegram\TelegramProviderInterface`
 
 | متد | ورودی | خروجی | یادداشت فنی |
 | --- | --- | --- | --- |
@@ -101,7 +101,7 @@ BotApiTelegramProvider  ──►  HttpTransport (HttpClientInterface)
    │  └─  Mapper (Telegram DTO ⇄ Domain DTO)
 ```
 
-- **انتقال شبکه:** از `Ata\Http\HttpClientInterface` با پیاده‌سازی `WpHttpTransport` (روی `wp_remote_request`) استفاده می‌شود — نه `wp_remote_post` مستقیم در Provider. دلیل: (الف) SSRF-Gate و Timeout و Throttle در یک نقطه متمرکزند، (ب) تست‌پذیری با `FakeHttpTransport`.
+- **انتقال شبکه:** از `Enzo\Http\HttpClientInterface` با پیاده‌سازی `WpHttpTransport` (روی `wp_remote_request`) استفاده می‌شود — نه `wp_remote_post` مستقیم در Provider. دلیل: (الف) SSRF-Gate و Timeout و Throttle در یک نقطه متمرکزند، (ب) تست‌پذیری با `FakeHttpTransport`.
 - **Token در این لایه:** هرگز داخل پیام خطا، لاگ یا ساختار برگشتی قرار نمی‌گیرد. `BotApiTelegramProvider` در سازنده فقط `SecretStore::get()` را می‌پذیرد و هرگز مقدار را log نمی‌کند.
 - **خطاها:** `TelegramException` با `code` (مثلاً `telegram_rate_limit`)، `isRetryable()`، `retryAfterSeconds()`. لایه بالاتر فقط `code` + پیام انسانی + Request ID را به کاربر/لاگ منتقل می‌کند.
 
@@ -111,7 +111,7 @@ BotApiTelegramProvider  ──►  HttpTransport (HttpClientInterface)
 
 **مسئولیت:** فراخوانی هر سرویس سازگار با OpenAI (و سرویس‌های آینده) به‌صورت کاملاً Provider-Agnostic: Base URL / API Key / Model / Temperature / Max Tokens / Timeout / Headers (`SPECIFICATION.md:326-352`).
 
-**قرارداد اصلی (پورت):** `Ata\Contracts\AI\AIProviderInterface`
+**قرارداد اصلی (پورت):** `Enzo\Contracts\AI\AIProviderInterface`
 
 | متد | ورودی | خروجی | یادداشت |
 | --- | --- | --- | --- |
@@ -141,7 +141,7 @@ AIResult   ←  Validation (ساختارِ پاسخ: content، tokensUsed، mode
 - **SSRF-Gate (D-8):** هر `base_url` قبل از استفاده در `HttpClientInterface` اعتبارسنجی می‌شود (scheme http/https، بلاک IP خصوصی/رزرو، جلوگیری از DNS-rebinding با resolve و مقایسه). این مهم‌ترین کنترل امنیتیِ BYOK است چون URL توسط کاربر غیرِفنی وارد می‌شود (`UX_SPEC.md:387`).
 - **خطاها:** `AIException` با `code`, `isRetryable()`. Timeout به‌صورت configurable و پیش‌فرض معقول.
 
-**تصمیم کلیدی ثبت‌شده (D-4، D-5، D-8):** لایه‌ی AI هیچ وابستگی به `Ata\Application` ندارد؛ از طریق `AIRequest`/`AIResult` (DTOهای خنثی) با هسته ارتباط برقرار می‌کند.
+**تصمیم کلیدی ثبت‌شده (D-4، D-5، D-8):** لایه‌ی AI هیچ وابستگی به `Enzo\Application` ندارد؛ از طریق `AIRequest`/`AIResult` (DTOهای خنثی) با هسته ارتباط برقرار می‌کند.
 
 ### ۳.۳ Application Layer (هسته — Business Logic)
 
@@ -192,7 +192,7 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 **مسئولیت:** نگهداری و اجرای امنِ «کارهای» طولانی (انتشار پست زمان‌بندی‌شده) با Retry، Resume، Cancel، Crash Recovery، Rate Limit، Timeout، Progress (الزامات فاز ۴ و تصمیم‌نهایی فاز ۹: `SPECIFICATION.md:449-472`).
 
-**قرارداد اصلی (پورت):** `Ata\Contracts\Queue\JobQueueInterface`
+**قرارداد اصلی (پورت):** `Enzo\Contracts\Queue\JobQueueInterface`
 
 | متد | توضیح | نکته‌ی فنی |
 | --- | --- | --- |
@@ -216,7 +216,7 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 - **Timezone:** همه‌ی ذخیره‌سازی به‌صورت **UTC** در DB + ترجمه به timezone وردپرس برای نمایش و ورودی (`UX_SPEC.md:288`). خطای ساعتِ رایج بین timezone سایت و سرور (UTC mismatch) از ریشه حذف می‌شود.
 - **جریان:** `SchedulerService.schedulePost(post, localDateTime)` → اعتبارسنجی (آینده باشد، post در حالت `approved`) → ثبت `Job(type=publish_post, payload=post_id, nextRun_at=UTC)` → ثبت رویداد Cron یک‌باره (MVP) → وضعیت پست `scheduled`.
 - **جدا از Queue:** Scheduler یعنی «تصمیمِ زمان»، Queue یعنی «اجرای امن با retry». این تفکیک (D-7) اجازه می‌دهد در فاز ۹ پشت‌اند صف عوض شود بدون لمس زمان‌بندی.
-- **Cron توکار وردپرس:** رویدادها با `wp_schedule_single_event`؛ اجراگرِ Cron یک‌نقطه‌ای `Ata\Cron\Runner::run()` که `JobQueueInterface.claim()` را صدا می‌زند. هنگام غیرفعال/حذف افزونه، رویدادهای Cron پاک می‌شوند.
+- **Cron توکار وردپرس:** رویدادها با `wp_schedule_single_event`؛ اجراگرِ Cron یک‌نقطه‌ای `Enzo\Cron\Runner::run()` که `JobQueueInterface.claim()` را صدا می‌زند. هنگام غیرفعال/حذف افزونه، رویدادهای Cron پاک می‌شوند.
 
 ### ۳.۶ Database
 
@@ -224,48 +224,48 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 | دسته | سازوکار | دلیل فنی |
 | --- | --- | --- |
-| تنظیمات و Config | WP Options (`ata_*`) | انتخاب طبیعی WP؛ خواندن پردردسر نیست؛ cache داخلی |
+| تنظیمات و Config | WP Options (`enzo_*`) | انتخاب طبیعی WP؛ خواندن پردردسر نیست؛ cache داخلی |
 | Secretها | `SecretStore` (Options با مقدار رمزنگاری‌شده + کلید جدا) | قانون ۱۳؛ هرگز plaintext در Options |
 | داده‌ی کوتاه‌عمر/نمایش | Transients | داشبورد، شمارنده AI Usage (`UX_SPEC.md:248`) |
 | مصرف AI | Options عددی + Transient خلاصه‌ی دوره | بدون جدول؛ شمارش درخواست/خطا |
-| **ردیف‌های تراکنشی** (پست‌ها، صف، لاگ‌ها، کانال‌ها، Providerها) | **Custom Tables** با `{prefix}ata_*` | دلیل در D-2 ثبت شده |
+| **ردیف‌های تراکنشی** (پست‌ها، صف، لاگ‌ها، کانال‌ها، Providerها) | **Custom Tables** با `{prefix}enzo_*` | دلیل در D-2 ثبت شده |
 
 **دلیل «نیاز واقعی» برای Custom Tables (تصمیم D-2):** (الف) claim اتمی و قفل صف فقط با «UPDATE اتمی روی جدول تکی» ممکن است؛ Options/Custom Post Type چنین تضمین تراکنشی ندارند. (ب) لاگ‌ها append-only با میلیون‌ها ردیف نباید در CPT/meta بروند (دوغ و روغن جدا). (ج) پستِ محصول وضعیت و المؤرخهٔ مخصوص خود را دارد (`status`, `scheduled_at`, `published_at`) که در WP post_status نمی‌گنجد و هرگوی Meta نویزی می‌سازد. این خروج صریح از ترجیح فاز ۱۱ با «نیاز واقعی» مستند می‌شود.
 
 **مخطط جدول‌های پیشنهادی (مبنا؛ ذکر schema نسخه‌دار در فاز توسعه):**
 
 ```
-{prefix}ata_posts      id PK, title, body LONGTEXT, image_id nullable, channel_id,
+{prefix}enzo_posts      id PK, title, body LONGTEXT, image_id nullable, channel_id,
                        status, scheduled_at, published_at, attempts, 
                        last_error_code, request_id, created_at, updated_at
                        INDEX(status), INDEX(status, scheduled_at), INDEX(channel_id)
 
-{prefix}ata_channels   id PK, chat_id, username, title, chat_type, status, created_at
+{prefix}enzo_channels   id PK, chat_id, username, title, chat_type, status, created_at
                        UNIQUE(chat_id)
 
-{prefix}ata_providers  id PK, type('telegram'|'ai'), driver, name, is_default,
+{prefix}enzo_providers  id PK, type('telegram'|'ai'), driver, name, is_default,
                        config_json(JSON غیرمبتنی بر Secret), secret_ref, created_at
                        INDEX(type)
 
-{prefix}ata_queue      id PK, job_type, payload JSON, status, attempts, max_attempts,
+{prefix}enzo_queue      id PK, job_type, payload JSON, status, attempts, max_attempts,
                        next_run_at, locked_at, lock_token, last_error, request_id,
                        created_at, updated_at
                        INDEX(status, next_run_at), INDEX(job_type)
 
-{prefix}ata_logs       id BIGINT AUTO PK, scope, level, message, context LONGTEXT(JSON
+{prefix}enzo_logs       id BIGINT AUTO PK, scope, level, message, context LONGTEXT(JSON
                        redact‌شده), request_id, created_at
                        INDEX(scope, created_at), INDEX(level)
 ```
 
-- **Migrate به‌صورت نسخه‌دار:** `ata_db_version` option + `dbDelta` در نصب/ارتقا؛ جدول‌های V1 با ALTER‌های افزودنی، نه حذف.
-- **پاک‌سازی در Uninstall:** همه‌ی جدول‌های `ata_*` + Options + Cron + Transients در uninstall حذف می‌شوند (الزام `SPECIFICATION.md:681-687`).
-- **دسترسی به DB:** فقط از طریق `*RepositoryInterface`های `Ata\Infrastructure\WpDb\*` با `$wpdb->prepare` (کنترل SQL Injection؛ `SPECIFICATION.md:480`). هسته‌ی DB عاری از SQL است.
+- **Migrate به‌صورت نسخه‌دار:** `enzo_db_version` option + `dbDelta` در نصب/ارتقا؛ جدول‌های V1 با ALTER‌های افزودنی، نه حذف.
+- **پاک‌سازی در Uninstall:** همه‌ی جدول‌های `enzo_*` + Options + Cron + Transients در uninstall حذف می‌شوند (الزام `SPECIFICATION.md:681-687`).
+- **دسترسی به DB:** فقط از طریق `*RepositoryInterface`های `Enzo\Infrastructure\WpDb\*` با `$wpdb->prepare` (کنترل SQL Injection؛ `SPECIFICATION.md:480`). هسته‌ی DB عاری از SQL است.
 
 ### ۳.۷ Admin UI
 
 **مسئولیت:** ۱۴ بخش `UX_SPEC.md:40-55` درون `/wp-admin`، RTL، ریسپانسیو، موبایل‌فرندلی.
 
-- **ساختار:** `Ata\Admin\MenuProvider` (ثبت منوی والد `ATA` + ۱۴ submenu)، `Ata\Admin\Page\*Controller` برای هر بخش، `Ata\Admin\View\*` قالب‌های PHP (فقط رندر، بدون منطق تجاری)، `Ata\Admin\Assets` (CSS/JS نسخه‌بندی‌شده با `wp_enqueue_*`).
+- **ساختار:** `Enzo\Admin\MenuProvider` (ثبت منوی والد `ENZO` + ۱۴ submenu)، `Enzo\Admin\Page\*Controller` برای هر بخش، `Enzo\Admin\View\*` قالب‌های PHP (فقط رندر، بدون منطق تجاری)، `Enzo\Admin\Assets` (CSS/JS نسخه‌بندی‌شده با `wp_enqueue_*`).
 - **قاعده معماری (D-3):** Controller فقط «ترجمه‌ی HTTP به تماس سرویس هسته» است؛ هیچ فراخوانی مستقیم Telegram/AI در Controller یا View انجام نمی‌شود؛ همه از Application Services.
 - **UX امنیتی وفادار به قانون ۱۳:** فیلد Secret = `type=password` + ماسک + هرگز بازگشت مقدار (`UX_SPEC.md:143, 507-512`). فرم‌ها POST؛ Nonce در تمام فرم‌ها؛ Capability چک روی هر صفحه.
 - **داده‌ی داشبورد** از `DashboardService` (Transient)؛ هیچ API زنده روی load (`UX_SPEC.md:248`).
@@ -278,12 +278,12 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 | کنترل | محل اعمال | جزئیات |
 | --- | --- | --- |
-| رمزنگاری Secret | `Ata\Security\SecretStore` | AES-256-GCM؛ کلید از `ATA_ENCRYPTION_KEY` (wp-config) یا fallback مشتق از salt با ثبت هشدار؛ هرگز در log/error/HTML |
-| CSRF | AJAX + Forms | Nonce اختصاصی هر اکشن (`wp_create_nonce('ata_...')`) + verification |
-| Capability | هر صفحه/ان‌‌دپوینت | MVP: `manage_options`؛ V2: Capabilityهای اختصاصی (`ata_publish`) برای چندکاربری |
+| رمزنگاری Secret | `Enzo\Security\SecretStore` | AES-256-GCM؛ کلید از `ENZO_ENCRYPTION_KEY` (wp-config) یا fallback مشتق از salt با ثبت هشدار؛ هرگز در log/error/HTML |
+| CSRF | AJAX + Forms | Nonce اختصاصی هر اکشن (`wp_create_nonce('enzo_...')`) + verification |
+| Capability | هر صفحه/ان‌‌دپوینت | MVP: `manage_options`؛ V2: Capabilityهای اختصاصی (`enzo_publish`) برای چندکاربری |
 | SQL Injection | فقط در Infrastructure | `$wpdb->prepare` الزامی؛ هسته SQL ندارد |
 | XSS | Admin UI | خروجی همیشه با `esc_html/esc_attr/esc_url/esc_textarea` یا `wp_kses` با allow-list محدود |
-| SSRF | `Ata\Http\HttpClientInterface` | validation base_url (scheme/IP/private-range/DNS-rebind) برای AI و هر خروجیِ با URL کاربر |
+| SSRF | `Enzo\Http\HttpClientInterface` | validation base_url (scheme/IP/private-range/DNS-rebind) برای AI و هر خروجیِ با URL کاربر |
 | Prompt Injection | AI Layer + `ContentService` | خروجی AI = دادگان غیرقابل‌اعتماد؛ قبل از ارسال به Telegram با HTML-Sanitizer بومی پاک‌سازی و محدودیت طول؛ متادیتای prompt از ورودی کاربرِ شامل دستورهای خصمانه جدا |
 | Webhook Security | بخش ۳.۱۳ | Secret Token؛ IP allowlist؛ idempotency |
 | File Upload | Media | اجازه‌ی MIME محدود (image/jpeg, png, webp, gif)، بررسی اسم، اندازه؛ نگهداری خارج از webroot یا با `.htaccess` deny، تحویل از طریق WP |
@@ -294,8 +294,8 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 **مسئولیت:** ثبت ساخت‌یافته‌ی رویدادها با چهار جزء قانون `SPECIFICATION.md:827-839`: Error Code، پیام انسانی، Request ID، Retry/Context — و رعایت قانون ۱۳ (Secret هرگز در لاگ).
 
-- **قرارداد:** `Ata\Contracts\Log\LoggerInterface` (سطح‌ها: debug/info/warning/error).
-- **دو نمایش، یک ذخیره (D-9):** ردیف `{prefix}ata_logs` با `scope` (telegram/ai/content/queue/system)، `level`، `message` (فارسیِ انسانی)، `context` (JSON سطح Developer، **redact‌شده**)، `request_id`. UI فقط `message` + `request_id` را نشان می‌دهد (`UX_SPEC.md:316-320`) و جزئیات Developer گشودنی است.
+- **قرارداد:** `Enzo\Contracts\Log\LoggerInterface` (سطح‌ها: debug/info/warning/error).
+- **دو نمایش، یک ذخیره (D-9):** ردیف `{prefix}enzo_logs` با `scope` (telegram/ai/content/queue/system)، `level`، `message` (فارسیِ انسانی)، `context` (JSON سطح Developer، **redact‌شده**)، `request_id`. UI فقط `message` + `request_id` را نشان می‌دهد (`UX_SPEC.md:316-320`) و جزئیات Developer گشودنی است.
 - **Redaction همه‌جا:** `Logger` یک context-processor توکار دارد که الگوهای توکن/کلید (`key*`, `token*`, `secret*`, `authorization`) را قبل از نوشتن با `***` جایگزین می‌کند — حتی اگر توسعه‌دهنده فراموش کند (دفاع دوم).
 - **Request ID:** تولید با `RequestIdGenerator` در ابتدای هر عملیات (REST/AJAX/Queue/Webhook) و عبور در کل زنجیره برای اتصال لاگ‌های یک درخواست.
 - **Retention:** تنظیمِ مدت‌نگهداری (پیش‌فرض X روز) + پاک‌سازی دستی با تأیید.
@@ -304,7 +304,7 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 **مسئولیت:** فعال‌سازی/اعتبار/وضعیت لایسنس (MVP: درج کلید + فعال‌سازی + وضعیت؛ V1: Update Check — فاز ۱۵: `SPECIFICATION.md:629-644`؛ `UX_SPEC.md:327-331`).
 
-- **قرارداد:** `Ata\Contracts\License\LicenseManagerInterface` — `activate(key, siteUrl)`, `deactivate()`, `status()`, `verify()`.
+- **قرارداد:** `Enzo\Contracts\License\LicenseManagerInterface` — `activate(key, siteUrl)`, `deactivate()`, `status()`, `verify()`.
 - **جریان فعال‌سازی:** کلید → ارسال به سرویس لایسنس (از طریق `HttpClientInterface` با TLS) → پاسخ امضاشده (HMAC با کلید عمومی/ثابت مادربُرد) → ذخیره‌ی نتیجه در `SecretStore` + Options (site-hash، expiry، status).
 - **اصل حیاتی (D-10):** **Fail-Open با Grace Period.** اگر سرور لایسنس در دسترس نباشد (آفلاین/تعطیلی)، محصول با یک «مهلت» (مثلاً N روز) به کار ادامه می‌دهد و فقط هشدار نمایش می‌دهد؛ **هرگز** سایت/عملکرد مشتری را نمی‌شکند — ترجمه‌ی مستقیم `SPECIFICATION.md:642` («پیاده‌سازی نباید باعث آسیب به سایت مشتری شود»).
 - **عدم gate شدن هسته‌ی انتشار:** لایسنس روی «ویژگی‌های مدیریتی/آپدیت» اعمال می‌شود، نه روی جدول‌های DB یا کد هسته؛ حذف افزونه = تمیز.
@@ -313,7 +313,7 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 **مسئولیت:** گردآوری و اعتبارسنجی تنظیمات همه‌ی ماژول‌ها.
 
-- **الگو (D-11):** `Ata\Settings\SettingsRegistry` — هر ماژول تعریف تنظیمات خود را (کلید، نوع، پیش‌فرض، سناریوهای اعتبارسنجی/سازگاری) ثبت می‌کند؛ `SettingsService` فقط از روی Registry می‌خواند/می‌نویسد. افزودن بخش جدید بدون مرکزی‌بودن مجدد — Extensibility.
+- **الگو (D-11):** `Enzo\Settings\SettingsRegistry` — هر ماژول تعریف تنظیمات خود را (کلید، نوع، پیش‌فرض، سناریوهای اعتبارسنجی/سازگاری) ثبت می‌کند؛ `SettingsService` فقط از روی Registry می‌خواند/می‌نویسد. افزودن بخش جدید بدون مرکزی‌بودن مجدد — Extensibility.
 - **تفکیک Secret:** تنظیماتِ معمولی (timezone، مدت، تُن پیش‌فرض) در Options؛ کلیدهای API/Token فقط از `SecretStore` — UI هرگز هر دو را مخلوط نمی‌کند (`UX_SPEC.md:322-325`).
 - **پیش‌فرض‌های معقول:** طبق اصل `UX_SPEC.md:325` کاربر غیرفنی بدون لمس تنظیمات هم کار می‌کند.
 - **Cache-aware:** هر تغییر، transientهای وابسته (مثلاً داشبورد) را invalid می‌کند.
@@ -322,7 +322,7 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 **مسئولیت:** عملیات ناهم‌زمانِ UI (تست اتصال، تولید، پیش‌نمایش، تایید، انتشار، مدیریت صف) با HTTP.
 
-- **REST اصلی:** prefix `ata/v1` (تحت `wp-json`). جدول زیر پیش‌نمای منابع است (محموله‌ها در فاز توسعه بسته می‌شوند):
+- **REST اصلی:** prefix `enzo/v1` (تحت `wp-json`). جدول زیر پیش‌نمای منابع است (محموله‌ها در فاز توسعه بسته می‌شوند):
 
 | متد | Route | کارکرد | Mark در دسترس |
 | --- | --- | --- | --- |
@@ -350,7 +350,7 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 **مسئولیت:** دریافت اعلان‌های Telegram (ورود، خروج از کانال؛ داده‌ی channel_post برای کشف کانال) — **نه چت‌بات**.
 
-- **نقطه‌ی ورود:** REST route `ata/v1/webhook/telegram` (POST) یا `index.php?ata_webhook=1` — عمومی، بدون Auth ادمین، اما **محمافظی‌شده**:
+- **نقطه‌ی ورود:** REST route `enzo/v1/webhook/telegram` (POST) یا `index.php?enzo_webhook=1` — عمومی، بدون Auth ادمین، اما **محمافظی‌شده**:
   1. **Secret Token:** فقط X-Telegram-Bot-Api-Secret-Token (تعیین‌شده هنگام setWebhook) پذیرفته می‌شود؛ مقایسه`hash_equals`.
   2. **IP allowlist (اختیاری):** محدودسازی به بازه‌های IP رسمی Telegram (اطلاع‌رسانی در فاز ۵).
   3. **Idempotency:** ذخیره‌ی `update_id` در Transient برای short-time برای جلوگیری از double-process.
@@ -362,10 +362,10 @@ Draft ──preview──► Preview ──approve (انسان، غیرقابل 
 
 ## گفتار چهارم: قراردادهای هسته (Ports) — فهرست مرجع
 
-این Interfaceها **مرزهای ماژول** هستند. پیاده‌سازیِ هر کدام در `Ata\Infrastructure\*` واقع است:
+این Interfaceها **مرزهای ماژول** هستند. پیاده‌سازیِ هر کدام در `Enzo\Infrastructure\*` واقع است:
 
 ```
-Ata\Contracts\
+Enzo\Contracts\
   ├─ Telegram\TelegramProviderInterface               (۳.۱)
   ├─ AI\AIProviderInterface                           (۳.۲)
   ├─ Queue\JobQueueInterface                          (۳.۴)
@@ -383,7 +383,7 @@ Ata\Contracts\
   └─ Common\ { ClockInterface, IdGeneratorInterface, RequestIdGeneratorInterface }
 ```
 
-**تز وابستگی (D-13):** بدون کتابخانه‌ی خارجی DI در MVP؛ یک **Service Container داخلی حداقلی** (`Ata\Container`) که map Interface→Factory را نگه می‌دارد. یک Composition Root (`Ata\Bootstrap`) همه‌ی پیوندها را هنگام `plugins_loaded` می‌سازد. این قابلیت تست و داشتن Adapterهای جایگزین را بدون سنگینی DI framework فراهم می‌کند.
+**تز وابستگی (D-13):** بدون کتابخانه‌ی خارجی DI در MVP؛ یک **Service Container داخلی حداقلی** (`Enzo\Container`) که map Interface→Factory را نگه می‌دارد. یک Composition Root (`Enzo\Bootstrap`) همه‌ی پیوندها را هنگام `plugins_loaded` می‌سازد. این قابلیت تست و داشتن Adapterهای جایگزین را بدون سنگینی DI framework فراهم می‌کند.
 
 ---
 
@@ -413,9 +413,9 @@ Admin (Scheduler) ──► SchedulerService.schedulePost(post, localDateTime)
    │  Post.status := scheduled
    ▼
 QueueService.enqueue(Job{publish_post, post_id, next_run_at=UTC})
-   │  wp_schedule_single_event(next_run_at, 'ata_due_queue')
+   │  wp_schedule_single_event(next_run_at, 'enzo_due_queue')
    ▼
-(Cron) Ata_Queue_Runner ──► JobQueueInterface.claim()      ┌── Crash → locked_at expiry
+(Cron) Enzo_Queue_Runner ──► JobQueueInterface.claim()      ┌── Crash → locked_at expiry
    │   status: running, lock_token                       → آزادسازی و retrying
    ▼
 PublishService(شناسه از payload) ──► TelegramProviderInterface.sendMessage/Photo
@@ -427,13 +427,13 @@ PublishService(شناسه از payload) ──► TelegramProviderInterface.send
 
 ## گفتار ششم: ساختار Namespace و پوشه‌ی پیشنهادی
 
-Namespace موقت `ATA` (از `README.md:33`) به‌صورت PSR-4: `ATA\Ata\...`. ساختار فیزیکی (پیش‌نما؛ در فاز توسعه دقیق می‌شود):
+Namespace موقت `ENZO` (از `README.md:33`) به‌صورت PSR-4: `ENZO\Enzo\...`. ساختار فیزیکی (پیش‌نما؛ در فاز توسعه دقیق می‌شود):
 
 ```
-ata/
+enzo/
   ata.php                     (bootstrap؛ بارگذاری autoloader + activation/deactivation)
   includes/
-    Ata/
+    Enzo/
       Bootstrap.php           (Composition Root)
       Plugin.php              (یکپارچه‌کننده: hooks، assets، routes، cron)
       Container.php
@@ -473,7 +473,7 @@ ata/
 | Content/Publish | ماشین حالت کامل با Preview/Approve | Resume/تجدید تلاش خودکار پیشرفته | Multi-user Roles |
 | Queue | WP-Cron + custom table با claim اتمی و Retry ساده | Action Scheduler یا Custom Queue با پایداری ۵۰+، Crash Recovery، Progress، Scalability (`SPECIFICATION.md:449-472`) | — |
 | Scheduler | یک‌باره | تکرارشونده (درصورت عبور فیلتر ۱۲.۲) | — |
-| Database | ۵ جدول ata_* + Options/Transients | ایندکس‌ها و Partition برای لاگ؛ Cache | — |
+| Database | ۵ جدول enzo_* + Options/Transients | ایندکس‌ها و Partition برای لاگ؛ Cache | — |
 | Admin UI | ۱۴ بخش طبق `UX_SPEC.md:60-77` | Templates/Prompts کامل؛ تم تیره | گزارش/تحلیل |
 | Security | خط مبنای قانون ۱۳+۱۴ (قفل از MVP؛ `PRODUCT_STRATEGY.md:154`) | چک‌لیست کامل فاز ۱۰ | Capability اختصاصی چندکاربری |
 | Logging | Logger با Request ID + Redaction | Retention اتوماتیک + Export | — |

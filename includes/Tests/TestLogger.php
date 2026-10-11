@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit test for ATA Logger.
+ * Unit test for ENZO Logger.
  * Tests structured logging with redaction.
  */
 class TestLogger extends WP_UnitTestCase
@@ -13,7 +13,7 @@ class TestLogger extends WP_UnitTestCase
             'action'  => 'test_action',
         ];
 
-        $result = \ATA\Logging\Logger::redact($context);
+        $result = \ENZO\Logging\Logger::redact($context);
 
         $this->assertNotEquals('sk-live-abc123secret', $result['api_key']);
         $this->assertEquals('***', $result['api_key']);
@@ -28,7 +28,7 @@ class TestLogger extends WP_UnitTestCase
             'message'       => 'API call',
         ];
 
-        $result = \ATA\Logging\Logger::redact($context);
+        $result = \ENZO\Logging\Logger::redact($context);
 
         $this->assertEquals('***', $result['authorization']);
     }
@@ -43,7 +43,7 @@ class TestLogger extends WP_UnitTestCase
             ],
         ];
 
-        $result = \ATA\Logging\Logger::redact($context);
+        $result = \ENZO\Logging\Logger::redact($context);
 
         $this->assertEquals('normal_value', $result['normal_key']);
         $this->assertEquals(42, $result['count']);
@@ -53,7 +53,7 @@ class TestLogger extends WP_UnitTestCase
     public function test_isSecretKey_patterns_via_redact(): void
     {
         // isSecretKey() is private; verify its behavior through the public redact().
-        $result = \ATA\Logging\Logger::redact([
+        $result = \ENZO\Logging\Logger::redact([
             'api_key'       => 'A',
             'apikey'        => 'B',
             'bot_token'     => 'C',

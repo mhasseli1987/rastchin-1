@@ -1,4 +1,4 @@
-# راهنمای استفاده — ATA: AI Telegram Admin
+# راهنمای استفاده — ENZO: AI Telegram Admin
 
 بعد از نصب ([INSTALLATION.md](INSTALLATION.md))، جریان کاری روزمره این است:
 

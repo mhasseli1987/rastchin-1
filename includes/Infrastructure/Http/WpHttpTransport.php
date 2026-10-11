@@ -1,8 +1,8 @@
 <?php
-namespace ATA\Infrastructure\Http;
+namespace ENZO\Infrastructure\Http;
 
-use ATA\Contracts\HttpClientInterface;
-use ATA\Security\SsrfGate;
+use ENZO\Contracts\HttpClientInterface;
+use ENZO\Security\SsrfGate;
 
 defined('ABSPATH') || exit;
 
@@ -35,7 +35,7 @@ class WpHttpTransport implements HttpClientInterface
             'timeout'  => $timeout,
             'headers'  => $headers,
             'sslverify'=> true,
-            'user-agent'=> 'AI-Telegram-Admin/' . ATA_VERSION,
+            'user-agent'=> 'AI-Telegram-Admin/' . ENZO_VERSION,
         ];
 
         if ($body !== null && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true)) {

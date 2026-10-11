@@ -41,8 +41,8 @@ Environment pieces (all verified working):
 These were **release blockers** — none of them were visible without executing tests:
 
 1. **`Container` class unresolvable — plugin fatals on boot.** The class lived in
-   `Core/Bootstrap.php` under namespace `ATA` while every call site uses
-   `ATA\Core\Container` (PSR-4 looks for `Core/Container.php`). → Moved to
+   `Core/Bootstrap.php` under namespace `ENZO` while every call site uses
+   `ENZO\Core\Container` (PSR-4 looks for `Core/Container.php`). → Moved to
    `includes/Core/Container.php`. Any real activation would have white-screened.
 
 2. **Four endpoint groups were never registered — REST surface dead.**
@@ -87,9 +87,9 @@ context; `find()` / `deleteOld()` (retention) added.
 | "PHPUnit 0" fatal in WP bootstrap | WP's `tests_get_phpunit_version()` ran before any autoloader loaded | Project `vendor/autoload.php` required **first** in the test bootstrap |
 | `Class "WP_Unit_Test_Case" not found` | Wrong class name (correct: `WP_UnitTestCase`) | Renamed in all test files |
 | Constant-conflict warnings | Bootstrap redefined `WP_TESTS_*` already in `wp-tests-config.php` | Removed redefinitions; config path pinned via `WP_TESTS_CONFIG_FILE_PATH` |
-| "Table wptests_ata_queue doesn't exist" | Plugin tables never installed in test DB | `Installer->install()` runs in bootstrap |
+| "Table wptests_enzo_queue doesn't exist" | Plugin tables never installed in test DB | `Installer->install()` runs in bootstrap |
 | MockHttp `TypeError: array given` | Callers pass array bodies (LicenseManager) | Mock JSON-encodes array bodies |
-| Wrong table/keys in fixtures (`ata_ai_providers`, `priority`, `is_admin`, `base_url`…) | Fixtures written against an imagined schema | Align every fixture with the real Installer schema |
+| Wrong table/keys in fixtures (`enzo_ai_providers`, `priority`, `is_admin`, `base_url`…) | Fixtures written against an imagined schema | Align every fixture with the real Installer schema |
 | Tests written against non-existent APIs (`isAllowed`, `getDefinitions`, `getDefault`, flat `base_url`…) | Spec drift | Tests rewritten against real interfaces; tiny aliases added where names are better |
 
 ---

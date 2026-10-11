@@ -3,16 +3,16 @@
 **تاریخ:** 2026-10-10 | **مجموعه تست:** OK (162 tests, 458 assertions)
 
 ## بسته RC
-- **فایل:** `dist/ata-telegram-ai-admin-1.0.0-MVP-rc1.zip` (49.3 KB)
+- **فایل:** `dist/enzo-telegram-ai-admin-1.0.0-MVP-rc1.zip` (49.3 KB)
 - **SHA-256:** `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11` *(بازسازی‌شده 2026-10-11 از `bc77d57` — نسخهٔ اولیه از staging قدیمی ساخته شده بود و آخرین فیکس‌ها را نداشت؛ هش قبلی: `fc0802…c41`)*
-- **ساختار:** `ata-telegram-ai-admin/ata-telegram-ai-admin.php` + `includes/` (30 فایل PHP، lint پاس)
+- **ساختار:** `enzo-telegram-ai-admin/enzo-telegram-ai-admin.php` + `includes/` (30 فایل PHP، lint پاس)
 - **حذف‌شده از بسته:** `includes/Tests`, `docs/`, `SESSIONS/`, `composer.json`, `phpunit.xml.dist`, SPECIFICATION (dev-only)
 
 ## چک‌لیست ۱۴ موردی SPEC — همگی به‌صورت تست اجرایی (`TestReleaseChecklist.php`)
 
 | # | مورد | نتیجه | پوشش |
 |---|---|---|---|
-| 1 | Installation | ✅ | ۵ جدول + `ata_db_version` |
+| 1 | Installation | ✅ | ۵ جدول + `enzo_db_version` |
 | 2 | Activation | ✅ | cron scheduled + migration guard |
 | 3 | Setup | ✅ | ذخیره/خواندن تنظیمات از REST + رد کلید ناشناخته |
 | 4 | Telegram Connection | ✅ | getMe موک، توکن در SecretStore رمز، هویت ربات ذخیره |
@@ -36,9 +36,9 @@
 
 ## فرآیند ساخت (تکرارشدنی)
 ```bash
-git archive HEAD | tar -x -C dist/ata-telegram-ai-admin
+git archive HEAD | tar -x -C dist/enzo-telegram-ai-admin
 # حذف dev files؛ سپس:
-powershell Compress-Archive -Path 'ata-telegram-ai-admin' -DestinationPath 'ata-telegram-ai-admin-1.0.0-MVP-rc1.zip'
+powershell Compress-Archive -Path 'enzo-telegram-ai-admin' -DestinationPath 'enzo-telegram-ai-admin-1.0.0-MVP-rc1.zip'
 sha256sum ...
 ```
 

@@ -1,8 +1,8 @@
 <?php
-namespace ATA\License;
+namespace ENZO\License;
 
-use ATA\Contracts\HttpClientInterface;
-use ATA\Core\Container;
+use ENZO\Contracts\HttpClientInterface;
+use ENZO\Core\Container;
 
 defined('ABSPATH') || exit;
 
@@ -19,9 +19,9 @@ defined('ABSPATH') || exit;
  */
 class Updater
 {
-    private const CHECK_TRANSIENT = 'ata_update_check';
+    private const CHECK_TRANSIENT = 'enzo_update_check';
     private const CACHE_TTL = 12 * HOUR_IN_SECONDS;
-    private const SLUG = 'ata-telegram-ai-admin';
+    private const SLUG = 'enzo-telegram-ai-admin';
     /** Hosts whose package URLs are gated (HTTPS + valid license). */
     private const PACKAGE_HOSTS = ['rtl-theme.com', 'www.rtl-theme.com'];
 
@@ -61,7 +61,7 @@ class Updater
                     'license_key' => (string) (LicenseManager::status()['key'] ?? ''),
                     'product'     => LicenseManager::PRODUCT,
                     'domain'      => LicenseManager::currentDomain(),
-                    'version'     => defined('ATA_VERSION') ? ATA_VERSION : '',
+                    'version'     => defined('ENZO_VERSION') ? ENZO_VERSION : '',
                 ],
                 'timeout' => 10,
             ]);
@@ -85,7 +85,7 @@ class Updater
 
         return [
             'version'      => $data['version'],
-            'url'          => (string) ($data['url'] ?? 'https://rtl-theme.com/plugins/ai-telegram-admin'),
+            'url'          => (string) ($data['url'] ?? 'https://rtl-theme.com/plugins/enzo'),
             'package'      => (string) ($data['package'] ?? ''),
             'requires'     => (string) ($data['requires'] ?? '6.5'),
             'requires_php' => (string) ($data['requires_php'] ?? '8.1'),
@@ -108,13 +108,13 @@ class Updater
         if ($info === null || $info['package'] === '') {
             return $transient;
         }
-        if (!version_compare(defined('ATA_VERSION') ? ATA_VERSION : '0', $info['version'], '<')) {
+        if (!version_compare(defined('ENZO_VERSION') ? ENZO_VERSION : '0', $info['version'], '<')) {
             return $transient; // already on the latest version
         }
 
-        $transient->response[plugin_basename(ATA_FILE)] = (object) [
+        $transient->response[plugin_basename(ENZO_FILE)] = (object) [
             'slug'         => self::SLUG,
-            'plugin'       => plugin_basename(ATA_FILE),
+            'plugin'       => plugin_basename(ENZO_FILE),
             'new_version'  => $info['version'],
             'url'          => $info['url'],
             'package'      => $info['package'],
@@ -140,7 +140,7 @@ class Updater
         }
 
         return (object) [
-            'name'            => 'AI Telegram Admin (آتا)',
+            'name'            => 'ENZO - AI Telegram Admin (انزو)',
             'slug'            => self::SLUG,
             'version'         => $info['version'],
             'requires'        => $info['requires'],
@@ -167,11 +167,11 @@ class Updater
         }
 
         if (strtolower((string) parse_url($url, PHP_URL_SCHEME)) !== 'https') {
-            return new \WP_Error('ata_insecure_package', 'دانلود بسته ATA فقط از طریق HTTPS مجاز است.');
+            return new \WP_Error('enzo_insecure_package', 'دانلود بسته ENZO فقط از طریق HTTPS مجاز است.');
         }
 
         if (!LicenseManager::failOpen()) {
-            return new \WP_Error('ata_license_required', 'برای دریافت به‌روزرسانی، لایسنس فعال و معتبر لازم است.');
+            return new \WP_Error('enzo_license_required', 'برای دریافت به‌روزرسانی، لایسنس فعال و معتبر لازم است.');
         }
 
         return $reply;

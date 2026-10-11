@@ -1,4 +1,4 @@
-# سازگاری — ATA: AI Telegram Admin
+# سازگاری — ENZO: AI Telegram Admin
 
 | مورد | مقدار |
 | --- | --- |

@@ -1,7 +1,7 @@
 <?php
-namespace ATA\Security;
+namespace ENZO\Security;
 
-use ATA\Contracts\SecretStoreInterface;
+use ENZO\Contracts\SecretStoreInterface;
 
 defined('ABSPATH') || exit;
 
@@ -19,8 +19,8 @@ defined('ABSPATH') || exit;
  */
 class SecretStore implements SecretStoreInterface
 {
-    private const OPTION_PREFIX = 'ata_secret_';
-    private const MAGIC = 'ATAS1';
+    private const OPTION_PREFIX = 'enzo_secret_';
+    private const MAGIC = 'ENZOS1';
 
     public function get(string $key): ?string
     {
@@ -48,12 +48,12 @@ class SecretStore implements SecretStoreInterface
 
     private function getEncryptionKey(): string
     {
-        $key = defined('ATA_ENCRYPTION_KEY') ? constant('ATA_ENCRYPTION_KEY') : '';
+        $key = defined('ENZO_ENCRYPTION_KEY') ? constant('ENZO_ENCRYPTION_KEY') : '';
         if (is_string($key) && strlen($key) >= 32) {
             return hash('sha256', $key, true);
         }
         // Fallback: derive from WP salts (documented limitation in readme notes).
-        $salt = defined('AUTH_KEY') ? constant('AUTH_KEY') : 'ata-fallback';
+        $salt = defined('AUTH_KEY') ? constant('AUTH_KEY') : 'enzo-fallback';
         if (defined('NONCE_SALT')) {
             $salt .= constant('NONCE_SALT');
         }

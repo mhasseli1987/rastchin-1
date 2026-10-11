@@ -23,9 +23,9 @@
     </testsuites>
 
     <php>
-        <env name="WP_TESTS_DOMAIN" value="ata-test.local"/>
-        <env name="WP_TESTS_EMAIL" value="test@ata-test.local"/>
-        <env name="WP_TESTS_TITLE" value="ATA Test Site"/>
+        <env name="WP_TESTS_DOMAIN" value="enzo-test.local"/>
+        <env name="WP_TESTS_EMAIL" value="test@enzo-test.local"/>
+        <env name="WP_TESTS_TITLE" value="ENZO Test Site"/>
         <ini name="memory_limit" value="512M"/>
         <ini name="max_execution_time" value="300"/>
     </php>

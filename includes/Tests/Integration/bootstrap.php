@@ -1,11 +1,11 @@
 <?php
 /**
  * Integration Test Bootstrap
- * Sets up WordPress test environment for ATA plugin integration tests.
+ * Sets up WordPress test environment for ENZO plugin integration tests.
  *
  * Order matters:
  *  1. Load project composer autoloader (so PHPUnit\Runner\Version resolves
- *     and the WP bootstrap version check passes; also autoloads ATA\* classes).
+ *     and the WP bootstrap version check passes; also autoloads ENZO\* classes).
  *  2. Define WP test constants.
  *  3. Load the WordPress test-suite bootstrap (installs WP, defines
  *     WP_UnitTestCase and all test helpers).
@@ -34,17 +34,17 @@ if (!defined('WP_TESTS_CONFIG_FILE_PATH')) {
 require_once WP_TEST_DIR . '/includes/bootstrap.php';
 
 // Load the plugin (defines ABSPATH-based plugin constants and its autoloader).
-require_once dirname(__DIR__, 3) . '/ata-telegram-ai-admin.php';
+require_once dirname(__DIR__, 3) . '/enzo-telegram-ai-admin.php';
 
 // Create the plugin's custom tables in the test database.
 require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-(new \ATA\Infrastructure\WpDb\Installer())->install();
+(new \ENZO\Infrastructure\WpDb\Installer())->install();
 
 /**
  * Mock HTTP transport for testing external API calls.
  * Records requests and serves canned responses.
  */
-class MockHttpTransport implements \ATA\Contracts\HttpClientInterface
+class MockHttpTransport implements \ENZO\Contracts\HttpClientInterface
 {
     /** @var array<int, array{method:string,url:string,body:string,headers:array,timeout:int}> */
     private array $requests = [];
@@ -169,7 +169,7 @@ trait IntegrationTestHelper
 {
     protected MockHttpTransport $mockHttp;
 
-    protected \ATA\Core\Container $container;
+    protected \ENZO\Core\Container $container;
 
     protected \wpdb $wpdb;
 
@@ -190,10 +190,10 @@ trait IntegrationTestHelper
         // Rebuild the container fresh each test, then override the HTTP
         // transport with the mock. Factories are lazy, so every service
         // resolved from here on receives the mock transport.
-        $this->container = \ATA\Core\Container::instance();
+        $this->container = \ENZO\Core\Container::instance();
         $this->container->reset();
-        \ATA\Core\Plugin::instance()->registerContainer();
-        $this->container->bind(\ATA\Contracts\HttpClientInterface::class, fn() => $this->mockHttp);
+        \ENZO\Core\Plugin::instance()->registerContainer();
+        $this->container->bind(\ENZO\Contracts\HttpClientInterface::class, fn() => $this->mockHttp);
 
         $this->cleanDatabase();
     }
@@ -208,15 +208,15 @@ trait IntegrationTestHelper
     private function cleanDatabase(): void
     {
         global $wpdb;
-        // ata_providers (NOT ata_ai_providers — matches Installer schema).
-        foreach (['ata_posts', 'ata_channels', 'ata_providers', 'ata_queue', 'ata_logs'] as $table) {
+        // enzo_providers (NOT enzo_ai_providers — matches Installer schema).
+        foreach (['enzo_posts', 'enzo_channels', 'enzo_providers', 'enzo_queue', 'enzo_logs'] as $table) {
             $wpdb->query("DELETE FROM {$wpdb->prefix}{$table}");
         }
-        foreach (['ata_bot_username', 'ata_bot_id', 'ata_license', 'ata_cpt_migrated'] as $opt) {
+        foreach (['enzo_bot_username', 'enzo_bot_id', 'enzo_license', 'enzo_cpt_migrated'] as $opt) {
             delete_option($opt);
         }
         foreach (['telegram_bot_token', 'ai_api_key'] as $key) {
-            (new \ATA\Security\SecretStore())->delete($key);
+            (new \ENZO\Security\SecretStore())->delete($key);
         }
     }
 
@@ -228,7 +228,7 @@ trait IntegrationTestHelper
             'channel_id' => 1,
             'status'     => 'draft',
         ];
-        return (new \ATA\Infrastructure\WpDb\PostRepository())->insert(array_merge($defaults, $overrides));
+        return (new \ENZO\Infrastructure\WpDb\PostRepository())->insert(array_merge($defaults, $overrides));
     }
 
     protected function createTestChannel(array $overrides = []): int
@@ -243,7 +243,7 @@ trait IntegrationTestHelper
             'status'     => 'connected',
             'created_at' => current_time('mysql', 1),
         ];
-        $wpdb->insert($wpdb->prefix . 'ata_channels', array_merge($defaults, $overrides));
+        $wpdb->insert($wpdb->prefix . 'enzo_channels', array_merge($defaults, $overrides));
         return (int) $wpdb->insert_id;
     }
 
@@ -276,7 +276,7 @@ trait IntegrationTestHelper
         ]);
     }
 
-    /** Insert a row into ata_queue. @return int job ID */
+    /** Insert a row into enzo_queue. @return int job ID */
     protected function createQueueItem(array $overrides = []): int
     {
         $defaults = [
@@ -290,14 +290,14 @@ trait IntegrationTestHelper
             'updated_at'   => current_time('mysql', 1),
         ];
         $data = array_merge($defaults, $overrides);
-        $this->wpdb->insert($this->wpdb->prefix . 'ata_queue', $data);
+        $this->wpdb->insert($this->wpdb->prefix . 'enzo_queue', $data);
         return (int) $this->wpdb->insert_id;
     }
 
     protected function getQueueItem(int $id): ?array
     {
         return $this->wpdb->get_row(
-            $this->wpdb->prepare("SELECT * FROM {$this->wpdb->prefix}ata_queue WHERE id = %d", $id),
+            $this->wpdb->prepare("SELECT * FROM {$this->wpdb->prefix}enzo_queue WHERE id = %d", $id),
             ARRAY_A
         ) ?: null;
     }

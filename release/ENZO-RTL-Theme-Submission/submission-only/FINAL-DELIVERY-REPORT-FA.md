@@ -9,7 +9,7 @@
 **repo:** docs/RTL-REQUIREMENTS-RESEARCH.md (تحقیق رسمی الزامات با منابع و تاریخ).
 
 ## ۳. افزونهٔ نهایی
-`ata-telegram-ai-admin-1.0.0-MVP-rc1.zip` — SHA-256 `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11` (بازتأیید 2026-10-11، بدون تغییر نسبت به سشن ۰۲).
+`enzo-telegram-ai-admin-1.0.0-MVP-rc1.zip` — SHA-256 `da2fd2b7e41c6530559ca9f052dc3ab0a8fcdceb083ea779d9058ded8b877d11` (بازتأیید 2026-10-11، بدون تغییر نسبت به سشن ۰۲).
 
 ## ۴. تست‌ها/بررسی‌های واقعاً انجام‌شده (با فرمان و نتیجه)
 - `phpunit` (XAMPP PHP 8.2، PHPUnit 9.6، مجموعه رسمی WP 6.5): **OK (162 tests, 458 assertions)**

@@ -32,7 +32,7 @@ AI Telegram Admin یک **افزونه (Plugin) قابل نصبِ وردپرس، 
 2. **لایه AI** — اتصال به هر سرویس سازگار با OpenAI (Base URL، API Key، Model، Temperature، Max Tokens، Timeout، Headers)؛ کاملاً Provider-Agnostic. تولید/بازنویسی/خلاصه‌سازی/عنوان/کپشن/ترجمه. (مبنای فاز ۶ و ۷: `SPECIFICATION.md:326-395`)
 3. **لایه Content & Scheduler** — چرخه Draft → Preview → Edit → Approve → Publish، به‌همراه صف زمان‌بندی، Retry، Cancel و داشبورد. (مبنای فاز ۸: `SPECIFICATION.md:397-447`)
 
-نتیجه نام‌گذاری موقت در `README.md:33` حفظ می‌شود: Namespace کد `ATA` (AI Telegram Admin) تا تعیین نام نهایی برند.
+نتیجه نام‌گذاری موقت در `README.md:33` حفظ می‌شود: Namespace کد `ENZO` (AI Telegram Admin) تا تعیین نام نهایی برند.
 
 ### ۲.۲ محصول چیست (ویژگی‌های ذاتی)
 

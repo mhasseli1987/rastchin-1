@@ -11,7 +11,7 @@ Reviewer مستقل (subagent) در دسترس نبود (خطای provider) → 
 |---|---|---|---|
 | C1 | **SPA ادمین کاملاً کرش می‌کرد**: `e.createElement(c/CardBody, …)` به‌جای `c.CardBody` → ReferenceError در رندر داشبورد (بخش پیش‌فرض) → همه صفحات خالی | includes/Admin/js/admin-app.js | `c.CardBody` |
 | C2 | **همه درخواست‌های REST از SPA با 403 می‌خوردند**: هدر `X-WP-Nonce` ارسال نمی‌شد و nonce اصلاً localize نشده بود → `rest_cookie_invalid_nonce` | admin-app.js + MenuProvider.php | ارسال هدر nonce + `'nonce' => wp_create_nonce('wp_rest')` |
-| C3 | **صفحه اصلی منو (toplevel) اسکریپت SPA را لود نمی‌کرد**: شرط `strpos($hook,'ata-') !== 0` با هوک `toplevel_page_…` شکست می‌خورد → صفحه اصلی خالی | MenuProvider.php | شرط جدید پذیرای `toplevel_page_` و `_page_ata-` |
+| C3 | **صفحه اصلی منو (toplevel) اسکریپت SPA را لود نمی‌کرد**: شرط `strpos($hook,'enzo-') !== 0` با هوک `toplevel_page_…` شکست می‌خورد → صفحه اصلی خالی | MenuProvider.php | شرط جدید پذیرای `toplevel_page_` و `_page_enzo-` |
 | C4 | **«انتشار فوری» به کانال واقعی تلگرام شکست می‌خورد**: `publishNow` شرط `$channelId <= 0` — کانال‌های تلگرام شناسه منفی دارند | ContentService.php:77 | `=== 0` (هم‌راستا با فیکس Runner در فاز ۱۳) |
 
 ## High — پیدا و رفع شد
@@ -31,7 +31,7 @@ Reviewer مستقل (subagent) در دسترس نبود (خطای provider) → 
 ## Medium/Low (مستند، مانع انتشار نیست)
 - M1: SPA فقط داشبورد و اتصال تلگرام را واقعی پیاده می‌کند؛ بقیه بخش‌ها «در حال ساخت…» — محدوده MVP طبق SPEC (خطر: انتظار خریدار — باید در توضیحات محصول صادقانه ذکر شود؛ در PHASE-14-RTL-PREP.md بخش ۱۹ آمده).
 - M2: `wp.element.render` در React 18 وردپرس ۶.۵ deprecated است (کار می‌کند، warning) — مهاجرت به createRoot در نسخه بعد.
-- M3: بدون تعریف `ATA_ENCRYPTION_KEY` رمزنگاری به salts وردپرس وابسته است — در راهنمای نصب توصیه شده.
+- M3: بدون تعریف `ENZO_ENCRYPTION_KEY` رمزنگاری به salts وردپرس وابسته است — در راهنمای نصب توصیه شده.
 - L1: هشدار timezone دستی: زمان‌بندی `strtotime` با timezone سایت و مقایسه UTC در صف — درست ولی کد مسیر یکسان‌سازی را دوباره در فاز ۱۷ بررسی می‌کند.
 
 ## جمع‌بندی

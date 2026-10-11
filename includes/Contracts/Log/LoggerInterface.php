@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Contracts\Log;
+namespace ENZO\Contracts\Log;
 
 defined('ABSPATH') || exit;
 

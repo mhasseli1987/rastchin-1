@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Contracts\Telegram;
+namespace ENZO\Contracts\Telegram;
 
 defined('ABSPATH') || exit;
 

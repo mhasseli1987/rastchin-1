@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Settings;
+namespace ENZO\Settings;
 
 defined('ABSPATH') || exit;
 

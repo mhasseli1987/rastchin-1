@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Cron;
+namespace ENZO\Cron;
 
 defined('ABSPATH') || exit;
 
@@ -31,7 +31,7 @@ class SchedulerAdapter
 
         as_schedule_recurring_event(
             time() + MINUTE_IN_SECONDS,
-            'ata_minute',
+            'enzo_minute',
             self::HOOK
         );
     }

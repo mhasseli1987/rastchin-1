@@ -1,11 +1,11 @@
 <?php
-namespace ATA\AI;
+namespace ENZO\AI;
 
-use ATA\Contracts\AI\AIProviderInterface;
-use ATA\Contracts\AI\AIRequest;
-use ATA\Contracts\AI\AIResult;
-use ATA\Contracts\HttpClientInterface;
-use ATA\Logging\Logger;
+use ENZO\Contracts\AI\AIProviderInterface;
+use ENZO\Contracts\AI\AIRequest;
+use ENZO\Contracts\AI\AIResult;
+use ENZO\Contracts\HttpClientInterface;
+use ENZO\Logging\Logger;
 
 defined('ABSPATH') || exit;
 

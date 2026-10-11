@@ -1,13 +1,13 @@
 <?php
-namespace ATA\Infrastructure\WpDb;
+namespace ENZO\Infrastructure\WpDb;
 
 use wpdb;
 
 defined('ABSPATH') || exit;
 
 /**
- * Repository for the ata_posts table (single source of truth for posts,
- * aligned with Installer + Cron\Runner; replaces the conflicting ata_post CPT path).
+ * Repository for the enzo_posts table (single source of truth for posts,
+ * aligned with Installer + Cron\Runner; replaces the conflicting enzo_post CPT path).
  */
 class PostRepository
 {
@@ -21,7 +21,7 @@ class PostRepository
 
     private function table(): string
     {
-        return $this->wpdb->prefix . 'ata_posts';
+        return $this->wpdb->prefix . 'enzo_posts';
     }
 
     public function insert(array $row): int

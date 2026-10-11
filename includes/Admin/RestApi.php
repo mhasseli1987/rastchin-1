@@ -1,19 +1,19 @@
 <?php
-namespace ATA\Admin;
+namespace ENZO\Admin;
 
-use ATA\Core\Container; // real namespace: Container lives in Core (not ATA\\)
-use ATA\AI\AIProviderRegistry;
-use ATA\Contracts\AI\AIProviderInterface;
-use ATA\Contracts\Log\LoggerInterface;
-use ATA\Contracts\SecretStoreInterface;
-use ATA\Contracts\Telegram\TelegramProviderInterface;
-use ATA\Cron\Runner;
-use ATA\License\LicenseManager;
-use ATA\Infrastructure\WpDb\LogRepository;
-use ATA\Infrastructure\WpDb\PostRepository;
-use ATA\Security\SecretStore;
-use ATA\Services\ContentService;
-use ATA\Settings\SettingsService;
+use ENZO\Core\Container; // real namespace: Container lives in Core (not ENZO\\)
+use ENZO\AI\AIProviderRegistry;
+use ENZO\Contracts\AI\AIProviderInterface;
+use ENZO\Contracts\Log\LoggerInterface;
+use ENZO\Contracts\SecretStoreInterface;
+use ENZO\Contracts\Telegram\TelegramProviderInterface;
+use ENZO\Cron\Runner;
+use ENZO\License\LicenseManager;
+use ENZO\Infrastructure\WpDb\LogRepository;
+use ENZO\Infrastructure\WpDb\PostRepository;
+use ENZO\Security\SecretStore;
+use ENZO\Services\ContentService;
+use ENZO\Settings\SettingsService;
 
 defined('ABSPATH') || exit;
 
@@ -26,7 +26,7 @@ class RestApi
 
     public static function registerRoutes(): void
     {
-        $base = 'ata/v1';
+        $base = 'enzo/v1';
         $aiNs = $base . '/ai';
 
         $routes = [
@@ -128,8 +128,8 @@ class RestApi
             return self::fail((string) ($result['message'] ?? 'اتصال ناموفق بود.'), 400, 'telegram_error');
         }
 
-        update_option('ata_bot_username', (string) ($result['bot_username'] ?? ''), false);
-        update_option('ata_bot_id', (int) ($result['bot_id'] ?? 0), false);
+        update_option('enzo_bot_username', (string) ($result['bot_username'] ?? ''), false);
+        update_option('enzo_bot_id', (int) ($result['bot_id'] ?? 0), false);
 
         self::container()->make(LoggerInterface::class)->info('Telegram bot connected', [
             'scope'         => 'telegram',
@@ -144,8 +144,8 @@ class RestApi
         /** @var SecretStore $secrets */
         $secrets = self::container()->make(SecretStoreInterface::class);
         $secrets->delete('telegram_bot_token');
-        delete_option('ata_bot_username');
-        delete_option('ata_bot_id');
+        delete_option('enzo_bot_username');
+        delete_option('enzo_bot_id');
         return self::ok();
     }
 
@@ -174,15 +174,15 @@ class RestApi
             ->get('telegram_bot_token') !== null;
         return self::ok([
             'connected'    => $connected,
-            'bot_username' => get_option('ata_bot_username', ''),
-            'bot_id'       => (int) get_option('ata_bot_id', 0),
+            'bot_username' => get_option('enzo_bot_username', ''),
+            'bot_id'       => (int) get_option('enzo_bot_id', 0),
         ]);
     }
 
     public static function listChannels(\WP_REST_Request $r): \WP_REST_Response
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_channels';
+        $table = $wpdb->prefix . 'enzo_channels';
         $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY id DESC LIMIT 200", ARRAY_A) ?: [];
         return self::ok(['channels' => $rows]);
     }
@@ -201,7 +201,7 @@ class RestApi
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_channels';
+        $table = $wpdb->prefix . 'enzo_channels';
         $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE chat_id = %d", $chatId));
         if ($exists) {
             return self::fail('این کانال قبلاً ثبت شده است.', 409, 'duplicate_channel');
@@ -276,7 +276,7 @@ class RestApi
     public static function aiListProviders(\WP_REST_Request $r): \WP_REST_Response
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_providers';
+        $table = $wpdb->prefix . 'enzo_providers';
         $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY id DESC LIMIT 200", ARRAY_A) ?: [];
         foreach ($rows as &$row) {
             $config = json_decode((string) ($row['config_json'] ?? ''), true);
@@ -308,7 +308,7 @@ class RestApi
         $isDefault = !empty($b['is_default']) ? 1 : 0;
 
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_providers';
+        $table = $wpdb->prefix . 'enzo_providers';
         if ($isDefault) {
             $wpdb->query($wpdb->prepare("UPDATE $table SET is_default = 0 WHERE type = %s", $type));
         }
@@ -341,7 +341,7 @@ class RestApi
         $b = self::body($r);
 
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_providers';
+        $table = $wpdb->prefix . 'enzo_providers';
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id), ARRAY_A);
         if (!$row) {
             return self::fail('Provider یافت نشد.', 404, 'not_found');
@@ -386,7 +386,7 @@ class RestApi
     {
         $id = (int) $r['id'];
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_providers';
+        $table = $wpdb->prefix . 'enzo_providers';
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id), ARRAY_A);
         if (!$row) {
             return self::fail('Provider یافت نشد.', 404, 'not_found');
@@ -405,7 +405,7 @@ class RestApi
     {
         $id = (int) $r['id'];
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_providers';
+        $table = $wpdb->prefix . 'enzo_providers';
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id), ARRAY_A);
         if (!$row) {
             return self::fail('Provider یافت نشد.', 404, 'not_found');
@@ -441,7 +441,7 @@ class RestApi
         // Config from default provider row (falls back to provider defaults).
         $config = [];
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_providers';
+        $table = $wpdb->prefix . 'enzo_providers';
         $def = $wpdb->get_row(
             "SELECT * FROM $table WHERE type = 'ai' AND is_default = 1 LIMIT 1",
             ARRAY_A
@@ -533,7 +533,7 @@ class RestApi
         // so image_id=0 → null is applied via a dedicated branch here.
         if (array_key_exists('image_id', $fields) && $fields['image_id'] === null) {
             global $wpdb;
-            $wpdb->update($wpdb->prefix . 'ata_posts', [
+            $wpdb->update($wpdb->prefix . 'enzo_posts', [
                 'image_id'   => null,
                 'updated_at' => current_time('mysql', 1),
             ], ['id' => $id]);
@@ -577,7 +577,7 @@ class RestApi
         }
         global $wpdb;
         $channel = $wpdb->get_row($wpdb->prepare(
-            'SELECT * FROM ' . $wpdb->prefix . 'ata_channels WHERE chat_id = %d',
+            'SELECT * FROM ' . $wpdb->prefix . 'enzo_channels WHERE chat_id = %d',
             (int) $post['channel_id']
         ), ARRAY_A);
 
@@ -630,7 +630,7 @@ class RestApi
         $repo->update($id, ['status' => 'scheduled', 'scheduled_at' => $utc]);
 
         global $wpdb;
-        $queue = $wpdb->prefix . 'ata_queue';
+        $queue = $wpdb->prefix . 'enzo_queue';
         // Replace any pending publish job for this post.
         $wpdb->query($wpdb->prepare(
             "UPDATE $queue SET status = 'cancelled'
@@ -680,7 +680,7 @@ class RestApi
         self::container()->make(PostRepository::class)->update($id, ['status' => 'cancelled']);
 
         global $wpdb;
-        $queue = $wpdb->prefix . 'ata_queue';
+        $queue = $wpdb->prefix . 'enzo_queue';
         $wpdb->query($wpdb->prepare(
             "UPDATE $queue SET status = 'cancelled', locked_at = NULL, lock_token = NULL
              WHERE job_type = 'publish_post' AND status IN ('pending', 'running') AND payload LIKE %s",
@@ -695,7 +695,7 @@ class RestApi
     public static function listQueue(\WP_REST_Request $r): \WP_REST_Response
     {
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
         $status = sanitize_key((string) $r->get_param('status'));
         if ($status !== '' && $status !== 'all') {
             $rows = $wpdb->get_results($wpdb->prepare(
@@ -721,7 +721,7 @@ class RestApi
         }
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare(
-            'SELECT * FROM ' . $wpdb->prefix . 'ata_queue WHERE id = %d',
+            'SELECT * FROM ' . $wpdb->prefix . 'enzo_queue WHERE id = %d',
             $id
         ), ARRAY_A);
         if ($row) {
@@ -734,7 +734,7 @@ class RestApi
     {
         $id = (int) $r['id'];
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
         $changed = $wpdb->query($wpdb->prepare(
             "UPDATE $table SET status = 'cancelled', locked_at = NULL, lock_token = NULL
              WHERE id = %d AND status IN ('pending', 'failed')",
@@ -750,7 +750,7 @@ class RestApi
     {
         $id = (int) $r['id'];
         global $wpdb;
-        $table = $wpdb->prefix . 'ata_queue';
+        $table = $wpdb->prefix . 'enzo_queue';
         $now = current_time('mysql', 1);
         $changed = $wpdb->query($wpdb->prepare(
             "UPDATE $table SET status = 'pending', next_run_at = %s, locked_at = NULL, lock_token = NULL
@@ -812,12 +812,12 @@ class RestApi
         $counts = [
             'posts'   => self::container()->make(PostRepository::class)->countByStatus(),
             'queue'   => [],
-            'channels'=> (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . $wpdb->prefix . 'ata_channels'),
+            'channels'=> (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . $wpdb->prefix . 'enzo_channels'),
             'logs'    => self::container()->make(LogRepository::class)->count(),
         ];
 
         $qRows = $wpdb->get_results(
-            'SELECT status, COUNT(*) AS c FROM ' . $wpdb->prefix . 'ata_queue GROUP BY status',
+            'SELECT status, COUNT(*) AS c FROM ' . $wpdb->prefix . 'enzo_queue GROUP BY status',
             ARRAY_A
         ) ?: [];
         foreach ($qRows as $qr) {
@@ -837,7 +837,7 @@ class RestApi
 
     private static function isSecretSetting(string $key): bool
     {
-        return in_array($key, ['ata_license_key'], true);
+        return in_array($key, ['enzo_license_key'], true);
     }
 
     public static function settings(\WP_REST_Request $r): \WP_REST_Response

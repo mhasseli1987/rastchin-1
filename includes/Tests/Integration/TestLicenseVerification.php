@@ -14,7 +14,7 @@ class TestLicenseVerification extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('ata_license');
+        delete_option('enzo_license');
         parent::tearDown();
     }
 
@@ -22,7 +22,7 @@ class TestLicenseVerification extends IntegrationTestCase
 
     public function test_license_status_default_no_license(): void
     {
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $status = $license->status();
 
         $this->assertFalse($status['activated']);
@@ -30,12 +30,12 @@ class TestLicenseVerification extends IntegrationTestCase
         $this->assertFalse($status['expired']);
         $this->assertFalse($status['grace']);
         $this->assertEquals('', $status['key']);
-        $this->assertEquals('ai-telegram-admin', $status['product']);
+        $this->assertEquals('enzo', $status['product']);
     }
 
     public function test_license_fail_open_when_not_activated(): void
     {
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $this->assertTrue($license->failOpen());
     }
 
@@ -43,7 +43,7 @@ class TestLicenseVerification extends IntegrationTestCase
 
     public function test_activate_rejects_empty_key(): void
     {
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $result = $license->activate('');
 
         $this->assertFalse($result['success']);
@@ -58,12 +58,12 @@ class TestLicenseVerification extends IntegrationTestCase
             'body'    => json_encode([
                 'valid'   => true,
                 'expires' => date('Y-m-d H:i:s', time() + 365 * DAY_IN_SECONDS),
-                'product' => 'ai-telegram-admin',
+                'product' => 'enzo',
             ]),
             'headers' => ['Content-Type: application/json'],
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $result = $license->activate('VALID-LICENSE-KEY-123');
 
         $this->assertTrue($result['success']);
@@ -88,11 +88,11 @@ class TestLicenseVerification extends IntegrationTestCase
             ]),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $license->activate('SECRET-KEY-123');
 
         // Verify option stored
-        $opt = get_option('ata_license');
+        $opt = get_option('enzo_license');
         $this->assertNotFalse($opt);
         $this->assertTrue($opt['activated']);
         $this->assertEquals('SECRET-KEY-123', $opt['key']);
@@ -108,7 +108,7 @@ class TestLicenseVerification extends IntegrationTestCase
             ]),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $result = $license->activate('INVALID-KEY');
 
         $this->assertFalse($result['success']);
@@ -122,7 +122,7 @@ class TestLicenseVerification extends IntegrationTestCase
             'body' => 'Internal Server Error',
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $result = $license->activate('TEST-KEY');
 
         $this->assertFalse($result['success']);
@@ -139,7 +139,7 @@ class TestLicenseVerification extends IntegrationTestCase
             'body'    => json_encode(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400)]),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $license->activate('TEST-KEY-123');
 
         // Then deactivate
@@ -149,7 +149,7 @@ class TestLicenseVerification extends IntegrationTestCase
         $this->assertEquals('لایسنس غیرفعال شد.', $result['message']);
 
         // Verify option removed
-        $this->assertFalse(get_option('ata_license', false));
+        $this->assertFalse(get_option('enzo_license', false));
     }
 
     // --------------------------------------------------------------- Expiration & Grace Period
@@ -157,14 +157,14 @@ class TestLicenseVerification extends IntegrationTestCase
     public function test_license_expired_status(): void
     {
         // Set expired license directly
-        update_option('ata_license', [
+        update_option('enzo_license', [
             'key'       => 'EXPIRED-KEY',
             'activated' => true,
             'expires'   => date('Y-m-d H:i:s', time() - 86400), // 1 day ago
-            'product'   => 'ai-telegram-admin',
+            'product'   => 'enzo',
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $status = $license->status();
 
         $this->assertTrue($status['activated']);
@@ -176,14 +176,14 @@ class TestLicenseVerification extends IntegrationTestCase
     public function test_license_grace_period(): void
     {
         // Set license expiring in 15 days (within 30-day grace)
-        update_option('ata_license', [
+        update_option('enzo_license', [
             'key'       => 'GRACE-KEY',
             'activated' => true,
             'expires'   => date('Y-m-d H:i:s', time() + 15 * DAY_IN_SECONDS),
-            'product'   => 'ai-telegram-admin',
+            'product'   => 'enzo',
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $status = $license->status();
 
         $this->assertTrue($status['activated']);
@@ -194,32 +194,32 @@ class TestLicenseVerification extends IntegrationTestCase
 
     public function test_fail_open_during_grace(): void
     {
-        update_option('ata_license', [
+        update_option('enzo_license', [
             'key'       => 'GRACE-KEY',
             'activated' => true,
             'expires'   => date('Y-m-d H:i:s', time() + 15 * DAY_IN_SECONDS),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $this->assertTrue($license->failOpen());
     }
 
     public function test_fail_open_after_expiration(): void
     {
-        update_option('ata_license', [
+        update_option('enzo_license', [
             'key'       => 'EXPIRED-KEY',
             'activated' => true,
             'expires'   => date('Y-m-d H:i:s', time() - 86400),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         // After expiration, failOpen returns false (plugin should restrict features)
         $this->assertFalse($license->failOpen());
     }
 
     public function test_grace_period_is_30_days(): void
     {
-        $reflection = new ReflectionClass(\ATA\License\LicenseManager::class);
+        $reflection = new ReflectionClass(\ENZO\License\LicenseManager::class);
         $constant = $reflection->getConstant('GRACE_DAYS');
         $this->assertEquals(30, $constant);
     }
@@ -233,7 +233,7 @@ class TestLicenseVerification extends IntegrationTestCase
             'body'    => json_encode(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400)]),
         ]);
 
-        $response = $this->restRequest('POST', '/ata/v1/license/activate', [
+        $response = $this->restRequest('POST', '/enzo/v1/license/activate', [
             'key' => 'REST-API-KEY-123',
         ], $this->adminUserId);
 
@@ -243,21 +243,21 @@ class TestLicenseVerification extends IntegrationTestCase
     public function test_rest_license_deactivate_endpoint(): void
     {
         // Set license first
-        update_option('ata_license', [
+        update_option('enzo_license', [
             'key'       => 'TEST',
             'activated' => true,
             'expires'   => date('Y-m-d H:i:s', time() + 86400),
         ]);
 
-        $response = $this->restRequest('POST', '/ata/v1/license/deactivate', [], $this->adminUserId);
+        $response = $this->restRequest('POST', '/enzo/v1/license/deactivate', [], $this->adminUserId);
 
         $this->assertEquals(true, $response['success']);
-        $this->assertFalse(get_option('ata_license', false));
+        $this->assertFalse(get_option('enzo_license', false));
     }
 
     public function test_rest_license_activate_validates_input(): void
     {
-        $response = $this->restRequest('POST', '/ata/v1/license/activate', ['key' => ''], $this->adminUserId);
+        $response = $this->restRequest('POST', '/enzo/v1/license/activate', ['key' => ''], $this->adminUserId);
 
         $this->assertEquals(false, $response['success']);
     }
@@ -267,7 +267,7 @@ class TestLicenseVerification extends IntegrationTestCase
     public function test_license_admin_page_renders(): void
     {
         wp_set_current_user($this->adminUserId);
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
 
         // Capture output
         ob_start();
@@ -277,7 +277,7 @@ class TestLicenseVerification extends IntegrationTestCase
         $this->assertStringContainsString('لایسنس', $output);
         $this->assertStringContainsString('کلید لایسنس', $output);
         // The page must include a nonce (CSRF protection added in Phase 15).
-        $this->assertStringContainsString('ata_license_nonce', $output);
+        $this->assertStringContainsString('enzo_license_nonce', $output);
     }
 
     public function test_license_admin_page_shows_status(): void
@@ -288,7 +288,7 @@ class TestLicenseVerification extends IntegrationTestCase
             'body'    => json_encode(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400)]),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $license->activate('ADMIN-PAGE-KEY');
 
         ob_start();
@@ -303,7 +303,7 @@ class TestLicenseVerification extends IntegrationTestCase
 
     public function test_admin_notice_when_no_license(): void
     {
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
 
         // Trigger the maybeCheckStatus hook
         $license->maybeCheckStatus();
@@ -335,7 +335,7 @@ class TestLicenseVerification extends IntegrationTestCase
             'body'    => json_encode(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400)]),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
 
         $license->activate('FIRST-KEY');
         $status1 = $license->status();
@@ -349,13 +349,13 @@ class TestLicenseVerification extends IntegrationTestCase
     public function test_verify_url_is_configurable(): void
     {
         // Default points at RTL-Theme; filters allow self-hosted servers.
-        $this->assertStringContainsString('rtl-theme.com', \ATA\License\LicenseManager::verifyUrl());
-        $this->assertStringContainsString('rtl-theme.com', \ATA\License\LicenseManager::updateCheckUrl());
+        $this->assertStringContainsString('rtl-theme.com', \ENZO\License\LicenseManager::verifyUrl());
+        $this->assertStringContainsString('rtl-theme.com', \ENZO\License\LicenseManager::updateCheckUrl());
 
         $override = 'https://license.example.com/verify-license.php';
-        add_filter('ata_license_verify_url', fn() => $override, 10, 0);
-        $this->assertEquals($override, \ATA\License\LicenseManager::verifyUrl());
-        remove_all_filters('ata_license_verify_url');
+        add_filter('enzo_license_verify_url', fn() => $override, 10, 0);
+        $this->assertEquals($override, \ENZO\License\LicenseManager::verifyUrl());
+        remove_all_filters('enzo_license_verify_url');
     }
 
     public function test_license_product_name(): void
@@ -365,7 +365,7 @@ class TestLicenseVerification extends IntegrationTestCase
             'body'    => json_encode(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400), 'product' => 'custom-product']),
         ]);
 
-        $license = $this->container->make(\ATA\License\LicenseManager::class);
+        $license = $this->container->make(\ENZO\License\LicenseManager::class);
         $license->activate('PRODUCT-TEST-KEY');
 
         $status = $license->status();

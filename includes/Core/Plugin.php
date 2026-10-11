@@ -1,30 +1,30 @@
 <?php
-namespace ATA\Core;
+namespace ENZO\Core;
 
-use ATA\Core\Container; // real namespace: Container lives in Core (not ATA\\)
-use ATA\Admin\MenuProvider;
-use ATA\Admin\RestApi;
-use ATA\Security\SecretStore;
-use ATA\Logging\Logger;
-use ATA\Infrastructure\Http\WpHttpTransport;
-use ATA\Infrastructure\WpDb\Installer;
-use ATA\Infrastructure\WpDb\LogRepository;
-use ATA\Settings\SettingsRegistry;
-use ATA\Settings\SettingsService;
-use ATA\Core\SettingsRegistrar;
-use ATA\Services\ContentService;
-use ATA\AI\AIProviderRegistry;
-use ATA\AI\OpenAICompatibleProvider;
-use ATA\Telegram\BotApiTelegramProvider;
-use ATA\Contracts\Telegram\TelegramProviderInterface;
-use ATA\Contracts\AI\AIProviderInterface;
-use ATA\Contracts\Log\LoggerInterface;
-use ATA\Contracts\SecretStoreInterface;
-use ATA\Contracts\HttpClientInterface;
-use ATA\Infrastructure\WpDb\PostRepository;
-use ATA\Cron\Runner;
-use ATA\Cron\SchedulerAdapter;
-use ATA\License\LicenseManager;
+use ENZO\Core\Container; // real namespace: Container lives in Core (not ENZO\\)
+use ENZO\Admin\MenuProvider;
+use ENZO\Admin\RestApi;
+use ENZO\Security\SecretStore;
+use ENZO\Logging\Logger;
+use ENZO\Infrastructure\Http\WpHttpTransport;
+use ENZO\Infrastructure\WpDb\Installer;
+use ENZO\Infrastructure\WpDb\LogRepository;
+use ENZO\Settings\SettingsRegistry;
+use ENZO\Settings\SettingsService;
+use ENZO\Core\SettingsRegistrar;
+use ENZO\Services\ContentService;
+use ENZO\AI\AIProviderRegistry;
+use ENZO\AI\OpenAICompatibleProvider;
+use ENZO\Telegram\BotApiTelegramProvider;
+use ENZO\Contracts\Telegram\TelegramProviderInterface;
+use ENZO\Contracts\AI\AIProviderInterface;
+use ENZO\Contracts\Log\LoggerInterface;
+use ENZO\Contracts\SecretStoreInterface;
+use ENZO\Contracts\HttpClientInterface;
+use ENZO\Infrastructure\WpDb\PostRepository;
+use ENZO\Cron\Runner;
+use ENZO\Cron\SchedulerAdapter;
+use ENZO\License\LicenseManager;
 
 defined('ABSPATH') || exit;
 
@@ -121,9 +121,9 @@ class Plugin
 
         // Cron queue runner: 1-minute custom schedule + idempotent scheduling.
         add_filter('cron_schedules', static function (array $schedules): array {
-            $schedules['ata_minute'] = [
+            $schedules['enzo_minute'] = [
                 'interval' => MINUTE_IN_SECONDS,
-                'display'  => 'Every Minute (ATA)',
+                'display'  => 'Every Minute (ENZO)',
             ];
             return $schedules;
         });
@@ -141,36 +141,36 @@ class Plugin
         add_action('init', [LicenseManager::class, 'maybeCheckStatus']);
 
         // Phase 15: update/version check + secure download gate (fail-safe).
-        \ATA\License\Updater::register();
+        \ENZO\License\Updater::register();
 
         // Assets.
         add_action('admin_enqueue_scripts', [$this, 'enqueueAssets']);
 
         // Text domain.
         add_action('init', function (): void {
-            load_plugin_textdomain('ata-telegram-ai-admin', false, dirname(plugin_basename(ATA_FILE)) . '/languages');
+            load_plugin_textdomain('enzo-telegram-ai-admin', false, dirname(plugin_basename(ENZO_FILE)) . '/languages');
         });
     }
 
     public function enqueueAssets(): void
     {
         $screen = get_current_screen();
-        if (!$screen || strpos($screen->id, 'ata') === false) {
+        if (!$screen || strpos($screen->id, 'enzo') === false) {
             return;
         }
 
         // Only load assets when the files actually exist (avoids 404s on MVP skeleton).
-        $css = ATA_DIR . 'assets/css/admin.css';
-        $js = ATA_DIR . 'assets/js/admin.js';
+        $css = ENZO_DIR . 'assets/css/admin.css';
+        $js = ENZO_DIR . 'assets/js/admin.js';
         if (is_file($css)) {
-            wp_enqueue_style('ata-admin', ATA_URL . 'assets/css/admin.css', [], ATA_VERSION);
+            wp_enqueue_style('enzo-admin', ENZO_URL . 'assets/css/admin.css', [], ENZO_VERSION);
         }
         if (is_file($js)) {
-            wp_enqueue_script('ata-admin', ATA_URL . 'assets/js/admin.js', ['wp-element', 'wp-api-fetch', 'wp-components'], ATA_VERSION, true);
+            wp_enqueue_script('enzo-admin', ENZO_URL . 'assets/js/admin.js', ['wp-element', 'wp-api-fetch', 'wp-components'], ENZO_VERSION, true);
 
             // Localize REST root + nonce (only when the handle exists).
-            wp_localize_script('ata-admin', 'ataRest', [
-                'root' => rest_url('ata/v1'),
+            wp_localize_script('enzo-admin', 'enzoRest', [
+                'root' => rest_url('enzo/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
             ]);
         }
@@ -182,7 +182,7 @@ class Plugin
         $installer = new Installer();
         $installer->install();
 
-        // One-time backfill for installs that still carry ata_post CPT drafts
+        // One-time backfill for installs that still carry enzo_post CPT drafts
         // from the earlier (conflicting) storage model.
         self::migrateCptDraftsToTable();
 
@@ -206,26 +206,26 @@ class Plugin
 
         // Remove leftover CPT content from the old storage model.
         global $wpdb;
-        $ids = $wpdb->get_col("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'ata_post'");
+        $ids = $wpdb->get_col("SELECT ID FROM {$wpdb->posts} WHERE post_type = 'enzo_post'");
         if ($ids) {
             $in = implode(',', array_map('intval', $ids));
             $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE post_id IN ($in)");
-            $wpdb->query("DELETE FROM {$wpdb->posts} WHERE post_type = 'ata_post'");
+            $wpdb->query("DELETE FROM {$wpdb->posts} WHERE post_type = 'enzo_post'");
         }
     }
 
     /**
-     * Copy legacy ata_post CPT drafts into ata_posts (once, guarded by an option).
+     * Copy legacy enzo_post CPT drafts into enzo_posts (once, guarded by an option).
      * Reconciles the two conflicting post models instead of silently dropping data.
      */
     private static function migrateCptDraftsToTable(): void
     {
-        if (get_option('ata_cpt_migrated')) {
+        if (get_option('enzo_cpt_migrated')) {
             return;
         }
 
         $posts = get_posts([
-            'post_type'      => 'ata_post',
+            'post_type'      => 'enzo_post',
             'post_status'    => ['draft', 'pending', 'private'],
             'posts_per_page' => 500,
             'orderby'        => 'ID',
@@ -233,7 +233,7 @@ class Plugin
         ]);
 
         if ($posts) {
-            $repo = new \ATA\Infrastructure\WpDb\PostRepository();
+            $repo = new \ENZO\Infrastructure\WpDb\PostRepository();
             foreach ($posts as $p) {
                 $repo->insert([
                     'title'      => $p->post_title,
@@ -245,7 +245,7 @@ class Plugin
             }
         }
 
-        update_option('ata_cpt_migrated', 1, false);
+        update_option('enzo_cpt_migrated', 1, false);
     }
 
 }

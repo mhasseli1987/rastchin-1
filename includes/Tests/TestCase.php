@@ -1,6 +1,6 @@
 <?php
 /**
- * Test case base for ATA unit tests.
+ * Test case base for ENZO unit tests.
  * PHPUnit compatible.
  */
 if (!defined('WP_TEST_DIR')) {

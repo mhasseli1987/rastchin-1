@@ -1,5 +1,5 @@
 <?php
-namespace ATA\Infrastructure\WpDb;
+namespace ENZO\Infrastructure\WpDb;
 
 use wpdb;
 
@@ -17,7 +17,7 @@ class LogRepository
 
     protected function table(): string
     {
-        return $this->wpdb->prefix . 'ata_logs';
+        return $this->wpdb->prefix . 'enzo_logs';
     }
 
     /** @return int inserted row ID. */

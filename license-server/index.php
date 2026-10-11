@@ -1,8 +1,8 @@
 <?php
 /**
- * ATA License Server — reference implementation (single file + SQLite).
+ * ENZO License Server — reference implementation (single file + SQLite).
  *
- * Implements the exact contract the ATA plugin (LicenseManager / Updater) speaks:
+ * Implements the exact contract the ENZO plugin (LicenseManager / Updater) speaks:
  *   POST /verify-license.php   {license_key, product, domain, version} → {valid, message?, expires, product, domain}
  *   POST /update-check.php     {license_key, product, domain, version} → {version, url, package, requires, requires_php, changelog}
  *   GET  /download.php?key=…&product=…&domain=…                        → package zip stream (gated)
@@ -22,11 +22,11 @@ declare(strict_types=1);
 
 $CONFIG = [
     // Set a long random admin key. Keep it secret; it controls license issuing.
-    'admin_key'   => getenv('ATA_LICENSE_ADMIN_KEY') ?: 'CHANGE-ME-admin-key',
+    'admin_key'   => getenv('ENZO_LICENSE_ADMIN_KEY') ?: 'CHANGE-ME-admin-key',
     // Data directory (SQLite db + packages). Move OUTSIDE the web root if possible.
     'data_dir'    => __DIR__ . '/data',
     // Product slugs this server issues licenses for.
-    'products'    => ['ai-telegram-admin'],
+    'products'    => ['enzo'],
 ];
 
 /* ------------------------------------------------------------------ boot */
@@ -175,7 +175,7 @@ if ($route === '/update-check.php' || $route === '/update-check.php/') {
     $self   = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? '') . $base;
     json_out([
         'version'      => (string) $pkg['version'],
-        'url'          => 'https://rtl-theme.com/plugins/ai-telegram-admin',
+        'url'          => 'https://rtl-theme.com/plugins/enzo',
         'package'      => $self . '/download.php?key=' . urlencode($key) . '&product=' . urlencode($product),
         'requires'     => (string) $pkg['requires'],
         'requires_php' => (string) $pkg['requires_php'],
@@ -237,7 +237,7 @@ if ($route === '/admin.php' || $route === '/admin.php/' || $route === '/' || $ro
         $domain  = norm_domain((string) ($_REQUEST['domain'] ?? ''));
         $expires = trim((string) ($_REQUEST['expires'] ?? ''));
         if (in_array($product, $CONFIG['products'], true) && ($expires === '' || preg_match('/^\d{4}-\d{2}-\d{2}$/', $expires))) {
-            $key = 'ATA-' . strtoupper(bin2hex(random_bytes(2))) . '-' . strtoupper(bin2hex(random_bytes(2)))
+            $key = 'ENZO-' . strtoupper(bin2hex(random_bytes(2))) . '-' . strtoupper(bin2hex(random_bytes(2)))
                  . '-' . strtoupper(bin2hex(random_bytes(2))) . '-' . strtoupper(bin2hex(random_bytes(2)));
             $pdo->prepare('INSERT INTO licenses (license_key, product, domain, expires, created_at) VALUES (?,?,?,?,?)')
                 ->execute([$key, $product, $domain, $expires, gmdate('Y-m-d H:i:s')]);
@@ -260,7 +260,7 @@ if ($route === '/admin.php' || $route === '/admin.php/' || $route === '/' || $ro
         if (!empty($_FILES['zip']['tmp_name']) && is_uploaded_file($_FILES['zip']['tmp_name'])) {
             $version = trim((string) ($_REQUEST['version'] ?? ''));
             if ($version !== '' && strtolower(pathinfo((string) $_FILES['zip']['name'], PATHINFO_EXTENSION)) === 'zip') {
-                $file = 'ata-' . $version . '.zip';
+                $file = 'enzo-' . $version . '.zip';
                 move_uploaded_file($_FILES['zip']['tmp_name'], $dataDir . '/packages/' . $file);
                 $pdo->prepare('INSERT OR REPLACE INTO packages (version, file, requires, requires_php, changelog, created_at) VALUES (?,?,?,?,?,?)')
                     ->execute([
@@ -295,7 +295,7 @@ function h_out(array $CONFIG, string $k, string $msg, array $licenses, array $pa
     $h = static fn($s) => htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
     ?>
 <!doctype html><html dir="rtl" lang="fa"><head><meta charset="utf-8">
-<title>سرور لایسنس آتا</title>
+<title>سرور لایسنس انزو</title>
 <style>
 body{font-family:Tahoma,Arial,sans-serif;background:#f0f2f5;margin:0;padding:24px;color:#0f2a43}
 .wrap{max-width:960px;margin:0 auto}h1{font-size:20px}table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;font-size:12px}
@@ -307,7 +307,7 @@ button{padding:8px 16px;background:#14b8a6;color:#fff;border:none;border-radius:
 h2{font-size:15px;margin:24px 0 8px}code{background:#f1f5f9;padding:2px 6px;border-radius:4px;direction:ltr;display:inline-block}
 .mut{color:#64748b;font-size:11px}
 </style></head><body><div class="wrap">
-<h1>🔑 سرور لایسنس آتا — پیاده‌سازی مرجع</h1>
+<h1>🔑 سرور لایسنس انزو — پیاده‌سازی مرجع</h1>
 <?php if ($msg): ?><div class="ok"><?= $h($msg) ?></div><?php endif; ?>
 
 <h2>صدور لایسنس جدید</h2>

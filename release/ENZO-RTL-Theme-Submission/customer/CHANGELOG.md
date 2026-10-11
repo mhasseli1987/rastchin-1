@@ -1,4 +1,4 @@
-# Changelog — ATA: AI Telegram Admin
+# Changelog — ENZO: AI Telegram Admin
 
 تمام تغییرات مهم این پروژه در این فایل ثبت می‌شود.
 قالب بر اساس [Keep a Changelog](https://keepachangelog.com/) و نسخه‌بندی [SemVer](https://semver.org/).
@@ -11,11 +11,11 @@
 - **هوش مصنوعی:** Provider سازگار با OpenAI (chat/completions)، عملیات generate/rewrite/summarize/title/caption/translate، تست اتصال، لیست مدل‌ها، مدیریت چند Provider با secret رمزنگاری‌شده
 - **محتوا:** تولید با ذخیره خودکار پیش‌نویس، پیش‌نمایش، تأیید، زمان‌بندی، انتشار فوری، لغو
 - **صف انتشار:** claim اتمیک با lock_token و TTL، حداکثر ۵ کار در هر گذر cron، retry با backoff نمایی (۲ⁿ×۶۰s، سقف ۱ ساعت، حداکثر ۵ تلاش)، اجرای فوری/لغو/retry دستی
-- **زمان‌بندی:** WP-Cron با سرعت دقیقه‌ای (`ata_minute`) + ادپتور Action Scheduler
+- **زمان‌بندی:** WP-Cron با سرعت دقیقه‌ای (`enzo_minute`) + ادپتور Action Scheduler
 - **دیتابیس:** ۵ جدول با dbDelta (add-only برای آینده)، migration از مدل CPT قدیمی
-- **REST API:** ۲۴ endpoint زیر `ata/v1` با محافظت `manage_options`
+- **REST API:** ۲۴ endpoint زیر `enzo/v1` با محافظت `manage_options`
 - **امنیت:**
-  - SecretStore با XChaCha20-Poly1305-IETF (پیشوند `ata_secret_`، magic `ATAS1`)، پشتیبانی `ATA_ENCRYPTION_KEY`
+  - SecretStore با XChaCha20-Poly1305-IETF (پیشوند `enzo_secret_`، magic `ENZOS1`)، پشتیبانی `ENZO_ENCRYPTION_KEY`
   - SSRF Gate: بلاک IPهای خصوصی/رزرو v4+v6، DNS rebinding، fail-closed — تک‌نقطه‌ی عبور همه ترافیک خروجی
   - Redaction خودکار secretها در لاگ‌ها
   - nonce و capability check در همه فرم‌ها و endpointها

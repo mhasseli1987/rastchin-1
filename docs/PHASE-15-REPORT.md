@@ -24,19 +24,19 @@ SPECIFICATION.md:629 — License Key, Activation, Domain, Update Check, Version 
 - `check()`: واکشی آخرین نسخه از `rtl-theme.com/update-check.php` با ارسال license_key + domain + version فعلی؛ **کش ۱۲ ساعته** در ترنزینت (بدون اضافه‌کردن cron — سبک برای میزبان مشتری).
 - `fetch()`: در هر خطا/پاسخ بد malformed → `null` (fail-safe).
 - هرگز بسته‌ی `http://` (غیر HTTPS) را به وردپرس پیشنهاد نمی‌دهد → `null`.
-- `injectUpdate()` روی فیلتر `pre_set_site_transient_update_plugins`: فقط وقتی `version_compare(ATA_VERSION, latest, '<')` باشد، آپدیت به ترنزینت اضافه می‌شود (Version Check).
+- `injectUpdate()` روی فیلتر `pre_set_site_transient_update_plugins`: فقط وقتی `version_compare(ENZO_VERSION, latest, '<')` باشد، آپدیت به ترنزینت اضافه می‌شود (Version Check).
 - `pluginInfo()` روی `plugins_api`: مودال «مشاهده جزئیات» در صفحه افزونه‌ها.
 
 ### 3. Secure Update — گیت دانلود
 - فیلتر `upgrader_pre_download` → `gateDownload()`:
   - فقط برای بسته‌های از هاست‌های `rtl-theme.com` فعال می‌شود؛ **بسته‌های ثالث (مثل wordpress.org) دست‌نخورده عبور می‌کنند** — حتی اگر لایسنس منقضی باشد.
-  - بسته ATA غیر HTTPS → `WP_Error(ata_insecure_package)`.
-  - لایسنس فعال‌شده‌ی منقضی → `WP_Error(ata_license_required)`.
+  - بسته ENZO غیر HTTPS → `WP_Error(enzo_insecure_package)`.
+  - لایسنس فعال‌شده‌ی منقضی → `WP_Error(enzo_license_required)`.
 - **بدون آپدیت خودکار:** آپدیت فقط در پیشخوان پیشنهاد می‌شود و نصب آن با کلیک مدیر است — هیچ مسیر نصب اجباری وجود ندارد.
 
 ### 4. اصلاحات جانبی (باگ‌های واقعی)
 - **هک خراب منو:** `adminPage()` مستقیماً به `admin_menu` هوک شده بود و در زمان ثبت منو خروجی HTML چاپ می‌کرد → جایگزینی با `LicenseManager::registerMenu()` (زیرمنوی استاندارد)؛ زیرمنوی License از لیست SPA حذف شد (فرم کلاسیک بدون وابستگی به JS کار می‌کند).
-- **CSRF در صفحه لایسنس:** فرم nonce رندر می‌کرد ولی هرگز verify نمی‌شد → `check_admin_referer('ata_license_action')` + `current_user_can('manage_options')` قبل از هر پردازش POST.
+- **CSRF در صفحه لایسنس:** فرم nonce رندر می‌کرد ولی هرگز verify نمی‌شد → `check_admin_referer('enzo_license_action')` + `current_user_can('manage_options')` قبل از هر پردازش POST.
 - تایپوی پیام «غیرعالی شد» → «غیرفعال شد» (تست هم اصلاح شد).
 
 ## تست‌ها — `TestLicenseUpdater.php` (20 تست جدید)

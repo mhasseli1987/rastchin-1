@@ -1,8 +1,8 @@
 <?php
-namespace ATA\Logging;
+namespace ENZO\Logging;
 
-use ATA\Contracts\Log\LoggerInterface;
-use ATA\Infrastructure\WpDb\LogRepository;
+use ENZO\Contracts\Log\LoggerInterface;
+use ENZO\Infrastructure\WpDb\LogRepository;
 
 defined('ABSPATH') || exit;
 
@@ -60,7 +60,7 @@ class Logger implements LoggerInterface
      *  1. Key-based: any value under a secret-looking key ('bot_token',
      *     'api_key', 'authorization', ...) is masked — this closed the biggest
      *     hole: context like ['bot_token' => '123:AAH...'] used to be written
-     *     verbatim to ata_logs.
+     *     verbatim to enzo_logs.
      *  2. Pattern-based: secret-looking fragments inside free text
      *     ('key=...', 'Bearer sk-...', 40+ hex/entropy strings).
      */

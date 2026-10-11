@@ -1,4 +1,4 @@
-# معماری هوش مصنوعی (AI Architecture) — AI Telegram Admin (ATA)
+# معماری هوش مصنوعی (AI Architecture) — AI Telegram Admin (ENZO)
 
 | مشخصه | مقدار |
 | --- | --- |
@@ -22,11 +22,11 @@
 Application Layer (AiTaskService ← تنها مصرف‌کننده‌ی هسته)
         │ فقط Interface + DTO خنثی (AIRequest/AIResult)
         ▼
-Ata\Contracts\AI\AIProviderInterface          ◄── پورت
+Enzo\Contracts\AI\AIProviderInterface          ◄── پورت
         ▲ implements                              (این سند، بخش ۴)
-Ata\AI\Registry\AIProviderRegistry            ◄── ثبت driverها (D-5)
+Enzo\AI\Registry\AIProviderRegistry            ◄── ثبت driverها (D-5)
         │ resolve(driver)
-Ata\AI\Providers\OpenAICompatibleProvider     ◄── آداپتر عمومی (بخش ۵)
+Enzo\AI\Providers\OpenAICompatibleProvider     ◄── آداپتر عمومی (بخش ۵)
         │
         ├─ PromptBuilder (قرارداد از فاز ۷؛ MVP: پیش‌فرض‌های ساده — D-16)
         ├─ ResponseParser → Validation        (بخش ۶)
@@ -34,7 +34,7 @@ Ata\AI\Providers\OpenAICompatibleProvider     ◄── آداپتر عمومی 
         └─ HttpClientInterface (SSRF-Gate روی base_url کاربر — D-8)
 ```
 
-جهت وابستگی دقیقاً مثل لایه‌ی تلگرام (`ARCHITECTURE.md:70`): `Ata\AI` نه `Ata\Application` را می‌شناسد نه `Ata\Admin` را؛ ارتباط فقط با DTOهای خنثی. تفاوت کلیدی با تلگرام: **base_url اینجا از کاربر می‌آید (BYOK)**، پس SSRF-Gate حیاتی‌ترین کنترل این لایه است (D-8).
+جهت وابستگی دقیقاً مثل لایه‌ی تلگرام (`ARCHITECTURE.md:70`): `Enzo\AI` نه `Enzo\Application` را می‌شناسد نه `Enzo\Admin` را؛ ارتباط فقط با DTOهای خنثی. تفاوت کلیدی با تلگرام: **base_url اینجا از کاربر می‌آید (BYOK)**، پس SSRF-Gate حیاتی‌ترین کنترل این لایه است (D-8).
 
 ---
 
@@ -42,9 +42,9 @@ Ata\AI\Providers\OpenAICompatibleProvider     ◄── آداپتر عمومی 
 
 زنجیره‌ی `SPECIFICATION.md:340-350` به اجزای واقعی این معماری:
 
-| واژه‌ی SPEC | جزء در معماری ATA | نقش |
+| واژه‌ی SPEC | جزء در معماری ENZO | نقش |
 | --- | --- | --- |
-| **Provider** | رکورد `ata_providers` (type=ai) + `ProviderConfig` | یک سرویس AI پیکربندی‌شده توسط کاربر (driver, baseUrl, model, …) |
+| **Provider** | رکورد `enzo_providers` (type=ai) + `ProviderConfig` | یک سرویس AI پیکربندی‌شده توسط کاربر (driver, baseUrl, model, …) |
 | **Adapter** | `OpenAICompatibleProvider` (و driverهای آینده) | ترجمه‌ی `AIRequest` به پروتکل خاص سرویس و برگرداندن پاسخ خام |
 | **AI Client** | `AiClient` (لایه‌ی نازک داخل آداپتر) | ساخت/امضای درخواست HTTP، timeout، retry سطح انتقال، mask کردن secret |
 | **Request** | `AIRequest` (DTO) | عملیات + پیام‌ها + config + context — خنثی و بدون اثری از Provider |
@@ -201,7 +201,7 @@ AiException { code, httpStatus?, isRetryable(), requestId, humanMessage }
 | --- | --- | --- |
 | 1 | کلید فقط سمت سرور | تمام فراخوانی‌ها در PHP سمت سرور؛ هیچ JS کلاینتی کلید یا proxy-کلید دریافت نمی‌کند؛ REST endpointها فقط `secretRef` و وضعیت connection را برمی‌گردانند |
 | 2 | ورودی یک‌طرفه | UI `type=password` + placeholder ماسک؛ پاسخ API هرگز مقدار را echo نمی‌کند (`UX_SPEC.md:507-512`) |
-| 3 | رمزنگاری در سکون | SecretStore AES-256-GCM (`ARCHITECTURE.md:281`)؛ `ata_providers` فقط `secret_ref` |
+| 3 | رمزنگاری در سکون | SecretStore AES-256-GCM (`ARCHITECTURE.md:281`)؛ `enzo_providers` فقط `secret_ref` |
 | 4 | عدم نشت در لاگ/خطا | redaction خودکار Logger + AiException بدون secret + mask در HttpClient (مشترک با تلگرام، T-3) |
 | 5 | SSRF-Gate روی base_url | scheme https/http، بلاک private/reserved IP، محافظت DNS-rebinding (resolve + compare) — D-8؛ base_url ورودی **کاربر غیرفنی** است، پس validation قبل از هر درخواست |
 | 6 | testConnection بدون ذخیره‌ی side-effect | درخواست مینیمال؛ پاسخ فقط ok/errorCode؛ کلید در هیچ فیلد پاسخ نیست |
@@ -218,7 +218,7 @@ AIProviderRegistry.register("anthropic-style", factory2)    ← فقط یک کل
 ```
 
 - `supports()` در driver: تشخیص اینکه یک `ProviderConfig` با این driver سازگار است (برای خطایابی تنظیمات).
-- UI در MVP یک driver دارد («OpenAI-Compatible»)، ولی ساختار داده (`ata_providers.driver`) و Registry از روز اول چنددرایوره‌اند — **بدون هزینه‌ی MVP، با ارزش V1**. دلیل فنی (قانون ۹): مهاجرت بعدی = backfill ستون driver، در برابر طرح تک‌درایوره = بازنویسی ذخیره‌سازی و UI.
+- UI در MVP یک driver دارد («OpenAI-Compatible»)، ولی ساختار داده (`enzo_providers.driver`) و Registry از روز اول چنددرایوره‌اند — **بدون هزینه‌ی MVP، با ارزش V1**. دلیل فنی (قانون ۹): مهاجرت بعدی = backfill ستون driver، در برابر طرح تک‌درایوره = بازنویسی ذخیره‌سازی و UI.
 
 ---
 

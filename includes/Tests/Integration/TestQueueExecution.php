@@ -13,12 +13,12 @@ class TestQueueExecution extends IntegrationTestCase
         parent::setUp();
 
         // The Telegram provider requires a configured token for publish jobs.
-        (new \ATA\Security\SecretStore())->set('telegram_bot_token', '123456:TEST-TOKEN');
+        (new \ENZO\Security\SecretStore())->set('telegram_bot_token', '123456:TEST-TOKEN');
     }
 
     protected function tearDown(): void
     {
-        (new \ATA\Security\SecretStore())->delete('telegram_bot_token');
+        (new \ENZO\Security\SecretStore())->delete('telegram_bot_token');
         parent::tearDown();
     }
 
@@ -36,10 +36,10 @@ class TestQueueExecution extends IntegrationTestCase
         $q2 = $this->createQueueItem(['job_type' => 'publish_post', 'payload' => json_encode(['post_id' => $postId])]);
 
         // Run handler - should claim and process ONE job (MAX_JOBS_PER_RUN = 5)
-        \ATA\Cron\Runner::handle();
+        \ENZO\Cron\Runner::handle();
 
         // Both jobs should be processed since MAX_JOBS_PER_RUN = 5 and we only have 2
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
         $post = $repo->find($postId);
         $this->assertEquals('published', $post['status']);
     }
@@ -48,7 +48,7 @@ class TestQueueExecution extends IntegrationTestCase
     {
         // This test would need to modify MAX_JOBS_PER_RUN constant or mock it
         // For now, verify the constant exists (private const → reflection).
-        $const = (new ReflectionClass(\ATA\Cron\Runner::class))->getConstant('MAX_JOBS_PER_RUN');
+        $const = (new ReflectionClass(\ENZO\Cron\Runner::class))->getConstant('MAX_JOBS_PER_RUN');
         $this->assertEquals(5, $const);
     }
 
@@ -69,12 +69,12 @@ class TestQueueExecution extends IntegrationTestCase
         $token = 'manual-lock-token';
         $now = current_time('mysql', 1);
         $wpdb->query($wpdb->prepare(
-            "UPDATE {$wpdb->prefix}ata_queue SET status = 'running', locked_at = %s, lock_token = %s WHERE id = %d",
+            "UPDATE {$wpdb->prefix}enzo_queue SET status = 'running', locked_at = %s, lock_token = %s WHERE id = %d",
             [$now, $token, $queueId]
         ));
 
         // Run handler - should skip locked job
-        \ATA\Cron\Runner::handle();
+        \ENZO\Cron\Runner::handle();
 
         // Job should still be locked (not processed again)
         $queue = $this->getQueueItem($queueId);
@@ -96,10 +96,10 @@ class TestQueueExecution extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => $postId]),
         ]);
 
-        $result = \ATA\Cron\Runner::runNow($queueId);
+        $result = \ENZO\Cron\Runner::runNow($queueId);
         $this->assertTrue($result);
 
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
         $post = $repo->find($postId);
         $this->assertEquals('published', $post['status']);
     }
@@ -122,10 +122,10 @@ class TestQueueExecution extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => $postId]),
         ]);
 
-        $result = \ATA\Cron\Runner::runNow($queueId);
+        $result = \ENZO\Cron\Runner::runNow($queueId);
         $this->assertTrue($result);
 
-        $repo = $this->container->make(\ATA\Infrastructure\WpDb\PostRepository::class);
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
         $post = $repo->find($postId);
         $this->assertEquals('published', $post['status']);
 
@@ -150,7 +150,7 @@ class TestQueueExecution extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => $postId]),
         ]);
 
-        $result = \ATA\Cron\Runner::runNow($queueId);
+        $result = \ENZO\Cron\Runner::runNow($queueId);
         $this->assertTrue($result); // runNow returns true if claimed
 
         // Job should be retried (status back to pending)
@@ -166,7 +166,7 @@ class TestQueueExecution extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => 999999]), // non-existent
         ]);
 
-        $result = \ATA\Cron\Runner::runNow($queueId);
+        $result = \ENZO\Cron\Runner::runNow($queueId);
         $this->assertTrue($result);
 
         $queue = $this->getQueueItem($queueId);
@@ -183,7 +183,7 @@ class TestQueueExecution extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => $postId]),
         ]);
 
-        $result = \ATA\Cron\Runner::runNow($queueId);
+        $result = \ENZO\Cron\Runner::runNow($queueId);
         $this->assertTrue($result);
 
         $queue = $this->getQueueItem($queueId);
@@ -211,7 +211,7 @@ class TestQueueExecution extends IntegrationTestCase
             'max_attempts' => 5,
         ]);
 
-        \ATA\Cron\Runner::runNow($queueId);
+        \ENZO\Cron\Runner::runNow($queueId);
 
         $queue = $this->getQueueItem($queueId);
         $this->assertEquals('pending', $queue['status']);
@@ -240,7 +240,7 @@ class TestQueueExecution extends IntegrationTestCase
             'max_attempts' => 5,
         ]);
 
-        \ATA\Cron\Runner::runNow($queueId);
+        \ENZO\Cron\Runner::runNow($queueId);
 
         $queue = $this->getQueueItem($queueId);
         $this->assertEquals('failed', $queue['status']);
@@ -260,7 +260,7 @@ class TestQueueExecution extends IntegrationTestCase
             'payload'  => json_encode(['post_id' => $postId]),
         ]);
 
-        \ATA\Cron\Runner::runNow($queueId);
+        \ENZO\Cron\Runner::runNow($queueId);
 
         $queue = $this->getQueueItem($queueId);
         $this->assertEquals('pending', $queue['status']);
@@ -284,12 +284,12 @@ class TestQueueExecution extends IntegrationTestCase
         global $wpdb;
         $expired = gmdate('Y-m-d H:i:s', time() - 360);
         $wpdb->query($wpdb->prepare(
-            "UPDATE {$wpdb->prefix}ata_queue SET status = 'running', locked_at = %s, lock_token = 'expired' WHERE id = %d",
+            "UPDATE {$wpdb->prefix}enzo_queue SET status = 'running', locked_at = %s, lock_token = 'expired' WHERE id = %d",
             [$expired, $queueId]
         ));
 
         // Run cleanup
-        \ATA\Cron\Runner::clearExpiredLocks();
+        \ENZO\Cron\Runner::clearExpiredLocks();
 
         $queue = $this->getQueueItem($queueId);
         $this->assertEquals('pending', $queue['status']);
@@ -311,11 +311,11 @@ class TestQueueExecution extends IntegrationTestCase
         global $wpdb;
         $recent = gmdate('Y-m-d H:i:s', time() - 60);
         $wpdb->query($wpdb->prepare(
-            "UPDATE {$wpdb->prefix}ata_queue SET status = 'running', locked_at = %s, lock_token = 'valid' WHERE id = %d",
+            "UPDATE {$wpdb->prefix}enzo_queue SET status = 'running', locked_at = %s, lock_token = 'valid' WHERE id = %d",
             [$recent, $queueId]
         ));
 
-        \ATA\Cron\Runner::clearExpiredLocks();
+        \ENZO\Cron\Runner::clearExpiredLocks();
 
         $queue = $this->getQueueItem($queueId);
         $this->assertEquals('running', $queue['status']);
@@ -326,26 +326,26 @@ class TestQueueExecution extends IntegrationTestCase
 
     public function test_schedule_one_shot_job(): void
     {
-        \ATA\Cron\SchedulerAdapter::scheduleOneShot('ata_test_hook', 60, ['data' => 'test']);
+        \ENZO\Cron\SchedulerAdapter::scheduleOneShot('enzo_test_hook', 60, ['data' => 'test']);
 
-        $scheduled = wp_next_scheduled('ata_test_hook', ['data' => 'test']);
+        $scheduled = wp_next_scheduled('enzo_test_hook', ['data' => 'test']);
         $this->assertNotFalse($scheduled);
         $this->assertGreaterThan(time() + 50, $scheduled);
         $this->assertLessThan(time() + 70, $scheduled);
 
         // Cleanup
-        wp_clear_scheduled_hook('ata_test_hook', ['data' => 'test']);
+        wp_clear_scheduled_hook('enzo_test_hook', ['data' => 'test']);
     }
 
     public function test_schedule_one_shot_immediate(): void
     {
-        \ATA\Cron\SchedulerAdapter::scheduleOneShot('ata_test_immediate', 0, ['now' => true]);
+        \ENZO\Cron\SchedulerAdapter::scheduleOneShot('enzo_test_immediate', 0, ['now' => true]);
 
-        $scheduled = wp_next_scheduled('ata_test_immediate', ['now' => true]);
+        $scheduled = wp_next_scheduled('enzo_test_immediate', ['now' => true]);
         $this->assertNotFalse($scheduled);
         $this->assertLessThanOrEqual(time() + 5, $scheduled);
 
-        wp_clear_scheduled_hook('ata_test_immediate', ['now' => true]);
+        wp_clear_scheduled_hook('enzo_test_immediate', ['now' => true]);
     }
 
     // --------------------------------------------------------------- Helpers
@@ -364,14 +364,14 @@ class TestQueueExecution extends IntegrationTestCase
             'updated_at'   => current_time('mysql', 1),
         ];
         $data = array_merge($defaults, $overrides);
-        $this->wpdb->insert($this->wpdb->prefix . 'ata_queue', $data);
+        $this->wpdb->insert($this->wpdb->prefix . 'enzo_queue', $data);
         return (int) $this->wpdb->insert_id;
     }
 
     protected function getQueueItem(int $id): ?array
     {
         return $this->wpdb->get_row(
-            $this->wpdb->prepare("SELECT * FROM {$this->wpdb->prefix}ata_queue WHERE id = %d", $id),
+            $this->wpdb->prepare("SELECT * FROM {$this->wpdb->prefix}enzo_queue WHERE id = %d", $id),
             ARRAY_A
         ) ?: null;
     }

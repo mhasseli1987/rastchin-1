@@ -1,4 +1,4 @@
-/* ATA Admin React SPA — v1.1.0 (full UI)
+/* ENZO Admin React SPA — v1.1.0 (full UI)
  * Vanilla wp.element + wp-components (no build step).
  * All REST calls are cookie-authenticated with the wp_rest nonce. */
 (function (wp) {
@@ -12,7 +12,7 @@
   /** rest_url() yields "/wp-json/…" on pretty permalinks but "/?rest_route=…"
    *  on plain ones — merge path + first query param into the right separator. */
   function apiUrl(path) {
-    var base = ATA_REST_URL.url;
+    var base = ENZO_REST_URL.url;
     path = String(path).replace(/^\//, '');
     var q = path.indexOf('?');
     if (base.indexOf('?') !== -1 && q !== -1) {
@@ -28,7 +28,7 @@
     return fetch(apiUrl(path), Object.assign({
       headers: Object.assign(
         { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
-        ATA_REST_URL.nonce ? { 'X-WP-Nonce': ATA_REST_URL.nonce } : {}
+        ENZO_REST_URL.nonce ? { 'X-WP-Nonce': ENZO_REST_URL.nonce } : {}
       ),
       credentials: 'same-origin',
     }, opts)).then(function (r) {
@@ -78,13 +78,13 @@
   };
 
   function Badge(props) {
-    return e.createElement('span', { className: 'ata-badge ' + (props.cls || 'badge-gray') }, props.label);
+    return e.createElement('span', { className: 'enzo-badge ' + (props.cls || 'badge-gray') }, props.label);
   }
   function postBadge(s) { var v = POST_STATUS[s] || [s, 'badge-gray']; return e.createElement(Badge, { label: v[0], cls: v[1] }); }
   function queueBadge(s) { var v = QUEUE_STATUS[s] || [s, 'badge-gray']; return e.createElement(Badge, { label: v[0], cls: v[1] }); }
   function levelBadge(s) { var v = LOG_LEVELS[s] || [s, 'badge-gray']; return e.createElement(Badge, { label: v[0], cls: v[1] }); }
 
-  function Loading() { return e.createElement('div', { className: 'ata-loading' }, e.createElement(c.Spinner)); }
+  function Loading() { return e.createElement('div', { className: 'enzo-loading' }, e.createElement(c.Spinner)); }
   function ErrorBox(props) {
     return e.createElement(c.Notice, { status: 'error', onRemove: props.onRemove }, props.children);
   }
@@ -98,17 +98,17 @@
       : e.createElement(ErrorBox, { onRemove: props.clear }, props.msg.text);
   }
   function Empty(props) {
-    return e.createElement('div', { className: 'ata-empty' },
+    return e.createElement('div', { className: 'enzo-empty' },
       e.createElement('span', { className: 'dashicons dashicons-' + (props.icon || 'awards') }),
       e.createElement('p', null, props.text || 'موردی یافت نشد.'));
   }
 
   function PageHeader(props) {
-    return e.createElement('div', { className: 'ata-page-header' },
+    return e.createElement('div', { className: 'enzo-page-header' },
       e.createElement('div', null,
         e.createElement('h2', null, props.title),
-        props.desc && e.createElement('p', { className: 'ata-page-desc' }, props.desc)),
-      props.actions && e.createElement('div', { className: 'ata-page-actions' }, props.actions));
+        props.desc && e.createElement('p', { className: 'enzo-page-desc' }, props.desc)),
+      props.actions && e.createElement('div', { className: 'enzo-page-actions' }, props.actions));
   }
 
   /** Standard response unwrap: throws Error(message) on success=false. */
@@ -145,7 +145,7 @@
   function Table(props) {
     var cols = props.columns;
     var rows = props.rows;
-    return e.createElement('table', { className: 'ata-table' },
+    return e.createElement('table', { className: 'enzo-table' },
       e.createElement('thead', null, e.createElement('tr', null, cols.map(function (col, i) {
         return e.createElement('th', { key: i }, col.label);
       }))),
@@ -158,10 +158,10 @@
 
   function ConfirmModal(props) {
     return e.createElement(c.Modal, {
-      title: props.title, onRequestClose: props.onCancel, className: 'ata-modal',
+      title: props.title, onRequestClose: props.onCancel, className: 'enzo-modal',
     },
       e.createElement('p', null, props.message),
-      e.createElement('div', { className: 'ata-modal-actions' },
+      e.createElement('div', { className: 'enzo-modal-actions' },
         e.createElement(c.Button, { isDestructive: true, variant: 'primary', onClick: props.onConfirm, isBusy: props.busy }, 'بله، انجام بده'),
         e.createElement(c.Button, { variant: 'tertiary', onClick: props.onCancel }, 'انصراف')));
   }
@@ -197,16 +197,16 @@
     return e.createElement('div', null,
       e.createElement(PageHeader, {
         title: 'داشبورد',
-        desc: 'نمای کلی وضعیت آتا — کانال‌ها، محتوا، صف انتشار و لاگ‌ها',
+        desc: 'نمای کلی وضعیت انزو — کانال‌ها، محتوا، صف انتشار و لاگ‌ها',
       }),
-      e.createElement('div', { className: 'ata-stat-grid' }, cards.map(function (card) {
-        return e.createElement('div', { key: card.label, className: 'ata-stat ' + card.cls },
+      e.createElement('div', { className: 'enzo-stat-grid' }, cards.map(function (card) {
+        return e.createElement('div', { key: card.label, className: 'enzo-stat ' + card.cls },
           e.createElement('span', { className: 'dashicons dashicons-' + card.icon }),
-          e.createElement('div', { className: 'ata-stat-value' }, Number(card.value).toLocaleString('fa-IR')),
-          e.createElement('div', { className: 'ata-stat-label' }, card.label),
-          card.sub && e.createElement('div', { className: 'ata-stat-sub' }, card.sub));
+          e.createElement('div', { className: 'enzo-stat-value' }, Number(card.value).toLocaleString('fa-IR')),
+          e.createElement('div', { className: 'enzo-stat-label' }, card.label),
+          card.sub && e.createElement('div', { className: 'enzo-stat-sub' }, card.sub));
       })),
-      e.createElement('h3', { className: 'ata-h3' }, 'لاگ‌های اخیر'),
+      e.createElement('h3', { className: 'enzo-h3' }, 'لاگ‌های اخیر'),
       recent.length === 0
         ? e.createElement(Empty, { icon: 'marker', text: 'لاگی ثبت نشده است.' })
         : e.createElement(Table, {
@@ -283,7 +283,7 @@
             onChange: token[1],
             help: 'قالب معتبر: ۱۳ رقم، دونقطه، حداقل ۳۰ کاراکتر. توکن فقط ذخیره می‌شود و هرگز برنمی‌گردد.',
           }),
-          e.createElement('div', { className: 'ata-btn-row' },
+          e.createElement('div', { className: 'enzo-btn-row' },
             e.createElement(c.Button, { variant: 'primary', onClick: save, isBusy: busy[0], disabled: !token[0] }, 'ذخیره و اتصال'),
             e.createElement(c.Button, { variant: 'secondary', onClick: test, isBusy: busy[0], disabled: !connected }, 'تست اتصال'),
             connected && e.createElement(c.Button, { isDestructive: true, variant: 'secondary', onClick: function () { confirmDisconnect[1](true); } }, 'قطع اتصال')))),
@@ -297,7 +297,7 @@
       e.createElement(c.Card, { style: { marginTop: '16px' } },
         e.createElement(c.CardHeader, null, e.createElement('b', null, 'راهنمای سریع')),
         e.createElement(c.CardBody, null,
-          e.createElement('ol', { className: 'ata-ol' },
+          e.createElement('ol', { className: 'enzo-ol' },
             e.createElement('li', null, 'در تلگرام به ', e.createElement('code', null, '@BotFather'), ' پیام دهید و با ', e.createElement('code', null, '/newbot'), ' یک ربات بسازید.'),
             e.createElement('li', null, 'توکن دریافتی را در فیلد بالا وارد و ذخیره کنید.'),
             e.createElement('li', null, 'ربات را ', e.createElement('b', null, 'ادمین کانال'), ' هدف کنید (دسترسی ارسال پیام داشته باشد).'),
@@ -353,7 +353,7 @@
         e.createElement(c.TextControl, { label: 'عنوان کانال', value: form[0].title, onChange: function (v) { form[1](Object.assign({}, form[0], { title: v })); } }),
         e.createElement(c.TextControl, { label: 'شناسه کاربر (اختیاری)', placeholder: '@mychannel', value: form[0].username, onChange: function (v) { form[1](Object.assign({}, form[0], { username: v })); } }),
         e.createElement(c.TextControl, { label: 'شناسه عددی کانال (chat_id)', placeholder: '-1001234567890', value: form[0].chat_id, onChange: function (v) { form[1](Object.assign({}, form[0], { chat_id: v })); }, help: 'برای کانال‌ها عدد منفی است.' }),
-        e.createElement('div', { className: 'ata-modal-actions' },
+        e.createElement('div', { className: 'enzo-modal-actions' },
           e.createElement(c.Button, { variant: 'primary', onClick: save, isBusy: busy[0], disabled: !form[0].chat_id || !form[0].title }, 'ثبت کانال'),
           e.createElement(c.Button, { variant: 'tertiary', onClick: function () { open[1](false); } }, 'انصراف'))));
   }
@@ -417,12 +417,12 @@
           : e.createElement(Table, {
               columns: [
                 { label: 'نام', render: function (r) { return e.createElement('b', null, r.name); } },
-                { label: 'Base URL', render: function (r) { return e.createElement('code', { className: 'ata-code-sm' }, (r.config && r.config.baseUrl) || '—'); } },
+                { label: 'Base URL', render: function (r) { return e.createElement('code', { className: 'enzo-code-sm' }, (r.config && r.config.baseUrl) || '—'); } },
                 { label: 'مدل', render: function (r) { return (r.config && r.config.model) || 'پیش‌فرض'; } },
                 { label: 'کلید API', render: function () { return e.createElement(Badge, { label: 'رمزنگاری‌شده', cls: 'badge-green' }); } },
                 { label: 'پیش‌فرض', render: function (r) { return r.is_default ? e.createElement(Badge, { label: 'پیش‌فرض', cls: 'badge-blue' }) : '—'; } },
                 { label: 'عملیات', render: function (r) {
-                    return e.createElement('div', { className: 'ata-btn-row' },
+                    return e.createElement('div', { className: 'enzo-btn-row' },
                       e.createElement(c.Button, { variant: 'secondary', isSmall: true, isBusy: testing[0] === r.id, onClick: function () { test(r); } }, 'تست'),
                       e.createElement(c.Button, { variant: 'tertiary', isSmall: true, onClick: function () { openEdit(r); } }, 'ویرایش'),
                       !r.is_default && e.createElement(c.Button, {
@@ -438,7 +438,7 @@
               ],
               rows: rows,
             }),
-      e.createElement('p', { className: 'ata-hint' },
+      e.createElement('p', { className: 'enzo-hint' },
         'توصیه برای هاست‌های ایران: OpenRouter یا Groq — با Base URL خودشان، دسترسی پایدارتری دارند. نمونه: ',
         e.createElement('code', null, 'https://openrouter.ai/api/v1/chat/completions')),
       edit[0] && e.createElement(c.Modal, {
@@ -470,7 +470,7 @@
           checked: edit[0].is_default,
           onChange: function (v) { edit[1](Object.assign({}, edit[0], { is_default: v })); },
         }),
-        e.createElement('div', { className: 'ata-modal-actions' },
+        e.createElement('div', { className: 'enzo-modal-actions' },
           e.createElement(c.Button, { variant: 'primary', onClick: save, isBusy: busyId[0] !== 0, disabled: !edit[0].name || !edit[0].baseUrl }, 'ذخیره'),
           e.createElement(c.Button, { variant: 'tertiary', onClick: function () { edit[1](null); } }, 'انصراف'))));
   }
@@ -504,7 +504,7 @@
         desc: 'تولید، بازنویسی، خلاصه و ترجمه محتوا — خروجی به‌صورت خودکار پیش‌نویس ذخیره می‌شود',
       }),
       e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
-      e.createElement('div', { className: 'ata-two-col' },
+      e.createElement('div', { className: 'enzo-two-col' },
         e.createElement(c.Card, null,
           e.createElement(c.CardBody, null,
             e.createElement(c.SelectControl, {
@@ -545,14 +545,14 @@
             !result[0] && !busy[0] && e.createElement(Empty, { icon: 'admin-post', text: 'نتیجه پس از اجرا اینجا نمایش داده می‌شود.' }),
             busy[0] && e.createElement(Loading),
             result[0] && e.createElement(Fragment, null,
-              e.createElement('div', { className: 'ata-btn-row', style: { marginBottom: '12px' } },
+              e.createElement('div', { className: 'enzo-btn-row', style: { marginBottom: '12px' } },
                 e.createElement(Badge, { label: 'مدل: ' + (result[0].model || '—'), cls: 'badge-blue' }),
                 result[0].tokens_used > 0 && e.createElement(Badge, { label: 'توکن: ' + result[0].tokens_used, cls: 'badge-gray' })),
               e.createElement(c.TextareaControl, {
                 rows: 12, value: result[0].content,
                 onChange: function (v) { result[1](Object.assign({}, result[0], { content: v })); },
               }),
-              e.createElement('div', { className: 'ata-btn-row', style: { marginTop: '12px' } },
+              e.createElement('div', { className: 'enzo-btn-row', style: { marginTop: '12px' } },
                 e.createElement(c.Button, {
                   variant: 'primary',
                   onClick: function () {
@@ -564,7 +564,7 @@
                   },
                 }, 'ذخیره به‌عنوان پیش‌نویس'),
                 e.createElement(c.Button, { variant: 'secondary', onClick: function () { props.go('posts'); } }, 'رفتن به پست‌ها')),
-              result[0].stored_post_id > 0 && e.createElement('p', { className: 'ata-hint' },
+              result[0].stored_post_id > 0 && e.createElement('p', { className: 'enzo-hint' },
                 'نسخه اصلی به‌صورت خودکار به‌عنوان پیش‌نویس #' + result[0].stored_post_id + ' ذخیره شده است.'))))));
   }
 
@@ -573,25 +573,25 @@
   function PreviewModal(props) {
     var q = useAsync(function () { return unwrap(api('/posts/' + props.id + '/preview', { method: 'POST', body: JSON.stringify({}) })); }, [props.id]);
     var p = q.data && q.data.preview;
-    return e.createElement(c.Modal, { title: 'پیش‌نمایش پیام تلگرام', onRequestClose: props.onClose, className: 'ata-modal ata-modal-preview' },
+    return e.createElement(c.Modal, { title: 'پیش‌نمایش پیام تلگرام', onRequestClose: props.onClose, className: 'enzo-modal enzo-modal-preview' },
       q.loading && e.createElement(Loading),
       q.error && e.createElement(ErrorBox, null, q.error),
       p && e.createElement(Fragment, null,
-        e.createElement('div', { className: 'ata-tg-preview' },
-          e.createElement('div', { className: 'ata-tg-header' },
-            e.createElement('div', { className: 'ata-tg-avatar' }, (p.channel_title || 'ک').slice(0, 1)),
+        e.createElement('div', { className: 'enzo-tg-preview' },
+          e.createElement('div', { className: 'enzo-tg-header' },
+            e.createElement('div', { className: 'enzo-tg-avatar' }, (p.channel_title || 'ک').slice(0, 1)),
             e.createElement('div', null,
-              e.createElement('div', { className: 'ata-tg-title' }, p.channel_title || 'کانال'),
-              p.channel_username && e.createElement('div', { className: 'ata-tg-user' }, p.channel_username))),
-          p.title && e.createElement('div', { className: 'ata-tg-title-text' }, p.title),
-          e.createElement('div', { className: 'ata-tg-body' }, p.text),
-          e.createElement('div', { className: 'ata-tg-footer' },
+              e.createElement('div', { className: 'enzo-tg-title' }, p.channel_title || 'کانال'),
+              p.channel_username && e.createElement('div', { className: 'enzo-tg-user' }, p.channel_username))),
+          p.title && e.createElement('div', { className: 'enzo-tg-title-text' }, p.title),
+          e.createElement('div', { className: 'enzo-tg-body' }, p.text),
+          e.createElement('div', { className: 'enzo-tg-footer' },
             e.createElement('span', null, p.char_count.toLocaleString('fa-IR') + ' کاراکتر'),
-            e.createElement('span', { className: 'ata-tg-clock' }, '⟵ زمان ارسال، سر وقت خودش'))),
-        e.createElement('p', { className: 'ata-hint' },
+            e.createElement('span', { className: 'enzo-tg-clock' }, '⟵ زمان ارسال، سر وقت خودش'))),
+        e.createElement('p', { className: 'enzo-hint' },
           'حداکثر طول پیام متنی تلگرام ۴۰۹۶ کاراکتر است.',
-          p.char_count > 4096 ? e.createElement('b', { className: 'ata-error-text' }, ' متن شما بلندتر از حد مجاز است!') : null)),
-      e.createElement('div', { className: 'ata-modal-actions' },
+          p.char_count > 4096 ? e.createElement('b', { className: 'enzo-error-text' }, ' متن شما بلندتر از حد مجاز است!') : null)),
+      e.createElement('div', { className: 'enzo-modal-actions' },
         e.createElement(c.Button, { variant: 'secondary', onClick: props.onClose }, 'بستن')));
   }
 
@@ -609,14 +609,14 @@
         .then(function () { busy[1](false); props.onSaved(); })
         .catch(function (err) { busy[1](false); props.onError(err.message); });
     }
-    return e.createElement(c.Modal, { title: 'ویرایش پست #' + v[0].id, onRequestClose: props.onClose, className: 'ata-modal' },
+    return e.createElement(c.Modal, { title: 'ویرایش پست #' + v[0].id, onRequestClose: props.onClose, className: 'enzo-modal' },
       e.createElement(c.TextControl, { label: 'عنوان', value: v[0].title, onChange: function (x) { v[1](Object.assign({}, v[0], { title: x })); } }),
       e.createElement(c.TextareaControl, { label: 'متن', rows: 10, value: v[0].body, onChange: function (x) { v[1](Object.assign({}, v[0], { body: x })); } }),
       e.createElement(c.SelectControl, {
         label: 'کانال', options: channelOptions(props.channels), value: v[0].channel_id,
         onChange: function (x) { v[1](Object.assign({}, v[0], { channel_id: parseInt(x, 10) || 0 })); },
       }),
-      e.createElement('div', { className: 'ata-modal-actions' },
+      e.createElement('div', { className: 'enzo-modal-actions' },
         e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], onClick: save }, 'ذخیره'),
         e.createElement(c.Button, { variant: 'tertiary', onClick: props.onClose }, 'انصراف')));
   }
@@ -639,14 +639,14 @@
         .catch(function (err) { busy[1](false); props.onError(err.message); });
     }
     return e.createElement(c.Modal, { title: 'زمان‌بندی انتشار پست #' + props.postId, onRequestClose: props.onClose },
-      e.createElement('p', { className: 'ata-hint' }, 'زمان به ساعت محلی سایت شماست؛ در صف به UTC تبدیل می‌شود و یک کار انتشار به صف اضافه می‌شود.'),
+      e.createElement('p', { className: 'enzo-hint' }, 'زمان به ساعت محلی سایت شماست؛ در صف به UTC تبدیل می‌شود و یک کار انتشار به صف اضافه می‌شود.'),
       e.createElement('label', { className: 'components-base-control__label' }, 'زمان انتشار'),
       e.createElement('input', {
-        type: 'datetime-local', className: 'ata-datetime',
+        type: 'datetime-local', className: 'enzo-datetime',
         value: when[0],
         onChange: function (ev) { when[1](ev.target.value); },
       }),
-      e.createElement('div', { className: 'ata-modal-actions' },
+      e.createElement('div', { className: 'enzo-modal-actions' },
         e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], onClick: save }, 'ثبت زمان‌بندی'),
         e.createElement(c.Button, { variant: 'tertiary', onClick: props.onClose }, 'انصراف')));
   }
@@ -689,7 +689,7 @@
         actions: e.createElement(c.Button, { variant: 'secondary', onClick: function () { props.go('content'); } }, 'ایجاد پست جدید'),
       }),
       e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
-      e.createElement('div', { className: 'ata-filter-row' },
+      e.createElement('div', { className: 'enzo-filter-row' },
         e.createElement(c.SelectControl, {
           label: 'وضعیت',
           options: [
@@ -711,7 +711,7 @@
                 { label: 'عنوان / متن', render: function (r) {
                     return e.createElement(Fragment, null,
                       r.title ? e.createElement('b', null, r.title) : null,
-                      e.createElement('div', { className: 'ata-cell-sub' }, (r.body || '').slice(0, 70) + ((r.body || '').length > 70 ? '…' : '')));
+                      e.createElement('div', { className: 'enzo-cell-sub' }, (r.body || '').slice(0, 70) + ((r.body || '').length > 70 ? '…' : '')));
                   } },
                 { label: 'کانال', render: function (r) { return (channelMap[r.channel_id] && channelMap[r.channel_id].title) || '—'; } },
                 { label: 'وضعیت', render: function (r) { return postBadge(r.status); } },
@@ -735,7 +735,7 @@
                     if (r.status === 'scheduled' || r.status === 'approved' || r.status === 'draft') {
                       b.push(e.createElement(c.Button, { key: 'c', isDestructive: true, variant: 'tertiary', isSmall: true, onClick: function () { confirmCancel[1](r.id); } }, 'لغو'));
                     }
-                    return e.createElement('div', { className: 'ata-btn-row' }, b);
+                    return e.createElement('div', { className: 'enzo-btn-row' }, b);
                   } },
               ],
               rows: rows,
@@ -795,7 +795,7 @@
         actions: e.createElement(c.CheckboxControl, { label: 'به‌روزرسانی خودکار (۱۵ ثانیه)', checked: auto[0], onChange: auto[1] }),
       }),
       e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
-      e.createElement('div', { className: 'ata-filter-row' },
+      e.createElement('div', { className: 'enzo-filter-row' },
         e.createElement(c.SelectControl, {
           label: 'وضعیت',
           options: [
@@ -819,7 +819,7 @@
                 { label: 'وضعیت', render: function (r) { return queueBadge(r.status); } },
                 { label: 'تلاش', render: function (r) { return r.attempts + ' از ' + r.max_attempts; } },
                 { label: 'اجرا بعدی', render: function (r) { return fmtDateTime(r.next_run_at); } },
-                { label: 'خطا', render: function (r) { return r.last_error ? e.createElement('span', { className: 'ata-error-text' }, r.last_error) : '—'; } },
+                { label: 'خطا', render: function (r) { return r.last_error ? e.createElement('span', { className: 'enzo-error-text' }, r.last_error) : '—'; } },
                 { label: 'عملیات', render: function (r) {
                     var b = [];
                     if (r.status === 'pending' || r.status === 'failed') {
@@ -831,7 +831,7 @@
                     if (r.status === 'pending' || r.status === 'failed') {
                       b.push(e.createElement(c.Button, { key: 'cancel', isDestructive: true, variant: 'tertiary', isSmall: true, isBusy: busyId[0] === r.id, onClick: function () { jobAction(r.id, 'cancel', 'کار لغو شد.'); } }, 'لغو'));
                     }
-                    return b.length ? e.createElement('div', { className: 'ata-btn-row' }, b) : '—';
+                    return b.length ? e.createElement('div', { className: 'enzo-btn-row' }, b) : '—';
                   } },
               ],
               rows: rows,
@@ -868,7 +868,7 @@
         e.createElement(c.CardBody, null,
           e.createElement('b', null, 'نکته WP-Cron:'),
           e.createElement('p', null, 'در سایت‌های کم‌بازدید، WP-Cron فقط با ورود بازدیدکننده اجرا می‌شود. برای انتشار دقیق، cron واقعی سرور را تنظیم کنید:'),
-          e.createElement('code', { className: 'ata-code-block' }, '*/2 * * * * curl -s https://YOUR-SITE.com/wp-cron.php?doing_wp_cron'))));
+          e.createElement('code', { className: 'enzo-code-block' }, '*/2 * * * * curl -s https://YOUR-SITE.com/wp-cron.php?doing_wp_cron'))));
   }
 
   // ------------------------------------------------------------------ Logs
@@ -908,7 +908,7 @@
         actions: e.createElement(c.Button, { isDestructive: true, variant: 'secondary', onClick: function () { confirmClear[1](true); } }, 'پاک کردن همه'),
       }),
       e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
-      e.createElement('div', { className: 'ata-filter-row' },
+      e.createElement('div', { className: 'enzo-filter-row' },
         e.createElement(c.SelectControl, {
           label: 'بخش',
           options: [
@@ -949,8 +949,8 @@
               ],
               rows: rows,
             }),
-      ctxRow && e.createElement('pre', { className: 'ata-json' }, JSON.stringify(ctxRow.context, null, 2)),
-      pages > 1 && e.createElement('div', { className: 'ata-pagination' },
+      ctxRow && e.createElement('pre', { className: 'enzo-json' }, JSON.stringify(ctxRow.context, null, 2)),
+      pages > 1 && e.createElement('div', { className: 'enzo-pagination' },
         e.createElement(c.Button, { variant: 'secondary', isSmall: true, disabled: page[0] <= 1, onClick: function () { page[1](page[0] - 1); } }, 'قبلی'),
         e.createElement('span', null, 'صفحه ' + page[0] + ' از ' + pages + ' — مجموع: ' + total),
         e.createElement(c.Button, { variant: 'secondary', isSmall: true, disabled: page[0] >= pages, onClick: function () { page[1](page[0] + 1); } }, 'بعدی')),
@@ -996,7 +996,7 @@
           e.createElement(c.TextControl, { label: 'عنوان (اختیاری)', value: form[0].title, onChange: function (v) { form[1](Object.assign({}, form[0], { title: v })); } }),
           e.createElement(c.TextareaControl, { label: 'متن پست', rows: 10, value: form[0].body, onChange: function (v) { form[1](Object.assign({}, form[0], { body: v })); } }),
           e.createElement(c.SelectControl, { label: 'کانال', options: channelOptions(channels.data && channels.data.channels), value: form[0].channel_id, onChange: function (v) { form[1](Object.assign({}, form[0], { channel_id: parseInt(v, 10) || 0 })); } }),
-          e.createElement('p', { className: 'ata-hint' }, 'پست ابتدا پیش‌نویس ذخیره می‌شود؛ انتشار فقط پس از تأیید یا زمان‌بندی شما انجام می‌شود.'),
+          e.createElement('p', { className: 'enzo-hint' }, 'پست ابتدا پیش‌نویس ذخیره می‌شود؛ انتشار فقط پس از تأیید یا زمان‌بندی شما انجام می‌شود.'),
           e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], disabled: !form[0].body, onClick: save }, 'ذخیره پیش‌نویس'))));
   }
 
@@ -1024,12 +1024,12 @@
                 { label: 'عنوان / متن', render: function (r) {
                     return e.createElement(Fragment, null,
                       r.title ? e.createElement('b', null, r.title) : null,
-                      e.createElement('div', { className: 'ata-cell-sub' }, (r.body || '').slice(0, 80) + ((r.body || '').length > 80 ? '…' : '')));
+                      e.createElement('div', { className: 'enzo-cell-sub' }, (r.body || '').slice(0, 80) + ((r.body || '').length > 80 ? '…' : '')));
                   } },
                 { label: 'کانال', render: function (r) { return (channelMap[r.channel_id] && channelMap[r.channel_id].title) || '—'; } },
                 { label: 'تاریخ', render: function (r) { return fmtDateTime(r.created_at); } },
                 { label: 'عملیات', render: function (r) {
-                    return e.createElement('div', { className: 'ata-btn-row' },
+                    return e.createElement('div', { className: 'enzo-btn-row' },
                       e.createElement(c.Button, { variant: 'tertiary', isSmall: true, onClick: function () { preview[1](r.id); } }, 'پیش‌نمایش'),
                       e.createElement(c.Button, { variant: 'secondary', isSmall: true, onClick: function () { props.go('posts'); } }, 'مدیریت و تأیید'));
                   } },
@@ -1051,11 +1051,11 @@
       if (q.data && q.data.values) {
         var v = q.data.values;
         form[1]({
-          ata_default_tone: v.ata_default_tone || 'friendly',
-          ata_default_language: v.ata_default_language || 'fa',
-          ata_post_template: v.ata_post_template || '',
-          ata_auto_preview: String(v.ata_auto_preview) === '1' || v.ata_auto_preview === true,
-          ata_log_retention_days: v.ata_log_retention_days || 30,
+          enzo_default_tone: v.enzo_default_tone || 'friendly',
+          enzo_default_language: v.enzo_default_language || 'fa',
+          enzo_post_template: v.enzo_post_template || '',
+          enzo_auto_preview: String(v.enzo_auto_preview) === '1' || v.enzo_auto_preview === true,
+          enzo_log_retention_days: v.enzo_log_retention_days || 30,
         });
       }
     }, [q.data]);
@@ -1065,11 +1065,11 @@
       busy[1](true);
       var f = form[0];
       unwrap(api('/settings', { method: 'POST', body: JSON.stringify({
-        ata_default_tone: f.ata_default_tone,
-        ata_default_language: f.ata_default_language,
-        ata_post_template: f.ata_post_template,
-        ata_auto_preview: f.ata_auto_preview ? '1' : '0',
-        ata_log_retention_days: parseInt(f.ata_log_retention_days, 10) || 30,
+        enzo_default_tone: f.enzo_default_tone,
+        enzo_default_language: f.enzo_default_language,
+        enzo_post_template: f.enzo_post_template,
+        enzo_auto_preview: f.enzo_auto_preview ? '1' : '0',
+        enzo_log_retention_days: parseInt(f.enzo_log_retention_days, 10) || 30,
       }) }))
         .then(function (d) { msg[1]({ type: 'success', text: 'تنظیمات ذخیره شد (' + ((d.saved || []).length) + ' مورد).' }); busy[1](false); })
         .catch(function (err) { msg[1]({ type: 'error', text: err.message }); busy[1](false); });
@@ -1091,7 +1091,7 @@
                   { label: 'خبردهی', value: 'informative' },
                   { label: 'تبلیغاتی', value: 'promotional' },
                 ],
-                value: f.ata_default_tone, onChange: function (v) { form[1](Object.assign({}, f, { ata_default_tone: v })); },
+                value: f.enzo_default_tone, onChange: function (v) { form[1](Object.assign({}, f, { enzo_default_tone: v })); },
               }),
               e.createElement(c.SelectControl, {
                 label: 'زبان خروجی',
@@ -1099,23 +1099,23 @@
                   { label: 'فارسی', value: 'fa' },
                   { label: 'انگلیسی', value: 'en' },
                 ],
-                value: f.ata_default_language, onChange: function (v) { form[1](Object.assign({}, f, { ata_default_language: v })); },
+                value: f.enzo_default_language, onChange: function (v) { form[1](Object.assign({}, f, { enzo_default_language: v })); },
               }),
               e.createElement(c.TextareaControl, {
                 label: 'قالب سفارشی پرامپت (اختیاری)',
                 help: 'اگر خالی باشد، قالب داخلی افزونه استفاده می‌شود.',
-                rows: 4, value: f.ata_post_template,
-                onChange: function (v) { form[1](Object.assign({}, f, { ata_post_template: v })); },
+                rows: 4, value: f.enzo_post_template,
+                onChange: function (v) { form[1](Object.assign({}, f, { enzo_post_template: v })); },
               }),
               e.createElement(c.CheckboxControl, {
                 label: 'نمایش پیش‌نمایش تلگرام بعد از تولید',
-                checked: !!f.ata_auto_preview,
-                onChange: function (v) { form[1](Object.assign({}, f, { ata_auto_preview: v })); },
+                checked: !!f.enzo_auto_preview,
+                onChange: function (v) { form[1](Object.assign({}, f, { enzo_auto_preview: v })); },
               }),
               e.createElement(c.TextControl, {
                 type: 'number', label: 'نگهداری لاگ‌ها (روز)',
-                value: f.ata_log_retention_days,
-                onChange: function (v) { form[1](Object.assign({}, f, { ata_log_retention_days: v })); },
+                value: f.enzo_log_retention_days,
+                onChange: function (v) { form[1](Object.assign({}, f, { enzo_log_retention_days: v })); },
               }),
               e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], onClick: save }, 'ذخیره تنظیمات'))));
   }
@@ -1128,7 +1128,7 @@
       e.createElement(c.Card, null,
         e.createElement(c.CardHeader, null, e.createElement('b', null, 'شروع سریع')),
         e.createElement(c.CardBody, null,
-          e.createElement('ol', { className: 'ata-ol' },
+          e.createElement('ol', { className: 'enzo-ol' },
             e.createElement('li', null, 'بخش «تلگرام» — توکن ربات را از @BotFather بگیرید و ذخیره کنید.'),
             e.createElement('li', null, 'بخش «کانال‌ها» — کانال مقصد را با شناسه عددی ثبت کنید و ربات را ادمین کانال کنید.'),
             e.createElement('li', null, 'بخش «AI Providerها» — یک سرویس سازگار OpenAI (مثل OpenRouter) اضافه و تست کنید.'),
@@ -1142,7 +1142,7 @@
           e.createElement('p', null, e.createElement('b', null, 'کلید API کجا ذخیره می‌شود؟'), ' رمزنگاری‌شده (XChaCha20) در دیتابیس — در پاسخ‌های REST و لاگ‌ها هرگز نمایش داده نمی‌شود.'))),
       e.createElement(c.Card, { style: { marginTop: '16px' } },
         e.createElement(c.CardBody, null,
-          e.createElement('p', null, 'نسخه: ', e.createElement('code', null, ATA_VERSION), ' — پشتیبانی: از طریق بازارچه خرید (تیکت).'))));
+          e.createElement('p', null, 'نسخه: ', e.createElement('code', null, ENZO_VERSION), ' — پشتیبانی: از طریق بازارچه خرید (تیکت).'))));
   }
 
   // ------------------------------------------------------------------ App shell
@@ -1185,26 +1185,26 @@
       default: view = e.createElement('p', null, 'بخش یافت نشد.');
     }
 
-    return e.createElement('div', { className: 'ata-admin-wrap' },
-      e.createElement('div', { className: 'ata-sidebar' },
-        e.createElement('div', { className: 'ata-brand' },
-          e.createElement('span', { className: 'ata-brand-icon' },
+    return e.createElement('div', { className: 'enzo-admin-wrap' },
+      e.createElement('div', { className: 'enzo-sidebar' },
+        e.createElement('div', { className: 'enzo-brand' },
+          e.createElement('span', { className: 'enzo-brand-icon' },
             e.createElement('svg', { viewBox: '0 0 24 24', width: '22', height: '22', fill: 'none' },
               e.createElement('path', { d: 'M21.5 3.4 2.9 10.6c-1 .4-1 1.8.1 2.1l4.6 1.5 1.7 5.2c.3 1 1.6 1.2 2.2.4l2.5-3 4.6 3.4c.8.6 2 .2 2.2-.8l2.3-14.6c.2-1-.7-1.8-1.6-1.4z', fill: '#fff' }))),
           e.createElement('div', null,
-            e.createElement('div', { className: 'ata-brand-name' }, 'آتا'),
-            e.createElement('div', { className: 'ata-brand-sub' }, 'AI Telegram Admin'))),
+            e.createElement('div', { className: 'enzo-brand-name' }, 'انزو'),
+            e.createElement('div', { className: 'enzo-brand-sub' }, 'AI Telegram Admin'))),
         sections.map(function (s) {
           return e.createElement('button', {
             key: s[0],
-            className: 'ata-nav-btn' + (active[0] === s[0] ? ' ata-nav-active' : ''),
+            className: 'enzo-nav-btn' + (active[0] === s[0] ? ' enzo-nav-active' : ''),
             onClick: function () { go(s[0]); },
           },
             e.createElement('span', { className: 'dashicons dashicons-' + s[2] }),
             e.createElement('span', null, s[1]));
         })),
-      e.createElement('div', { className: 'ata-main' }, view));
+      e.createElement('div', { className: 'enzo-main' }, view));
   }
 
-  wp.element.render(e.createElement(App), document.getElementById('ata-admin-root'));
+  wp.element.render(e.createElement(App), document.getElementById('enzo-admin-root'));
 })(window.wp);

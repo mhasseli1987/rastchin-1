@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit test for ATA Cron Runner.
+ * Unit test for ENZO Cron Runner.
  * Tests atomic claim, job execution, retry logic via the public handle().
  */
 class TestRunner extends WP_UnitTestCase
@@ -12,26 +12,26 @@ class TestRunner extends WP_UnitTestCase
         parent::setUp();
 
         global $wpdb;
-        $wpdb->query("DELETE FROM {$wpdb->prefix}ata_queue");
-        $wpdb->query("DELETE FROM {$wpdb->prefix}ata_posts");
+        $wpdb->query("DELETE FROM {$wpdb->prefix}enzo_queue");
+        $wpdb->query("DELETE FROM {$wpdb->prefix}enzo_posts");
 
         $this->mockHttp = new MockHttpTransport();
 
-        $container = \ATA\Core\Container::instance();
+        $container = \ENZO\Core\Container::instance();
         $container->reset();
-        \ATA\Core\Plugin::instance()->registerContainer();
-        $container->bind(\ATA\Contracts\HttpClientInterface::class, fn() => $this->mockHttp);
+        \ENZO\Core\Plugin::instance()->registerContainer();
+        $container->bind(\ENZO\Contracts\HttpClientInterface::class, fn() => $this->mockHttp);
 
         // The provider requires a configured bot token.
-        (new \ATA\Security\SecretStore())->set('telegram_bot_token', '123456:TEST-TOKEN');
+        (new \ENZO\Security\SecretStore())->set('telegram_bot_token', '123456:TEST-TOKEN');
     }
 
     protected function tearDown(): void
     {
         global $wpdb;
-        $wpdb->query("DELETE FROM {$wpdb->prefix}ata_queue");
-        $wpdb->query("DELETE FROM {$wpdb->prefix}ata_posts");
-        (new \ATA\Security\SecretStore())->delete('telegram_bot_token');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}enzo_queue");
+        $wpdb->query("DELETE FROM {$wpdb->prefix}enzo_posts");
+        (new \ENZO\Security\SecretStore())->delete('telegram_bot_token');
         parent::tearDown();
     }
 
@@ -49,7 +49,7 @@ class TestRunner extends WP_UnitTestCase
             'payload'      => json_encode(['post_id' => 999]),
         ], $overrides);
         $row = array_filter($row, static fn($v) => $v !== null);
-        $wpdb->insert($wpdb->prefix . 'ata_queue', $row);
+        $wpdb->insert($wpdb->prefix . 'enzo_queue', $row);
         return (int) $wpdb->insert_id;
     }
 
@@ -57,7 +57,7 @@ class TestRunner extends WP_UnitTestCase
     {
         global $wpdb;
 
-        $postId = (new \ATA\Infrastructure\WpDb\PostRepository())->insert([
+        $postId = (new \ENZO\Infrastructure\WpDb\PostRepository())->insert([
             'title'      => 'Runner Post',
             'body'       => 'Hello channel',
             'channel_id' => -1001234567890,
@@ -71,13 +71,13 @@ class TestRunner extends WP_UnitTestCase
 
         $this->insertJob(['payload' => json_encode(['post_id' => $postId])]);
 
-        \ATA\Cron\Runner::handle();
+        \ENZO\Cron\Runner::handle();
 
-        $job = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}ata_queue", ARRAY_A);
+        $job = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}enzo_queue", ARRAY_A);
         $this->assertEquals('done', $job['status']);
         $this->assertEmpty($job['lock_token']);
 
-        $post = (new \ATA\Infrastructure\WpDb\PostRepository())->find($postId);
+        $post = (new \ENZO\Infrastructure\WpDb\PostRepository())->find($postId);
         $this->assertEquals('published', $post['status']);
 
         // Telegram must have received exactly one sendMessage (no photo → no sendPhoto).
@@ -86,7 +86,7 @@ class TestRunner extends WP_UnitTestCase
 
     public function test_no_pending_jobs_means_no_claim(): void
     {
-        \ATA\Cron\Runner::handle();
+        \ENZO\Cron\Runner::handle();
         $this->assertSame(0, count($this->mockHttp->getRequests()));
     }
 }
