@@ -1,0 +1,307 @@
+<!doctype html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>آتا — تولید و انتشار هوشمند محتوای تلگرام از وردپرس | دموی آنلاین</title>
+<meta name="description" content="آتا (ATA): افزونه وردپرس تولید محتوا با هوش مصنوعی، تأیید انسانی، زمان‌بندی و صف انتشار اتمیک برای کانال تلگرام — تمام‌فارسی و راست‌چین.">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Vazirmatn', Tahoma, sans-serif; background:#f0f2f5; color:#0f2a43; line-height:1.9; }
+  .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+
+  /* nav */
+  nav { position:sticky; top:0; z-index:50; background:rgba(11,31,51,.92); backdrop-filter:blur(8px); color:#fff; }
+  nav .container { display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand-mini { display:flex; align-items:center; gap:10px; font-weight:900; font-size:20px; }
+  .logo-sm { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#14b8a6,#0e7490);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(20,184,166,.4); }
+  nav a { color:#cbd5e1; text-decoration:none; font-size:14px; margin-right:22px; }
+  nav a:hover { color:#fff; }
+
+  /* hero */
+  .hero { background:linear-gradient(135deg,#0b1f33 0%,#12314d 55%,#0d3b4f 100%); color:#fff; padding:72px 0 84px; position:relative; overflow:hidden; }
+  .hero::after { content:''; position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+    background-size:44px 44px; }
+  .hero .container { position:relative; z-index:1; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; }
+  .hero h1 { font-size:40px; font-weight:900; line-height:1.6; }
+  .hero h1 .accent { color:#2dd4bf; }
+  .hero p.lead { color:#b8c8d8; font-size:17px; margin:18px 0 28px; }
+  .cta-row { display:flex; gap:14px; flex-wrap:wrap; }
+  .btn { display:inline-block; padding:13px 30px; border-radius:12px; text-decoration:none; font-weight:700; font-size:16px; transition:.2s; }
+  .btn-primary { background:linear-gradient(135deg,#14b8a6,#0d9488); color:#fff; box-shadow:0 8px 24px rgba(20,184,166,.35); }
+  .btn-primary:hover { transform:translateY(-2px); }
+  .btn-ghost { border:1px solid rgba(255,255,255,.3); color:#fff; }
+  .btn-ghost:hover { background:rgba(255,255,255,.08); }
+  .hero-cover { width:100%; border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.15); }
+
+  /* sections */
+  section { padding:64px 0; }
+  h2.title { font-size:30px; font-weight:900; text-align:center; }
+  p.subtitle { text-align:center; color:#64748b; margin-top:8px; margin-bottom:40px; }
+
+  .features { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:18px; }
+  .feature { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; box-shadow:0 1px 3px rgba(15,42,67,.05); }
+  .feature .icon { font-size:30px; margin-bottom:10px; }
+  .feature h3 { font-size:17px; margin-bottom:6px; }
+  .feature p { font-size:14px; color:#64748b; }
+
+  /* gallery */
+  .gallery { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .gallery figure { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(15,42,67,.06); }
+  .gallery img { width:100%; display:block; }
+  .gallery figcaption { padding:12px 16px; font-size:13.5px; color:#475569; border-top:1px solid #f1f5f9; font-weight:600; }
+
+  /* demo section */
+  .demo-wrap { background:#0b1f33; color:#fff; }
+  .demo-note { text-align:center; color:#fbbf24; background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.3);
+    border-radius:10px; padding:10px 18px; font-size:13.5px; max-width:640px; margin:0 auto 28px; }
+  .demo-app { max-width:980px; margin:0 auto; background:#fff; border-radius:16px; overflow:hidden; display:flex; min-height:540px; direction:rtl; box-shadow:0 24px 60px rgba(0,0,0,.4); }
+  .demo-side { width:210px; background:linear-gradient(180deg,#12314d,#0d2338); padding:0; color:#e6eef6; flex-shrink:0; }
+  .demo-side .brand { display:flex; align-items:center; gap:10px; padding:16px; border-bottom:1px solid rgba(255,255,255,.08); font-weight:800; font-size:16px; }
+  .demo-side .brand span.mini { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,#14b8a6,#0e7490); display:flex; align-items:center; justify-content:center; }
+  .demo-side button { display:flex; align-items:center; gap:8px; width:100%; padding:10px 16px; background:none; border:none;
+    border-right:3px solid transparent; color:#b8c8d8; font-family:inherit; font-size:13.5px; text-align:right; cursor:pointer; }
+  .demo-side button:hover { background:rgba(255,255,255,.06); color:#fff; }
+  .demo-side button.on { background:rgba(20,184,166,.15); border-right-color:#14b8a6; color:#fff; font-weight:700; }
+  .demo-main { flex:1; padding:22px; background:#f0f2f5; color:#0f2a43; overflow-y:auto; max-height:540px; }
+  .demo-main h4 { font-size:18px; margin-bottom:4px; }
+  .demo-main .desc { color:#64748b; font-size:12.5px; margin-bottom:16px; }
+  .d-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+  .d-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
+  .d-card .v { font-size:22px; font-weight:900; }
+  .d-card .l { font-size:11.5px; color:#64748b; }
+  table.d-tbl { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; font-size:12.5px; }
+  .d-tbl th { background:#f8fafc; text-align:right; padding:8px 10px; font-size:11.5px; color:#475569; }
+  .d-tbl td { padding:8px 10px; border-bottom:1px solid #f1f5f9; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:10.5px; font-weight:700; }
+  .b-green { background:#dcfce7; color:#15803d; } .b-blue { background:#dbeafe; color:#1d4ed8; }
+  .b-purple { background:#ede9fe; color:#6d28d9; } .b-gray { background:#f1f5f9; color:#475569; }
+  .b-red { background:#fee2e2; color:#b91c1c; } .b-yellow { background:#fef9c3; color:#a16207; }
+  .d-btn { padding:4px 12px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; font-family:inherit; font-size:11.5px; cursor:pointer; color:#334155; }
+  .d-btn:hover { background:#f8fafc; }
+  .d-form { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:18px; max-width:420px; }
+  .d-form label { display:block; font-size:12px; color:#475569; margin:10px 0 4px; }
+  .d-form input, .d-form textarea, .d-form select { width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-family:inherit; font-size:13px; }
+  .d-form .btn { background:linear-gradient(135deg,#14b8a6,#0d9488); color:#fff; border:none; padding:9px 22px; border-radius:8px; font-family:inherit; font-weight:700; cursor:pointer; margin-top:14px; }
+  .tg-card { max-width:420px; background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 2px 10px rgba(15,42,67,.08); }
+  .tg-head { display:flex; align-items:center; gap:10px; background:#517da2; color:#fff; padding:10px 14px; }
+  .tg-av { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-weight:800; }
+  .tg-body { padding:10px 14px 14px; font-size:13.5px; white-space:pre-wrap; }
+  .tg-foot { display:flex; justify-content:space-between; padding:8px 14px; background:#f8fafc; color:#94a3b8; font-size:11px; }
+
+  /* faq */
+  .faq { max-width:760px; margin:0 auto; }
+  details { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px 20px; margin-bottom:12px; }
+  details summary { font-weight:700; cursor:pointer; font-size:15px; }
+  details p { color:#475569; font-size:14px; margin-top:10px; }
+
+  /* cta */
+  .cta { background:linear-gradient(135deg,#12314d,#0d3b4f); color:#fff; text-align:center; padding:64px 0; }
+  .cta h2 { font-size:28px; font-weight:900; margin-bottom:10px; }
+  .cta p { color:#b8c8d8; margin-bottom:26px; }
+
+  footer { background:#081827; color:#64748b; text-align:center; padding:22px; font-size:13px; }
+  footer a { color:#2dd4bf; text-decoration:none; }
+
+  @media (max-width: 860px) {
+    .hero .container { grid-template-columns:1fr; }
+    .gallery { grid-template-columns:1fr; }
+    .demo-app { flex-direction:column; }
+    .demo-side { width:100%; display:flex; flex-wrap:wrap; }
+    .demo-side .brand { width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="brand-mini">
+      <span class="logo-sm"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M21.5 3.4 2.9 10.6c-1 .4-1 1.8.1 2.1l4.6 1.5 1.7 5.2c.3 1 1.6 1.2 2.2.4l2.5-3 4.6 3.4c.8.6 2 .2 2.2-.8l2.3-14.6c.2-1-.7-1.8-1.6-1.4z" fill="#fff"/></svg></span>
+      آتا
+    </div>
+    <div>
+      <a href="#features">قابلیت‌ها</a>
+      <a href="#shots">تصاویر</a>
+      <a href="#demo">تست آنلاین</a>
+      <a href="#faq">سوالات</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div>
+      <h1>محتوای کانال تلگرام‌ات را<br>به <span class="accent">هوش مصنوعی</span> بسپار،<br>تأیید نهایی با خودت</h1>
+      <p class="lead">آتا یک افزونه وردپرس است: با هر سرویس AI سازگار OpenAI محتوا تولید، بازنویسی، خلاصه و ترجمه می‌کند؛ پیش‌نمایش را به تأیید تو می‌گذارد و سر وقتِ مقرر با صف انتشار اتمیک در کانال منتشر می‌کند. تمام‌فارسی و راست‌چین.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#demo">🚀 تست آنلاین بدون نصب</a>
+        <a class="btn btn-ghost" href="#shots">مشاهده تصاویر</a>
+      </div>
+    </div>
+    <img class="hero-cover" src="shots/cover.jpg" alt="کاور آتا">
+  </div>
+</header>
+
+<section id="features">
+  <div class="container">
+    <h2 class="title">چرا آتا؟</h2>
+    <p class="subtitle">همه‌چیز داخل پیشخوان وردپرس — بدون خروج از سایت</p>
+    <div class="features">
+      <div class="feature"><div class="icon">🤖</div><h3>۶ عملیات هوش مصنوعی</h3><p>تولید محتوا، بازنویسی، خلاصه‌سازی، ترجمه، تیتر و کپشن — با هر سرویس سازگار OpenAI: OpenAI، OpenRouter، Groq و…</p></div>
+      <div class="feature"><div class="icon">👀</div><h3>تأیید انسانی الزامی</h3><p>پیش‌نمایش تلگرامیِ واقعی قبل از انتشار؛ ویرایش مستقیم متن و تنها با تأیید تو مرحله بعد.</p></div>
+      <div class="feature"><div class="icon">⏱</div><h3>زمان‌بندی و صف اتمیک</h3><p>صف انتشار با قفل اتمیک و retry هوشمند — بدون انتشار تکراری حتی اگر سرور وسط کار بیفتد.</p></div>
+      <div class="feature"><div class="icon">🖼</div><h3>عکس + کپشن در یک پیام</h3><p>ارسال تصویر شاخص همراه متن در یک پیام تلگرام.</p></div>
+      <div class="feature"><div class="icon">🔒</div><h3>امنیت سخت‌گیرانه</h3><p>توکن و کلیدها با XChaCha20-Poly1305 رمزنگاری می‌شوند؛ SSRF Gate روی همه ترافیک خروجی؛ لاگ‌ها بدون مقادیر حساس.</p></div>
+      <div class="feature"><div class="icon">🇮🇷</div><h3>تمام‌فارسی و راست‌چین</h3><p>رابط مدیریت کامل فارسی؛ تاریخ شمسی؛ مستندات فارسی؛ نصب در ۵ دقیقه.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="shots" style="background:#fff;">
+  <div class="container">
+    <h2 class="title">یک نگاه به پیشخوان</h2>
+    <p class="subtitle">اسکرین‌شات‌های واقعی محصول (نسخه ۱.۱.۰)</p>
+    <div class="gallery">
+      <figure><img src="shots/01-dashboard.jpg" alt="داشبورد" loading="lazy"><figcaption>داشبورد: نمای کلی کانال‌ها، پست‌ها، صف و لاگ‌ها</figcaption></figure>
+      <figure><img src="shots/02-telegram.jpg" alt="اتصال تلگرام" loading="lazy"><figcaption>اتصال ربات تلگرام با اعتبارسنجی و تست اتصال</figcaption></figure>
+      <figure><img src="shots/03-ai.jpg" alt="سرویس‌های AI" loading="lazy"><figcaption>هر سرویس سازگار OpenAI — کلیدها رمزنگاری‌شده ذخیره می‌شوند</figcaption></figure>
+      <figure><img src="shots/04-generate.jpg" alt="تولید با AI" loading="lazy"><figcaption>تولید/بازنویسی/خلاصه/ترجمه با ویرایش مستقیم خروجی</figcaption></figure>
+      <figure><img src="shots/05-posts.jpg" alt="پست‌ها" loading="lazy"><figcaption>گردش کار: پیش‌نویس ← تأیید شما ← زمان‌بندی یا انتشار فوری</figcaption></figure>
+      <figure><img src="shots/06-queue.jpg" alt="صف انتشار" loading="lazy"><figcaption>صف اتمیک با اجرای دستی، تلاش مجدد و لغو</figcaption></figure>
+      <figure><img src="shots/08-preview.jpg" alt="پیش‌نمایش تلگرام" loading="lazy"><figcaption>پیش‌نمایش پیام تلگرام + هشدار سقف ۴۰۹۶ کاراکتر</figcaption></figure>
+      <figure><img src="shots/07-workflow.jpg" alt="گردش کار" loading="lazy"><figcaption>گردش کار ۴ مرحله‌ای — هیچ‌چیز بدون تأیید شما منتشر نمی‌شود</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="demo" class="demo-wrap">
+  <div class="container">
+    <h2 class="title" style="color:#fff">تست آنلاین</h2>
+    <p class="subtitle" style="color:#b8c8d8">نسخه نمایشی پنل مدیریت — همین‌جا کلیک کن و ور برو</p>
+    <div class="demo-note">⚠️ این دمو شبیه‌سازی‌شده و بدون اتصال واقعی به تلگرام/AI است؛ داده‌ها نمایشی‌اند. محصول اصلی داخل پیشخوان وردپرس شما اجرا می‌شود.</div>
+
+    <div class="demo-app">
+      <div class="demo-side">
+        <div class="brand"><span class="mini">✈</span> آتا</div>
+        <button class="on" data-view="dash">📊 داشبورد</button>
+        <button data-view="gen">🤖 تولید با AI</button>
+        <button data-view="posts">📋 پست‌ها</button>
+        <button data-view="queue">⏱ صف انتشار</button>
+        <button data-view="tg">✈ تلگرام</button>
+      </div>
+      <div class="demo-main" id="demoMain"></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <h2 class="title">سوال‌های پرتکرار</h2>
+    <p class="subtitle"></p>
+    <div class="faq">
+      <details open><summary>برای تولید محتوا به چه سرویسی نیاز دارم؟</summary><p>هر سرویس سازگار با OpenAI: API رسمی OpenAI، OpenRouter یا Groq (برای دسترسی پایدار از هاست‌های ایران توصیه می‌شود). هزینه مصرف AI مستقیماً با سرویس‌دهنده خودتان تسویه می‌شود.</p></details>
+      <details><summary>آیا خودش بدون اجازه من پست منتشر می‌کند؟</summary><p>خیر. گردش کار آتا عمداً بر تأیید انسانی استوار است: خروجی AI پیش‌نویس ذخیره می‌شود و تنها پس از تأیید یا زمان‌بندیِ شما منتشر می‌گردد.</p></details>
+      <details><summary>اگر سرور موقع انتشار قطع شود چه می‌شود؟</summary><p>صف انتشار اتمیک است: هر کار با قفل و TTL اجرا می‌شود و در صورت خطا با فاصله نمایی تا ۵ بار تلاش می‌کند. انتشار تکراری رخ نمی‌دهد.</p></details>
+      <details><summary>توکن ربات و کلید API کجا ذخیره می‌شود؟</summary><p>در دیتابیس سایت خودتان، رمزنگاری‌شده با XChaCha20-Poly1305. در هیچ پاسخ REST، فرم یا لاگی نمایش داده نمی‌شوند (به‌صورت خودکار حذف/ماسک می‌شوند).</p></details>
+      <details><summary>هاست من به تلگرام دسترسی دارد؟</summary><p>میزبان باید بتواند به api.telegram.org و endpoint سرویس AI شما HTTPS خروجی بزند. اگر هاستتان محدود است، Base URL سرویس‌هایی مثل OpenRouter معمولاً در دسترس‌تر است.</p></details>
+      <details><summary>نیازمندی‌ها؟</summary><p>وردپرس ۶.۵+ (تک‌سایت)، PHP 8.1+ با اکستنشن sodium، MySQL 5.7+ / MariaDB 10.3+.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>آماده‌ای کانال تلگرامت خودکار شود؟</h2>
+    <p>نصب در ۵ دقیقه — بدون هیچ وابستگی خارجی، با حذف کامل در uninstall</p>
+    <a class="btn btn-primary" href="https://rtl-theme.com" target="_blank" rel="noopener">خرید از RTL-Theme</a>
+  </div>
+</section>
+
+<footer>آتا — AI Telegram Admin · نسخه ۱.۱.۰ · این صفحه دموی نمایشی است · <a href="https://github.com/mhasseli1987/ai-telegram-admin">مخزن پروژه</a></footer>
+
+<script>
+/* --- شبیه‌سازی دمو: داده نمایشی، بدون هیچ تماس شبکه‌ای --- */
+var CH = 'کانال رسمی سایت';
+function badge(t, c) { return '<span class="badge ' + c + '">' + t + '</span>'; }
+var V = {
+  dash: function () {
+    return '<h4>داشبورد</h4><div class="desc">نمای کلی وضعیت آتا — کانال‌ها، محتوا، صف انتشار و لاگ‌ها</div>'
+      + '<div class="d-cards">'
+      + '<div class="d-card"><div class="v">۲</div><div class="l">کانال‌های متصل</div></div>'
+      + '<div class="d-card"><div class="v">۷</div><div class="l">پست‌ها <span style="color:#94a3b8;font-size:10px">پیش‌نویس ۲ · منتشرشده ۲</span></div></div>'
+      + '<div class="d-card"><div class="v">۸</div><div class="l">کارهای صف</div></div>'
+      + '<div class="d-card"><div class="v">۱۰</div><div class="l">لاگ‌ها</div></div>'
+      + '</div><h4 style="margin-top:18px">لاگ‌های اخیر</h4>'
+      + '<table class="d-tbl"><tr><th>سطح</th><th>بخش</th><th>پیام</th><th>زمان</th></tr>'
+      + '<tr><td>' + badge('اطلاعات', 'b-blue') + '</td><td><code>telegram</code></td><td>Telegram bot connected</td><td>۱۴۰۵/۰۷/۱۹ ۱۴:۵۹</td></tr>'
+      + '<tr><td>' + badge('اطلاعات', 'b-blue') + '</td><td><code>publish</code></td><td>Post published to channel</td><td>۱۴۰۵/۰۷/۱۹ ۱۴:۳۳</td></tr>'
+      + '<tr><td>' + badge('هشدار', 'b-yellow') + '</td><td><code>publish</code></td><td>Telegram sendPhoto retry scheduled</td><td>۱۴۰۵/۰۷/۱۹ ۱۴:۱۰</td></tr>'
+      + '<tr><td>' + badge('خطا', 'b-red') + '</td><td><code>publish</code></td><td>Telegram error 403: bot is not a member…</td><td>۱۴۰۵/۰۷/۱۹ ۱۳:۲۶</td></tr>'
+      + '</table>';
+  },
+  gen: function () {
+    return '<h4>AI تولید</h4><div class="desc">تولید، بازنویسی، خلاصه و ترجمه محتوا — خروجی به‌صورت خودکار پیش‌نویس ذخیره می‌شود (در دمو: شبیه‌سازی)</div>'
+      + '<div class="d-form">'
+      + '<label>عملیات</label><select id="gOp"><option>تولید محتوا</option><option>بازنویسی</option><option>خلاصه‌سازی</option><option>ترجمه</option><option>تیتر</option><option>کپشن</option></select>'
+      + '<label>موضوع یا ورودی</label><textarea id="gIn" rows="3" placeholder="مثال: معرفی تخفیف ۲۰٪ محصولات پاییزی برای کانال فروشگاه"></textarea>'
+      + '<button class="btn" onclick="demoGenerate()">اجرا با AI</button>'
+      + '</div><div id="gOut" style="margin-top:16px"></div>';
+  },
+  posts: function () {
+    return '<h4>پست‌ها</h4><div class="desc">گردش کار: پیش‌نویس ← تأیید شما ← زمان‌بندی یا انتشار فوری</div>'
+      + '<table class="d-tbl"><tr><th>#</th><th>عنوان / متن</th><th>کانال</th><th>وضعیت</th><th>عملیات</th></tr>'
+      + '<tr><td><code>۷</code></td><td><b>معرفی نسخه جدید قالب فروشگاهی</b><br><span style="color:#64748b">۱۰ قابلیت تازه…</span></td><td>کانال رسمی</td><td>' + badge('پیش‌نویس', 'b-gray') + '</td><td><button class="d-btn" onclick="alert(\'در محصول واقعی: پیش‌نمایش تلگرامی + ویرایش\')">پیش‌نمایش</button></td></tr>'
+      + '<tr><td><code>۶</code></td><td><b>مقاله جدید: هوش مصنوعی در بازاریابی محتوا</b></td><td>کانال رسمی</td><td>' + badge('پیش‌نویس', 'b-gray') + '</td><td><button class="d-btn" onclick="alert(\'در محصول واقعی: تأیید ← زمان‌بندی یا انتشار فوری\')">تأیید</button></td></tr>'
+      + '<tr><td><code>۵</code></td><td><b>آموزش بکاپ‌گیری خودکار از دیتابیس</b></td><td>کانال رسمی</td><td>' + badge('منتشرشده', 'b-green') + '</td><td>—</td></tr>'
+      + '<tr><td><code>۳</code></td><td><b>راهنمای کامل اتصال درگاه بانکی جدید</b></td><td>کانال محصولات</td><td>' + badge('زمان‌بندی‌شده', 'b-purple') + '</td><td>' + badge('۱۴۰۵/۰۷/۲۰ ۲۰:۰۰', 'b-gray') + '</td></tr>'
+      + '</table>';
+  },
+  queue: function () {
+    return '<h4>صف انتشار</h4><div class="desc">صف اتمیک با قفل و تلاش مجدد نمایی — هر کار فقط یک‌بار اجرا می‌شود</div>'
+      + '<table class="d-tbl"><tr><th>#</th><th>پست</th><th>وضعیت</th><th>تلاش</th><th>اجرا بعدی</th><th>عملیات</th></tr>'
+      + '<tr><td><code>۱۶</code></td><td>#۳</td><td>' + badge('ناموفق', 'b-red') + '</td><td>۵ از ۵</td><td>—</td><td><button class="d-btn">تلاش مجدد</button></td></tr>'
+      + '<tr><td><code>۱۵</code></td><td>#۴</td><td>' + badge('انجام‌شده', 'b-green') + '</td><td>۱ از ۵</td><td>—</td><td>—</td></tr>'
+      + '<tr><td><code>۱۱</code></td><td>#۶</td><td>' + badge('در حال اجرا', 'b-blue') + '</td><td>۱ از ۵</td><td>—</td><td>—</td></tr>'
+      + '<tr><td><code>۱۰</code></td><td>#۸</td><td>' + badge('در انتظار', 'b-gray') + '</td><td>۰ از ۵</td><td>۱۴۰۵/۰۷/۲۰ ۱۵:۴۵</td><td><button class="d-btn">اجرای الان</button></td></tr>'
+      + '</table>';
+  },
+  tg: function () {
+    return '<h4>تلگرام</h4><div class="desc">اتصال ربات تلگرام — توکن با رمزنگاری XChaCha20 ذخیره می‌شود (در دمو هیچ توکنی ذخیره نمی‌شود)</div>'
+      + '<div style="margin-bottom:14px">' + badge('✔ ربات متصل است: @mysite_admin_bot', 'b-green') + '</div>'
+      + '<div class="d-form"><label>Bot Token (از @BotFather)</label><input type="password" placeholder="123456789:AAH…" value="123456789:AA••••••••••••••••••••••••" disabled>'
+      + '<div style="font-size:11px;color:#64748b;margin-top:6px">در دمو غیرفعال است — توکن واقعی فقط روی سایت خودتان وارد می‌شود.</div></div>'
+      + '<div class="tg-card" style="margin-top:16px"><div class="tg-head"><div class="tg-av">ک</div><div><div style="font-weight:800;font-size:13px">' + CH + '</div><div style="font-size:11px;opacity:.8;direction:ltr;text-align:right">@mysite_news</div></div></div>'
+      + '<div class="tg-body">🔥 معرفی نسخه جدید قالب فروشگاهی — ۱۰ قابلیت تازه\n\nاین متن نمونه برای نمایش پیش‌نمایش تلگرامی در دمو است.</div>'
+      + '<div class="tg-foot"><span>زمان ارسال، سر وقت خودش</span><span>۸۸ کاراکتر</span></div></div>';
+  },
+};
+function show(id) {
+  document.querySelectorAll('.demo-side button').forEach(function (b) { b.classList.toggle('on', b.dataset.view === id); });
+  document.getElementById('demoMain').innerHTML = V[id]();
+  document.getElementById('demoMain').scrollTop = 0;
+}
+function demoGenerate() {
+  var input = document.getElementById('gIn').value.trim();
+  var op = document.getElementById('gOp').value;
+  var out = document.getElementById('gOut');
+  if (!input) { out.innerHTML = '<div class="badge b-red">متن ورودی خالی است.</div>'; return; }
+  out.innerHTML = '<div class="badge b-blue">در حال تولید…</div>';
+  setTimeout(function () {
+    out.innerHTML = '<div class="d-form"><label>خروجی شبیه‌سازی‌شده (' + op + ')</label><textarea rows="5" readonly>'
+      + '🔥 ' + input + '\n\nبه‌عنوان نمونه، این متن در نسخه واقعی توسط سرویس AI خودِ شما تولید می‌شود و همین‌جا قابل ویرایش است.'
+      + '\n\n✅ در محصول واقعی: خروجی بلافاصله به‌عنوان پیش‌نویس ذخیره و قابل تأیید/زمان‌بندی است.</textarea>'
+      + '<button class="btn" onclick="show(\'posts\')">رفتن به پست‌ها →</button></div>';
+  }, 900);
+}
+document.querySelectorAll('.demo-side button[data-view]').forEach(function (b) {
+  b.addEventListener('click', function () { show(b.dataset.view); });
+});
+show('dash');
+</script>
+</body>
+</html>
