@@ -1142,7 +1142,7 @@
           e.createElement('p', null, e.createElement('b', null, 'کلید API کجا ذخیره می‌شود؟'), ' رمزنگاری‌شده (XChaCha20) در دیتابیس — در پاسخ‌های REST و لاگ‌ها هرگز نمایش داده نمی‌شود.'))),
       e.createElement(c.Card, { style: { marginTop: '16px' } },
         e.createElement(c.CardBody, null,
-          e.createElement('p', null, 'نسخه: ', e.createElement('code', null, ENZO_VERSION), ' — پشتیبانی: از طریق بازارچه خرید (تیکت).'))));
+          e.createElement('p', null, 'نسخه: ', e.createElement('code', null, (typeof ENZO_REST_URL !== 'undefined' && ENZO_REST_URL.version) || ''), ' — پشتیبانی: از طریق بازارچه خرید (تیکت).'))));
   }
 
   // ------------------------------------------------------------------ App shell

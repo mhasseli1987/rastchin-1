@@ -82,6 +82,7 @@ class MenuProvider
             'url'   => rest_url('enzo/v1/'),
             // wp_rest nonce — without it every REST call from the SPA answers 403.
             'nonce' => wp_create_nonce('wp_rest'),
+            'version' => ENZO_VERSION,
         ]);
 
         wp_enqueue_style(
