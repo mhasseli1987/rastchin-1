@@ -29,7 +29,7 @@ class Installer
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             title varchar(255) NOT NULL,
             body longtext,
-            image_id bigint(20) DEFAULT NULL,
+            image_ids longtext DEFAULT NULL,
             channel_id bigint(20) NOT NULL,
             status varchar(32) NOT NULL DEFAULT 'draft',
             scheduled_at datetime DEFAULT NULL,

@@ -8,8 +8,12 @@ use ENZO\Logging\Logger;
 defined('ABSPATH') || exit;
 
 /**
- * Telegram & Bale Bot API adapter.
- * Supports both Telegram (api.telegram.org) and Bale (tapi.bale.ai).
+ * Telegram, Bale, It & Rubika Bot API adapter.
+ * Supports all four Iranian messaging platforms:
+ * - Telegram: api.telegram.org
+ * - Bale: tapi.bale.ai
+ * - It: api.it.ir
+ * - Rubika: api.robika.io
  * Verbs: getMe/getChat/sendMessage/sendPhoto/sendMediaGroup/editMessageText/testConnection.
  */
 class BotApiTelegramProvider implements TelegramProviderInterface
@@ -17,12 +21,16 @@ class BotApiTelegramProvider implements TelegramProviderInterface
     private HttpClientInterface $http;
     private Logger $logger;
     private string $apiBase = 'https://api.telegram.org/bot';
-    private string $platform = 'telegram'; // 'telegram' or 'bale'
+    private string $platform = 'telegram'; // 'telegram', 'bale', 'it', 'rubika'
 
-    public function __construct(HttpClientInterface $http, Logger $logger)
-    {
+    public function __construct(
+        HttpClientInterface $http,
+        Logger $logger,
+        string $initialPlatform = 'telegram'
+    ) {
         $this->http = $http;
         $this->logger = $logger;
+        $this->setPlatform($initialPlatform);
     }
 
     /** Singleton access point for dependency injection. */
@@ -35,12 +43,23 @@ class BotApiTelegramProvider implements TelegramProviderInterface
     public function setPlatform(string $platform): void
     {
         $platform = strtolower(trim($platform));
-        if ($platform === 'bale') {
-            $this->apiBase = 'https://tapi.bale.ai/bot';
-            $this->platform = 'bale';
-        } else {
-            $this->apiBase = 'https://api.telegram.org/bot';
-            $this->platform = 'telegram';
+        switch ($platform) {
+            case 'bale':
+                $this->apiBase = 'https://tapi.bale.ai/bot';
+                $this->platform = 'bale';
+                break;
+            case 'it':
+                $this->apiBase = 'https://api.it.ir/bot';
+                $this->platform = 'it';
+                break;
+            case 'rubika':
+                $this->apiBase = 'https://api.robika.io/bot';
+                $this->platform = 'rubika';
+                break;
+            default:
+                $this->apiBase = 'https://api.telegram.org/bot';
+                $this->platform = 'telegram';
+                break;
         }
     }
 

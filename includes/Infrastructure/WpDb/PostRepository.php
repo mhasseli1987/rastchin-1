@@ -29,7 +29,7 @@ class PostRepository
         $row = wp_parse_args($row, [
             'title'           => '',
             'body'            => '',
-            'image_id'        => null,
+            'image_ids'       => null,
             'channel_id'      => 0,
             'status'          => 'draft',
             'scheduled_at'    => null,
@@ -63,7 +63,7 @@ class PostRepository
     public function update(int $id, array $fields): bool
     {
         $allowed = [
-            'title', 'body', 'image_id', 'channel_id', 'status',
+            'title', 'body', 'image_ids', 'channel_id', 'status',
             'scheduled_at', 'published_at', 'attempts', 'last_error_code', 'request_id',
         ];
         $fields = array_intersect_key($fields, array_flip($allowed));

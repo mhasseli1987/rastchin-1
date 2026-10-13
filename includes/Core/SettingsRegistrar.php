@@ -13,6 +13,13 @@ class SettingsRegistrar
 {
     public static function register(SettingsRegistry $registry): void
     {
+        $registry->register('enzo_platform', [
+            'default'   => 'telegram',
+            'type'      => 'string',
+            'sanitize'  => 'sanitize_text_field',
+            'group'     => 'telegram',
+            'description' => 'Platform for bot communication (telegram or bale).',
+        ]);
         $registry->register('enzo_default_tone', [
             'default'   => 'friendly',
             'type'      => 'string',

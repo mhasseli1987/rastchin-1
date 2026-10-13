@@ -63,6 +63,8 @@ class RestApi
             [$base, '/settings', ['GET', 'POST'], 'settings'],
             [$base, '/license/activate', 'POST', 'licenseActivate'],
             [$base, '/license/deactivate', 'POST', 'licenseDeactivate'],
+            [$base, '/platform', 'POST', 'switchPlatform'],
+            [$base, '/media/library', 'GET', 'listMediaLibrary'],
         ];
 
         foreach ($routes as [$ns, $route, $methods, $cb]) {
@@ -433,7 +435,7 @@ class RestApi
         }
 
         $operation = sanitize_key((string) ($b['operation'] ?? 'generate'));
-        $allowed = ['generate', 'rewrite', 'summarize', 'title', 'caption', 'translate'];
+        $allowed = ['generate', 'rewrite', 'summarize', 'title', 'caption', 'translate', 'seo', 'hashtags'];
         if (!in_array($operation, $allowed, true)) {
             $operation = 'generate';
         }
@@ -522,22 +524,22 @@ class RestApi
         if (isset($b['channel_id'])) {
             $fields['channel_id'] = (int) $b['channel_id'];
         }
-        if (isset($b['image_id'])) {
-            $fields['image_id'] = !empty($b['image_id']) ? (int) $b['image_id'] : null;
+        if (isset($b['image_ids'])) {
+            $fields['image_ids'] = !empty($b['image_ids']) ? $b['image_ids'] : null;
         }
         if (!$fields) {
             return self::fail('هیچ فیلدی برای به‌روزرسانی ارسال نشده است.');
         }
 
         // nulls must survive update() — repository filters nulls internally,
-        // so image_id=0 → null is applied via a dedicated branch here.
-        if (array_key_exists('image_id', $fields) && $fields['image_id'] === null) {
+        // so image_ids=null is applied via a dedicated branch here.
+        if (array_key_exists('image_ids', $fields) && $fields['image_ids'] === null) {
             global $wpdb;
             $wpdb->update($wpdb->prefix . 'enzo_posts', [
-                'image_id'   => null,
+                'image_ids'   => null,
                 'updated_at' => current_time('mysql', 1),
             ], ['id' => $id]);
-            unset($fields['image_id']);
+            unset($fields['image_ids']);
         }
         if ($fields) {
             self::container()->make(PostRepository::class)->update($id, $fields);
@@ -559,7 +561,7 @@ class RestApi
             'title'      => sanitize_text_field((string) ($b['title'] ?? '')),
             'body'       => $text,
             'channel_id' => (int) ($b['channel_id'] ?? 0),
-            'image_id'   => !empty($b['image_id']) ? (int) $b['image_id'] : null,
+            'image_ids'  => !empty($b['image_ids']) ? $b['image_ids'] : null,
             'status'     => 'draft',
         ]);
 
@@ -804,6 +806,49 @@ class RestApi
         return self::ok();
     }
 
+    // ------------------------------------------------------------- Media Library
+
+    public static function listMediaLibrary(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $page = max(1, (int) $r->get_param('page'));
+        $perPage = min(100, max(1, (int) ($r->get_param('per_page') ?: 50)));
+        $offset = ($page - 1) * $perPage;
+
+        $query = [
+            'post_type'      => 'attachment',
+            'post_mime_type' => 'image',
+            'post_status'    => 'inherit',
+            'posts_per_page' => $perPage,
+            'offset'         => $offset,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ];
+
+        $images = get_posts($query);
+        $total = (int) wp_count_posts('attachment')->inherit;
+
+        $media = [];
+        foreach ($images as $img) {
+            $url = wp_get_attachment_url($img->ID);
+            if ($url) {
+                $media[] = [
+                    'id'    => (int) $img->ID,
+                    'url'   => $url,
+                    'title' => $img->post_title,
+                    'mime'  => get_post_mime_type($img->ID),
+                ];
+            }
+        }
+
+        return self::ok([
+            'media'      => $media,
+            'total'      => $total,
+            'page'       => $page,
+            'per_page'   => $perPage,
+            'total_pages'=> (int) ceil($total / $perPage),
+        ]);
+    }
+
     // ------------------------------------------------------------- Dashboard
 
     public static function getDashboard(\WP_REST_Request $r): \WP_REST_Response
@@ -900,5 +945,31 @@ class RestApi
             return self::fail($result['message'], 400, 'license_error');
         }
         return self::ok(['status' => LicenseManager::status()]);
+    }
+
+    // ------------------------------------------------------------- Platform
+    public static function switchPlatform(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $b = self::body($r);
+        $platform = sanitize_key((string) ($b['platform'] ?? ''));
+        if (!in_array($platform, ['telegram', 'bale', 'it', 'rubika'], true)) {
+            return self::fail('platform باید یکی از 'telegram'، 'bale'، 'it' یا 'rubika' باشد.', 400, 'invalid_platform');
+        }
+
+        /** @var TelegramProviderInterface $telegram */
+        $telegram = self::container()->make(TelegramProviderInterface::class);
+        $telegram->setPlatform($platform);
+
+        // Update settings
+        /** @var SettingsService $settings */
+        $settings = self::container()->make(SettingsService::class);
+        $settings->set('enzo_platform', $platform);
+
+        self::container()->make(LoggerInterface::class)->info('Platform switched', [
+            'scope' => 'platform',
+            'platform' => $platform,
+        ]);
+
+        return self::ok(['platform' => $platform]);
     }
 }

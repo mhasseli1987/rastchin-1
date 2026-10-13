@@ -159,6 +159,7 @@ class ContentService
             'title'      => (string) ($context['title'] ?? ''),
             'body'       => $content,
             'channel_id' => (int) ($context['channel_id'] ?? 0),
+            'image_ids'  => $context['image_ids'] ?? null,
             'status'     => 'draft',
         ]);
 

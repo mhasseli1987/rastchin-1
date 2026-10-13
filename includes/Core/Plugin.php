@@ -87,10 +87,11 @@ class Plugin
         $container->singleton(AIProviderInterface::class, fn($c) => $c->make(AIProviderRegistry::class)->default());
 
         // Telegram provider.
-        $container->singleton(TelegramProviderInterface::class, fn($c) => 
+        $container->singleton(TelegramProviderInterface::class, fn($c) =>
             new BotApiTelegramProvider(
                 $c->make(HttpClientInterface::class),
-                $c->make(LoggerInterface::class)
+                $c->make(LoggerInterface::class),
+                $c->make(SettingsService::class)->get('enzo_platform')
             )
         );
 

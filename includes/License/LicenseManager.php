@@ -18,10 +18,54 @@ class LicenseManager
     public const DEFAULT_UPDATE_CHECK_URL = 'https://rtl-theme.com/update-check.php';
     public const PRODUCT = 'enzo';
 
+    /** Update-check endpoint — overridable for self-hosted license servers. */
+    public static function updateCheckUrl(): string
+    {
+        return (string) apply_filters('enzo_license_update_check_url', self::DEFAULT_UPDATE_CHECK_URL);
+    }
+
     /** Verification endpoint — overridable for self-hosted license servers. */
     public static function verifyUrl(): string
     {
         return (string) apply_filters('enzo_license_verify_url', self::DEFAULT_VERIFY_URL);
+    }
+
+    /** Maximum domain change attempts before enforcing domain binding. */
+    private const MAX_DOMAIN_CHANGES = 5;
+
+    /** Track domain change attempts in the stored license data. */
+    public static function trackDomainChange(): void
+    {
+        $lic = get_option(self::OPTION_KEY, []);
+        if (!is_array($lic)) {
+            $lic = [];
+        }
+
+        $lic['domain_changes'] = ($lic['domain_changes'] ?? 0) + 1;
+        update_option(self::OPTION_KEY, $lic, false);
+    }
+
+    /** Check if domain change limit has been exceeded. */
+    public static function domainChangeLimitExceeded(): bool
+    {
+        $lic = get_option(self::OPTION_KEY, []);
+        if (!is_array($lic)) {
+            return false;
+        }
+
+        return ($lic['domain_changes'] ?? 0) >= self::MAX_DOMAIN_CHANGES;
+    }
+
+    /** Reset domain change counter (for testing or manual intervention). */
+    public static function resetDomainChanges(): void
+    {
+        $lic = get_option(self::OPTION_KEY, []);
+        if (!is_array($lic)) {
+            return;
+        }
+
+        unset($lic['domain_changes']);
+        update_option(self::OPTION_KEY, $lic, false);
     }
 
     /** Update-check endpoint — overridable for self-hosted license servers. */
@@ -115,13 +159,23 @@ class LicenseManager
             return ['success' => false, 'message' => 'کلید لایسنس نامعتبر است.' . $extra];
         }
 
-        update_option(self::OPTION_KEY, [
+        $savedDomain = (string) ($data['domain'] ?? self::currentDomain());
+        $stored = [
             'key'       => $key,
             'activated' => true,
             'expires'   => (string) ($data['expires'] ?? ''),
             'product'   => (string) ($data['product'] ?? self::PRODUCT),
-            'domain'    => (string) ($data['domain'] ?? self::currentDomain()),
-        ], false);
+            'domain'    => $savedDomain,
+            'domain_changes' => 0,
+        ];
+
+        // Track domain change attempts: each activation counts as a domain change attempt
+        $lic = get_option(self::OPTION_KEY, []);
+        if (is_array($lic) && isset($lic['domain']) && $lic['domain'] !== $savedDomain) {
+            $stored['domain_changes'] = ($lic['domain_changes'] ?? 0) + 1;
+        }
+
+        update_option(self::OPTION_KEY, $stored, false);
 
         return ['success' => true, 'message' => 'لایسنس فعال شد.'];
     }

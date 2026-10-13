@@ -304,6 +304,122 @@
             e.createElement('li', null, 'شناسه عددی کانال (مثل ', e.createElement('code', null, '-100…'), ') را در بخش «کانال‌ها» ثبت کنید.')))));
   }
 
+  // ------------------------------------------------------------------ Platform
+
+  function Platform() {
+    var status = useAsync(function () { return unwrap(api('/telegram/status')); }, []);
+    var busy = useState(false);
+    var msg = useState(null);
+    var platform = useState('telegram');
+
+    useEffect(function () {
+      if (status.data && status.data.connected) {
+        // If bot is connected, we need to check current platform from Telegram provider
+        // For now, we'll use the platform setting
+        var settings = useAsync(function () { return unwrap(api('/settings')); }, []);
+        if (settings.data && settings.data.values && settings.data.values.enzo_platform) {
+          platform[1](settings.data.values.enzo_platform);
+        }
+      }
+    }, [status.data]);
+
+    function switchPlatform() {
+      msg[1](null);
+      busy[1](true);
+      unwrap(api('/platform', {
+        method: 'POST',
+        body: JSON.stringify({ platform: platform[0] })
+      }))
+        .then(function () {
+          msg[1]({ type: 'success', text: 'پلتفرم با موفقیت تغییر کرد.' });
+          busy[1](false);
+        })
+        .catch(function (err) { msg[1]({ type: 'error', text: err.message }); busy[1](false); });
+    }
+
+    return e.createElement('div', null,
+      e.createElement(PageHeader, {
+        title: 'پلتفرم',
+        desc: 'تلگرام و بله (Bale) — پلتفرم داخلی ایران — هر دو با یک API یکسان کار می‌کنند. برای استفاده از بله، پلتفرم را تغییر دهید و توکن مورد نیاز را دریافت کنید.',
+      }),
+      e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
+      e.createElement('div', { className: 'enzo-platform-selector' },
+        e.createElement(c.Card, null,
+          e.createElement(c.CardHeader, null, e.createElement('b', null, 'پلتفرم فعلی')),
+          e.createElement(c.CardBody, null,
+            e.createElement('p', null, 'پلتفرم انتخاب‌شده فعلی: '),
+            e.createElement('div', { className: 'enzo-platform-info' },
+              e.createElement('span', { className: 'enzo-platform-badge ' + (
+                platform[0] === 'telegram' ? 'enzo-platform-telegram' :
+                platform[0] === 'bale' ? 'enzo-platform-bale' :
+                platform[0] === 'it' ? 'enzo-platform-it' : 'enzo-platform-rubika'
+              ) }, (
+                platform[0] === 'telegram' ? 'تلگرام' :
+                platform[0] === 'bale' ? 'بله' :
+                platform[0] === 'it' ? 'ایت' : 'روبیکا'
+              )),
+              e.createElement('span', { className: 'enzo-platform-description' }, (
+                platform[0] === 'telegram' ? 'بوت تلگرام (https://api.telegram.org)' :
+                platform[0] === 'bale' ? 'بله (https://tapi.bale.ai)' :
+                platform[0] === 'it' ? 'ایت (https://api.it.ir)' : 'روبیکا (https://api.robika.io)'
+              ))),
+            e.createElement('div', { className: 'enzo-platform-options' },
+              e.createElement(c.Button, {
+                variant: platform[0] === 'telegram' ? 'primary' : 'secondary',
+                onClick: function () { platform[1]('telegram'); },
+                disabled: busy[0],
+                className: 'enzo-platform-btn',
+              }, 'تلگرام'),
+              e.createElement(c.Button, {
+                variant: platform[0] === 'bale' ? 'primary' : 'secondary',
+                onClick: function () { platform[1]('bale'); },
+                disabled: busy[0],
+                className: 'enzo-platform-btn',
+              }, 'بله'),
+              e.createElement(c.Button, {
+                variant: platform[0] === 'it' ? 'primary' : 'secondary',
+                onClick: function () { platform[1]('it'); },
+                disabled: busy[0],
+                className: 'enzo-platform-btn',
+              }, 'ایت'),
+              e.createElement(c.Button, {
+                variant: platform[0] === 'rubika' ? 'primary' : 'secondary',
+                onClick: function () { platform[1]('rubika'); },
+                disabled: busy[0],
+                className: 'enzo-platform-btn',
+              }, 'روبیکا')),
+            e.createElement('div', { className: 'enzo-platform-action' },
+              e.createElement(c.Button, {
+                variant: 'primary',
+                isBusy: busy[0],
+                disabled: platform[0] === (status.data ? (status.data.connected ? 'telegram' : 'bale') : platform[0]) || busy[0],
+                onClick: switchPlatform,
+              }, 'اعمال تغییرات پلتفرم')),
+            e.createElement('p', { className: 'enzo-hint' },
+              'تغییر پلتفرم دونس از سیستم مجاز نیست — فقط زمانی مجاز است که ربات فعال نباشد. بعد از تغییر پلتفرم، توکن جدید را دریافت و ربات را دوباره اتصال دهید.')),
+          )),
+        e.createElement(c.Card, { style: { marginTop: '16px' } },
+          e.createElement(c.CardHeader, null, e.createElement('b', null, 'راهنمای سریع')),
+          e.createElement(c.CardBody, null,
+            e.createElement('ol', { className: 'enzo-ol' },
+              e.createElement('li', null, 'برای استفاده از تلگرام: ',
+                e.createElement('code', null, '@BotFather'),
+                ' را باز کنید و ربات تلگرام بسازید.'),
+              e.createElement('li', null, 'برای استفاده از بله: ',
+                e.createElement('code', null, '@BaleBot'),
+                ' را باز کنید و ربات بله بسازید.'),
+              e.createElement('li', null, 'برای استفاده از ایتا: ',
+                e.createElement('code', null, '@ItBot'),
+                ' را باز کنید و ربات ایتا بسازید.'),
+              e.createElement('li', null, 'برای استفاده از روبیکا: ',
+                e.createElement('code', null, '@RubikaBot'),
+                ' را باز کنید و ربات روبیکا بسازید.'),
+              e.createElement('li', null, 'با ربات مورد نظر ادمین کانال شوید و شناسه کانال را ثبت کنید.'))),
+        )),
+      e.createElement('div', { className: 'enzo-alert enzo-alert-info' },
+        e.createElement('b', null, 'توجه:'), ' پلتفرم فقط در زمانی قابل تغییر است که ربات فعال نباشد. ربات را قطع کنید قبل از تغییر پلتفرم.'));
+  }
+
   // ------------------------------------------------------------------ Channels
 
   function Channels() {
@@ -481,7 +597,7 @@
     var channels = useAsync(function () { return unwrap(api('/channels')); }, []);
     var busy = useState(false);
     var msg = useState(null);
-    var form = useState({ operation: 'generate', input: '', title: '', channel_id: 0 });
+    var form = useState({ operation: 'generate', input: '', title: '', channel_id: 0, image_ids: [] });
     var result = useState(null);
 
     function run() {
@@ -493,6 +609,7 @@
         input: form[0].input,
         title: form[0].title,
         channel_id: form[0].channel_id || 0,
+        image_ids: form[0].image_ids,
       }) }))
         .then(function (d) { result[1](d); busy[1](false); })
         .catch(function (err) { msg[1]({ type: 'error', text: err.message }); busy[1](false); });
@@ -516,13 +633,15 @@
                 { label: 'ترجمه', value: 'translate' },
                 { label: 'عنوان‌سازی', value: 'title' },
                 { label: 'کپشن', value: 'caption' },
+                { label: 'سئو', value: 'seo' },
+                { label: 'هشتگ', value: 'hashtags' },
               ],
               value: form[0].operation,
               onChange: function (v) { form[1](Object.assign({}, form[0], { operation: v })); },
             }),
             e.createElement(c.TextareaControl, {
-              label: form[0].operation === 'translate' ? 'متن برای ترجمه' : 'موضوع یا ورودی',
-              placeholder: 'مثال: معرفی تخفیف ۲۰٪ محصولات پاییزی برای کانال فروشگاه',
+              label: form[0].operation === 'translate' ? 'متن برای ترجمه' : (form[0].operation === 'seo' ? 'عبارت کلیدی یا موضوع سئو' : (form[0].operation === 'hashtags' ? 'موضوع یا کپشن برای تولید هشتگ' : 'موضوع یا ورودی')),
+              placeholder: form[0].operation === 'seo' ? 'مثال: بهترین رستوران‌های محلی در گرگان' : (form[0].operation === 'hashtags' ? 'مثال: رستوران، غذای محلی، گرگان' : 'مثال: معرفی تخفیف ۲۰٪ محصولات پاییزی برای کانال فروشگاه'),
               rows: 6,
               value: form[0].input,
               onChange: function (v) { form[1](Object.assign({}, form[0], { input: v })); },
@@ -538,6 +657,9 @@
               value: form[0].channel_id,
               onChange: function (v) { form[1](Object.assign({}, form[0], { channel_id: parseInt(v, 10) || 0 })); },
             }),
+            e.createElement('div', { style: { marginTop: '12px' } },
+              e.createElement('h4', { className: 'enzo-h4' }, 'تصاویر (آلبوم عکس)')),
+            e.createElement(MediaPicker, { value: form[0].image_ids, onChange: function (ids) { form[1](Object.assign({}, form[0], { image_ids: ids })); } }),
             e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], disabled: !form[0].input, onClick: run }, 'اجرا با AI'))),
         e.createElement(c.Card, null,
           e.createElement(c.CardHeader, null, e.createElement('b', null, 'خروجی')),
@@ -558,6 +680,7 @@
                   onClick: function () {
                     unwrap(api('/posts', { method: 'POST', body: JSON.stringify({
                       title: form[0].title, body: result[0].content, channel_id: form[0].channel_id || 0,
+                      image_ids: form[0].image_ids,
                     }) }))
                       .then(function (d) { msg[1]({ type: 'success', text: 'به‌عنوان پیش‌نویس ذخیره شد (پست #' + d.id + ').' }); })
                       .catch(function (err) { msg[1]({ type: 'error', text: err.message }); });
@@ -599,12 +722,19 @@
 
   function EditPostModal(props) {
     var busy = useState(false);
-    var v = useState({ id: props.value.id, title: props.value.title, body: props.value.body, channel_id: props.value.channel_id });
+    var v = useState({
+      id: props.value.id,
+      title: props.value.title,
+      body: props.value.body,
+      channel_id: props.value.channel_id,
+      image_ids: props.value.image_ids || [],
+    });
 
     function save() {
       busy[1](true);
       unwrap(api('/posts/' + v[0].id, { method: 'POST', body: JSON.stringify({
         title: v[0].title, body: v[0].body, channel_id: v[0].channel_id,
+        image_ids: v[0].image_ids,
       }) }))
         .then(function () { busy[1](false); props.onSaved(); })
         .catch(function (err) { busy[1](false); props.onError(err.message); });
@@ -616,6 +746,9 @@
         label: 'کانال', options: channelOptions(props.channels), value: v[0].channel_id,
         onChange: function (x) { v[1](Object.assign({}, v[0], { channel_id: parseInt(x, 10) || 0 })); },
       }),
+      e.createElement('div', { style: { marginTop: '12px' } },
+        e.createElement('h4', { className: 'enzo-h4' }, 'تصاویر (آلبوم عکس)')),
+      e.createElement(MediaPicker, { value: v[0].image_ids, onChange: function (ids) { v[1](Object.assign({}, v[0], { image_ids: ids })); } }),
       e.createElement('div', { className: 'enzo-modal-actions' },
         e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], onClick: save }, 'ذخیره'),
         e.createElement(c.Button, { variant: 'tertiary', onClick: props.onClose }, 'انصراف')));
@@ -964,21 +1097,53 @@
 
   // ------------------------------------------------------------------ Content create
 
-  function ContentCreate(props) {
+function MediaPicker(props) {
+    var busy = useState(false);
+    var msg = useState(null);
+    var list = useAsync(function () { return unwrap(api('/media/library')); }, []);
+
+    function attach(id) {
+      var ids = props.value || [];
+      if (ids.indexOf(id) === -1) {
+        props.onChange(ids.concat([id]));
+      }
+    }
+
+    function detach(id) {
+      var ids = props.value || [];
+      props.onChange(ids.filter(function (x) { return x !== id; }));
+    }
+
+    var items = (list.data && list.data.media) || [];
+    return e.createElement('div', null,
+      e.createElement('div', { className: 'enzo-media-picker' },
+        items.map(function (m) {
+          var attached = (props.value || []).indexOf(m.id) !== -1;
+          return e.createElement('div', { key: m.id, className: 'enzo-media-thumb' + (attached ? ' enzo-media-thumb-active' : '') },
+            e.createElement('img', { src: m.url, alt: m.title || '', loading: 'lazy' }),
+            attached
+              ? e.createElement(c.Button, { variant: 'secondary', isSmall: true, onClick: function () { detach(m.id); } }, 'حذف')
+              : e.createElement(c.Button, { variant: 'primary', isSmall: true, onClick: function () { attach(m.id); } }, 'افزودن'));
+        }));
+  }
+}
+
+function ContentCreate(props) {
     var channels = useAsync(function () { return unwrap(api('/channels')); }, []);
     var busy = useState(false);
     var msg = useState(null);
-    var form = useState({ title: '', body: '', channel_id: 0 });
+    var form = useState({ title: '', body: '', channel_id: 0, image_ids: [] });
 
     function save() {
       msg[1](null);
       busy[1](true);
       unwrap(api('/posts', { method: 'POST', body: JSON.stringify({
         title: form[0].title, body: form[0].body, channel_id: form[0].channel_id,
+        image_ids: form[0].image_ids,
       }) }))
         .then(function (d) {
           msg[1]({ type: 'success', text: 'پست #' + d.id + ' به‌عنوان پیش‌نویس ذخیره شد.' });
-          form[1]({ title: '', body: '', channel_id: 0 });
+          form[1]({ title: '', body: '', channel_id: 0, image_ids: [] });
           busy[1](false);
         })
         .catch(function (err) { msg[1]({ type: 'error', text: err.message }); busy[1](false); });
@@ -991,13 +1156,21 @@
         actions: e.createElement(c.Button, { variant: 'secondary', onClick: function () { props.go('ai-generate'); } }, 'تولید با AI'),
       }),
       e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
-      e.createElement(c.Card, null,
-        e.createElement(c.CardBody, null,
-          e.createElement(c.TextControl, { label: 'عنوان (اختیاری)', value: form[0].title, onChange: function (v) { form[1](Object.assign({}, form[0], { title: v })); } }),
-          e.createElement(c.TextareaControl, { label: 'متن پست', rows: 10, value: form[0].body, onChange: function (v) { form[1](Object.assign({}, form[0], { body: v })); } }),
-          e.createElement(c.SelectControl, { label: 'کانال', options: channelOptions(channels.data && channels.data.channels), value: form[0].channel_id, onChange: function (v) { form[1](Object.assign({}, form[0], { channel_id: parseInt(v, 10) || 0 })); } }),
-          e.createElement('p', { className: 'enzo-hint' }, 'پست ابتدا پیش‌نویس ذخیره می‌شود؛ انتشار فقط پس از تأیید یا زمان‌بندی شما انجام می‌شود.'),
-          e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], disabled: !form[0].body, onClick: save }, 'ذخیره پیش‌نویس'))));
+      e.createElement('div', { className: 'enzo-two-col' },
+        e.createElement(c.Card, null,
+          e.createElement(c.CardBody, null,
+            e.createElement(c.TextControl, { label: 'عنوان (اختیاری)', value: form[0].title, onChange: function (v) { form[1](Object.assign({}, form[0], { title: v })); } }),
+            e.createElement(c.TextareaControl, { label: 'متن پست', rows: 10, value: form[0].body, onChange: function (v) { form[1](Object.assign({}, form[0], { body: v })); } }),
+            e.createElement(c.SelectControl, { label: 'کانال', options: channelOptions(channels.data && channels.data.channels), value: form[0].channel_id, onChange: function (v) { form[1](Object.assign({}, form[0], { channel_id: parseInt(v, 10) || 0 })); } }),
+            e.createElement('p', { className: 'enzo-hint' }, 'پست ابتدا پیش‌نویس ذخیره می‌شود؛ انتشار فقط پس از تأیید یا زمان‌بندی شما انجام می‌شود.'),
+            e.createElement(c.Button, { variant: 'primary', isBusy: busy[0], disabled: !form[0].body, onClick: save }, 'ذخیره پیش‌نویس')),
+          )),
+        e.createElement('div', null,
+          e.createElement('h3', { className: 'enzo-h3' }, 'تصاویر پست (آلبوم عکس)'),
+          e.createElement(MediaPicker, { value: form[0].image_ids, onChange: function (ids) { form[1](Object.assign({}, form[0], { image_ids: ids })); } }),
+          e.createElement('p', { className: 'enzo-hint' },
+            'برای ارسال آلبوم عکس (Media Group)، چندین عکس انتخاب کنید. '
+            , e.createElement('b', null, 'نکته:'), ' برای یک عکس، تنها یکی انتخاب کنید. انتخاب ۲+ عکس → Media Group.'))));
   }
 
   // ------------------------------------------------------------------ Generated
@@ -1158,6 +1331,7 @@
     ['channels', 'کانال‌ها', 'groups'],
     ['ai-providers', 'سرویس‌های AI', 'admin-network'],
     ['telegram', 'تلگرام', 'share'],
+    ['platform', 'پلتفرم', 'cog'],
     ['logs', 'لاگ‌ها', 'marker'],
     ['settings', 'تنظیمات', 'admin-settings'],
     ['help', 'راهنما', 'editor-help'],

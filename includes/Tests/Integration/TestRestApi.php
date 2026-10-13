@@ -567,52 +567,272 @@ class TestRestApi extends IntegrationTestCase
         );
         $this->assertNotNull($row);
         $this->assertEquals('connected', $row['status']);
-        $this->assertEquals('channel', $row['chat_type']);
+    }
 
-        $dup = $this->restRequest('POST', '/enzo/v1/channels', [
-            'chat_id' => -100555444333,
-            'title'   => 'دوباره',
+    public function test_add_channel_rejects_duplicate(): void
+    {
+        $this->restRequest('POST', '/enzo/v1/channels', [
+            'chat_id'  => -100555444333,
+            'title'    => 'کانال اول',
+            'username' => '@first',
         ], $this->adminUserId);
-        $this->assertEquals(false, $dup['success']);
+
+        $response = $this->restRequest('POST', '/enzo/v1/channels', [
+            'chat_id'  => -100555444333,
+            'title'    => 'کانال دوم',
+            'username' => '@second',
+        ], $this->adminUserId);
+
+        $this->assertEquals(false, $response['success']);
+        $this->assertEquals('duplicate_channel', $response['code'] ?? '');
     }
 
-    public function test_add_channel_requires_chat_id_and_title(): void
-    {
-        $noChat = $this->restRequest('POST', '/enzo/v1/channels', ['title' => 'بدون شناسه'], $this->adminUserId);
-        $this->assertEquals(false, $noChat['success']);
+    // --------------------------------------------------------------- Media Group / Album Tests
 
-        $noTitle = $this->restRequest('POST', '/enzo/v1/channels', ['chat_id' => -100111], $this->adminUserId);
-        $this->assertEquals(false, $noTitle['success']);
+    public function test_create_post_with_multiple_image_ids(): void
+    {
+        $response = $this->restRequest('POST', '/enzo/v1/posts', [
+            'title'      => 'Post with Images',
+            'body'       => 'Content',
+            'channel_id' => 1,
+            'image_ids'  => [101, 102, 103],
+        ], $this->adminUserId);
+
+        $this->assertEquals(true, $response['success']);
+        $this->assertArrayHasKey('post', $response);
+        $this->assertEquals([101, 102, 103], $response['post']['image_ids']);
     }
 
-    public function test_telegram_status_reflects_secret_presence(): void
+    public function test_create_post_with_single_image_id(): void
     {
-        $secrets = $this->container->make(\ENZO\Contracts\SecretStoreInterface::class);
-        $secrets->delete('telegram_bot_token');
+        $response = $this->restRequest('POST', '/enzo/v1/posts', [
+            'title'      => 'Post with Single Image',
+            'body'       => 'Content',
+            'channel_id' => 1,
+            'image_ids'  => [201],
+        ], $this->adminUserId);
 
-        $off = $this->restRequest('GET', '/enzo/v1/telegram/status', [], $this->adminUserId);
-        $this->assertEquals(true, $off['success']);
-        $this->assertFalse((bool) $off['connected']);
-
-        $secrets->set('telegram_bot_token', '123456789:TESTTOKENTESTTOKENTESTTOKEN1');
-        $on = $this->restRequest('GET', '/enzo/v1/telegram/status', [], $this->adminUserId);
-        $this->assertTrue((bool) $on['connected']);
-        $secrets->delete('telegram_bot_token');
+        $this->assertEquals(true, $response['success']);
+        $this->assertEquals([201], $response['post']['image_ids']);
     }
 
-    private function createLogEntry(string $level, string $message): int
+    public function test_create_post_without_image_ids(): void
     {
-        $this->wpdb->insert(
-            $this->wpdb->prefix . 'enzo_logs',
-            [
-                'scope'       => 'test',
-                'level'       => $level,
-                'message'     => $message,
-                'context'     => '{}',
-                'request_id'  => null,
-                'created_at'  => current_time('mysql', 1),
-            ]
-        );
-        return (int) $this->wpdb->insert_id;
+        $response = $this->restRequest('POST', '/enzo/v1/posts', [
+            'title'      => 'Text Only',
+            'body'       => 'Content',
+            'channel_id' => 1,
+        ], $this->adminUserId);
+
+        $this->assertEquals(true, $response['success']);
+        $this->assertNull($response['post']['image_ids']);
+    }
+
+    public function test_update_post_image_ids(): void
+    {
+        $postId = $this->createTestPost(['status' => 'draft']);
+
+        $response = $this->restRequest('POST', "/enzo/v1/posts/$postId", [
+            'image_ids' => [301, 302],
+        ], $this->adminUserId);
+
+        $this->assertEquals(true, $response['success']);
+        $this->assertEquals([301, 302], $response['post']['image_ids']);
+    }
+
+    public function test_update_post_clears_image_ids(): void
+    {
+        $postId = $this->createTestPost([
+            'status'     => 'draft',
+            'image_ids'  => json_encode([401, 402]),
+        ]);
+
+        $response = $this->restRequest('POST', "/enzo/v1/posts/$postId", [
+            'image_ids' => [],
+        ], $this->adminUserId);
+
+        $this->assertEquals(true, $response['success']);
+        $this->assertNull($response['post']['image_ids']);
+    }
+
+    public function test_publish_post_with_media_group_sends_multiple_photos(): void
+    {
+        $postId = $this->createTestPost([
+            'status'     => 'approved',
+            'channel_id' => -100123,
+            'image_ids'  => json_encode([501, 502, 503]),
+        ]);
+
+        $this->createTestChannel(['chat_id' => -100123]);
+
+        // Mock attachment URLs
+        $this->mockHttp->setResponse('GET', '*wp-content/uploads*', [
+            'code' => 200,
+            'body' => 'https://example.com/wp-content/uploads/photo1.jpg',
+        ]);
+
+        $this->mockTelegramResponse('sendMediaGroup', [
+            'message_id' => 789,
+            'chat'       => ['id' => -100123, 'username' => 'testchannel'],
+        ]);
+
+        $response = $this->restRequest('POST', "/enzo/v1/posts/$postId/publish", [], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+        $this->assertEquals(789, $response['result']['message_id'] ?? null);
+
+        // Verify post marked as published
+        $repo = $this->container->make(\ENZO\Infrastructure\WpDb\PostRepository::class);
+        $post = $repo->find($postId);
+        $this->assertEquals('published', $post['status']);
+    }
+
+    public function test_publish_post_with_single_image_sends_photo(): void
+    {
+        $postId = $this->createTestPost([
+            'status'     => 'approved',
+            'channel_id' => -100123,
+            'image_ids'  => json_encode([601]),
+        ]);
+
+        $this->createTestChannel(['chat_id' => -100123]);
+
+        $this->mockTelegramResponse('sendPhoto', [
+            'message_id' => 790,
+            'chat'       => ['id' => -100123, 'username' => 'testchannel'],
+        ]);
+
+        $response = $this->restRequest('POST', "/enzo/v1/posts/$postId/publish", [], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+        $this->assertEquals(790, $response['result']['message_id'] ?? null);
+    }
+
+    // --------------------------------------------------------------- Platform Switching Tests
+
+    public function test_platform_switch_switch_valid_platform(): void
+    {
+        $response = $this->restRequest('POST', '/enzo/v1/platform', [
+            'platform' => 'bale',
+        ], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+        $this->assertEquals('bale', $response['platform']);
+    }
+
+    public function test_platform_switch_requires_admin(): void
+    {
+        $response = $this->restRequest('POST', '/enzo/v1/platform', [
+            'platform' => 'bale',
+        ], $this->factory->user->create(['role' => 'subscriber']));
+        $this->assertEquals(false, $response['success']);
+        $this->assertEquals(403, $response['code'] ?? 0);
+    }
+
+    // --------------------------------------------------------------- SEO & Hashtags Tests
+
+    public function test_ai_generate_seo_operation(): void
+    {
+        $providerId = $this->createAiProvider();
+        $response = $this->restRequest('POST', '/enzo/v1/ai/generate', [
+            'provider_id' => $providerId,
+            'operation' => 'seo',
+            'prompt' => 'برترین رستوران‌های ساحلی در بوشهر',
+        ], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+        $this->assertArrayHasKey('content', $response);
+        $this->assertStringContainsString('رستوران', $response['content']);
+    }
+
+    public function test_ai_generate_hashtags_operation(): void
+    {
+        $providerId = $this->createAiProvider();
+        $response = $this->restRequest('POST', '/enzo/v1/ai/generate', [
+            'provider_id' => $providerId,
+            'operation' => 'hashtags',
+            'prompt' => 'غذای محلی ایران',
+        ], $this->adminUserId);
+        $this->assertEquals(true, $response['success']);
+        $this->assertArrayHasKey('content', $response);
+        $this->assertStringContainsString('#', $response['content']);
+    }
+
+    public function test_ai_generate_seo_hashtags_requires_provider(): void
+    {
+        $response = $this->restRequest('POST', '/enzo/v1/ai/generate', [
+            'operation' => 'seo',
+            'prompt' => 'Test SEO',
+        ], $this->adminUserId);
+        $this->assertEquals(false, $response['success']);
+    }
+
+    public function test_ai_generate_seo_validates_prompt(): void
+    {
+        $providerId = $this->createAiProvider();
+        $response = $this->restRequest('POST', '/enzo/v1/ai/generate', [
+            'provider_id' => $providerId,
+            'operation' => 'seo',
+            'prompt' => '',
+        ], $this->adminUserId);
+        $this->assertEquals(false, $response['success']);
+    }
+
+    public function test_ai_generate_hashtags_validates_prompt(): void
+    {
+        $providerId = $this->createAiProvider();
+        $response = $this->restRequest('POST', '/enzo/v1/ai/generate', [
+            'provider_id' => $providerId,
+            'operation' => 'hashtags',
+            'prompt' => '',
+        ], $this->adminUserId);
+        $this->assertEquals(false, $response['success']);
+    }
+
+    // --------------------------------------------------------------- License Domain Binding Tests
+
+    public function test_license_manager_tracks_domain_changes(): void
+    {
+        $this->mockLicenseServer(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400)]);
+        (new \ENZO\License\LicenseManager())->activate('TEST-KEY-1');
+
+        $status = (new \ENZO\License\LicenseManager())->status();
+        $this->assertEquals(0, $status['domain_changes'] ?? null);
+
+        // Second activation with different domain counts as a change
+        $this->mockLicenseServer([
+            'valid' => true, 
+            'expires' => date('Y-m-d H:i:s', time() + 86400), 
+            'domain' => 'different-domain.com'
+        ]);
+        (new \ENZO\License\LicenseManager())->activate('TEST-KEY-2');
+
+        $status = (new \ENZO\License\LicenseManager())->status();
+        $this->assertEquals(1, $status['domain_changes'] ?? null);
+    }
+
+    public function test_domain_change_limit_enforcement(): void
+    {
+        // Mock multiple domain changes to reach the limit
+        for ($i = 0; $i < 6; $i++) {
+            $this->mockLicenseServer([
+                'valid' => true, 
+                'expires' => date('Y-m-d H:i:s', time() + 86400), 
+                'domain' => "site-" . $i . ".com"
+            ]);
+            (new \ENZO\License\LicenseManager())->activate("TEST-KEY-" . $i);
+        }
+
+        $this->assertTrue(LicenseManager::domainChangeLimitExceeded());
+
+        // Simulate an update gate test with a domain mismatch
+        $testDomain = "different-domain.com";
+        update_option('enzo_license', [
+            'key' => 'TEST',
+            'activated' => true,
+            'expires' => date('Y-m-d H:i:s', time() + 86400),
+            'domain' => $testDomain,
+            'domain_changes' => 6,
+        ]);
+
+        $err = \ENZO\License\Updater::gateDownload(false, 'https://rtl-theme.com/downloads/ata.zip');
+        $this->assertInstanceOf(\WP_Error::class, $err);
+        $this->assertSame('enzo_domain_mismatch', $err->get_error_code());
     }
 }

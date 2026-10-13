@@ -94,9 +94,66 @@ class TestLicenseUpdater extends IntegrationTestCase
             'key'       => 'LEGACY',
             'activated' => true,
             'expires'   => date('Y-m-d H:i:s', time() + 86400),
+            'domain'    => '',
+            'domain_changes' => 0,
         ]);
         $status = (new \ENZO\License\LicenseManager())->status();
         $this->assertTrue($status['domain_match']);
+    }
+
+    public function test_domain_change_tracking(): void
+    {
+        // First activation stores domain
+        $this->mockLicenseServer(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400), 'domain' => $this->siteDomain()]);
+        (new \ENZO\License\LicenseManager())->activate('KEY-D1');
+        $status = (new \ENZO\License\LicenseManager())->status();
+        $this->assertSame($this->siteDomain(), $status['domain']);
+        $this->assertSame(0, get_option('enzo_license')['domain_changes'] ?? null);
+
+        // Second activation with different domain counts as a change
+        $this->mockLicenseServer(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400), 'domain' => 'different-site.com']);
+        (new \ENZO\License\LicenseManager())->activate('KEY-D2');
+        $status = (new \ENZO\License\LicenseManager())->status();
+        $this->assertSame('different-site.com', $status['domain']);
+        $this->assertTrue(LicenseManager::domainChangeLimitExceeded() === false); // Should not exceed yet
+        $this->assertSame(1, get_option('enzo_license')['domain_changes'] ?? null);
+
+        // Third activation with different domain increments again
+        $this->mockLicenseServer(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400), 'domain' => 'another-site.com']);
+        (new \ENZO\License\LicenseManager())->activate('KEY-D3');
+        $status = (new \ENZO\License\LicenseManager())->status();
+        $this->assertSame('another-site.com', $status['domain']);
+        $this->assertSame(2, get_option('enzo_license')['domain_changes'] ?? null);
+
+        // Test reset
+        LicenseManager::resetDomainChanges();
+        $status = (new \ENZO\License\LicenseManager())->status();
+        $this->assertArrayNotHasKey('domain_changes', get_option('enzo_license'));
+    }
+
+    public function test_domain_change_limit_enforcement(): void
+    {
+        // Mock multiple domain changes to reach the limit
+        for ($i = 0; $i < 6; $i++) {
+            $this->mockLicenseServer(['valid' => true, 'expires' => date('Y-m-d H:i:s', time() + 86400), 'domain' => "site-" . $i . ".com"]);
+            (new \ENZO\License\LicenseManager())->activate("KEY-" . $i);
+        }
+
+        $this->assertTrue(LicenseManager::domainChangeLimitExceeded());
+
+        // Now simulate an update gate test with a domain mismatch
+        $testDomain = "different-domain.com";
+        update_option('enzo_license', [
+            'key' => 'TEST',
+            'activated' => true,
+            'expires' => date('Y-m-d H:i:s', time() + 86400),
+            'domain' => $testDomain,
+            'domain_changes' => 6,
+        ]);
+
+        $err = \ENZO\License\Updater::gateDownload(false, 'https://rtl-theme.com/downloads/ata.zip');
+        $this->assertInstanceOf(\WP_Error::class, $err);
+        $this->assertSame('enzo_domain_mismatch', $err->get_error_code());
     }
 
     public function test_status_default_has_empty_domain(): void

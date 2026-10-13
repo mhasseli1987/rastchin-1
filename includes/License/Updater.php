@@ -174,6 +174,18 @@ class Updater
             return new \WP_Error('enzo_license_required', 'برای دریافت به‌روزرسانی، لایسنس فعال و معتبر لازم است.');
         }
 
+        // Phase 15 — enforce domain binding: after MAX_DOMAIN_CHANGES domain changes,
+        // only allow updates when the current domain matches the bound domain.
+        if (LicenseManager::domainChangeLimitExceeded()) {
+            $status = LicenseManager::status();
+            if (!$status['domain_match']) {
+                return new \WP_Error('enzo_domain_mismatch', 
+                    'بسته نرم‌افزاری قابل دانلود نیست: دامنه سایت با لایسنس مطابقت ندارد. '
+                    . 'محدودیت domain binding اجباری شده است بعد از ' . LicenseManager::MAX_DOMAIN_CHANGES . ' تغییر دامنه.'
+                );
+            }
+        }
+
         return $reply;
     }
 }
