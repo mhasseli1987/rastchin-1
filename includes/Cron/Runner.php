@@ -100,7 +100,7 @@ class Runner
         $channelId = (int) $post['channel_id'];
         $text = trim((string) $post['body']);
 
-        // Telegram channel IDs are negative (e.g. -1001234567890); only 0 means unset.
+        // Telegram/Bale channel IDs are negative (e.g. -1001234567890); only 0 means unset.
         if ($channelId === 0 || $text === '') {
             self::failJob((int) $job['id'], 'invalid_post', 'متن یا کانال پست تنظیم نشده است.');
             return;
@@ -110,23 +110,47 @@ class Runner
             $container = \ENZO\Core\Container::instance();
             $telegram = $container->make(\ENZO\Contracts\Telegram\TelegramProviderInterface::class);
 
-            $imageId = (int) ($post['image_id'] ?? 0);
+            $imageIds = $post['image_ids'] ?? [];
+            if (is_string($imageIds)) {
+                $imageIds = json_decode($imageIds, true) ?: [];
+            }
             $sent = null;
 
-            if ($imageId > 0) {
-                $image = wp_get_attachment_url($imageId);
-                if ($image) {
-                    // Single message: photo with caption (old code sent text AND photo = duplicate).
+            if (!empty($imageIds) && count($imageIds) > 1) {
+                // Media Group (album) - multiple images
+                $media = [];
+                foreach ($imageIds as $index => $imgId) {
+                    $url = wp_get_attachment_url((int) $imgId);
+                    if ($url) {
+                        $media[] = [
+                            'type' => 'photo',
+                            'media' => $url,
+                            'caption' => ($index === 0) ? $text : '',
+                            'parse_mode' => 'HTML',
+                        ];
+                    }
+                }
+                if (!empty($media)) {
+                    $sent = $telegram->sendMediaGroup([
+                        'chat_id' => $channelId,
+                        'media' => $media,
+                    ]);
+                }
+            } elseif (!empty($imageIds)) {
+                // Single image
+                $url = wp_get_attachment_url((int) $imageIds[0]);
+                if ($url) {
                     $sent = $telegram->sendPhoto([
                         'chat_id' => $channelId,
-                        'photo'   => $image,
+                        'photo'   => $url,
                         'caption' => $text,
+                        'parse_mode' => 'HTML',
                     ]);
                 }
             }
 
             if ($sent === null) {
-                $sent = $telegram->sendMessage(['chat_id' => $channelId, 'text' => $text]);
+                $sent = $telegram->sendMessage(['chat_id' => $channelId, 'text' => $text, 'parse_mode' => 'HTML']);
             }
 
             $now = current_time('mysql', 1); // UTC.
@@ -141,7 +165,7 @@ class Runner
                 'scope'      => 'publish',
                 'post_id'    => $postId,
                 'channel_id' => $channelId,
-                'message_id' => (int) ($sent['message_id'] ?? 0),
+                'message_id' => (int) (($sent[0]['message_id'] ?? $sent['message_id'] ?? 0)),
             ]);
 
             self::completeJob((int) $job['id']);

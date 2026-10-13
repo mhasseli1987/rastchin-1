@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       ENZO - AI Telegram Admin
+ * Plugin Name:       ENZO - AI Telegram & Bale Admin
  * Plugin URI:        https://rtl-theme.com/plugins/enzo
- * Description:       مدیریت هوشمند کانال‌ها و محتوای تلگرام با AI — تولید، بازنویسی، ترجمه، خلاصه، زمان‌بندی و صف انتشار.
- * Version:           1.2.0
+ * Description:       مدیریت هوشمند کانال‌های تلگرام و بله با AI — تولید، بازنویسی، ترجمه، خلاصه، سئو، استخراج هشتگ، زمان‌بندی، آلبوم عکس و صف انتشار اتمیک.
+ * Version:           1.0.0
  * Author:            RTL-Theme
  * Author URI:        https://rtl-theme.com
  * License:           GPL-2.0+
@@ -17,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-define('ENZO_VERSION', '1.2.0');
+define('ENZO_VERSION', '1.0.0');
 define('ENZO_FILE', __FILE__);
 define('ENZO_DIR', plugin_dir_path(__FILE__));
 define('ENZO_URL', plugin_dir_url(__FILE__));

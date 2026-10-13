@@ -1,8 +1,9 @@
 {
     "name": "rtl-theme/enzo",
-    "description": "AI Telegram Admin Plugin for WordPress",
+    "description": "AI Telegram & Bale Admin Plugin for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0+",
+    "version": "1.0.0",
     "require": {
         "php": ">=8.1",
         "ext-json": "*",

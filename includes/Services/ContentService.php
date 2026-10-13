@@ -63,7 +63,7 @@ class ContentService
     }
 
     /**
-     * Publish now — send Telegram message.
+     * Publish now — send Telegram/Bale message with optional media group.
      */
     public function publishNow(int $postId): array
     {
@@ -74,7 +74,7 @@ class ContentService
 
         $text = trim((string) $post['body']);
         $channelId = (int) $post['channel_id'];
-        // Telegram channel IDs are negative; only 0 means unset.
+        // Telegram/Bale channel IDs are negative; only 0 means unset.
         if ($channelId === 0 || $text === '') {
             return ['success' => false, 'error' => 'متن یا کانال تنظیم نشده است.'];
         }
@@ -84,7 +84,50 @@ class ContentService
         }
 
         try {
-            $sent = $this->telegram->sendMessage(['chat_id' => $channelId, 'text' => $text]);
+            $imageIds = $post['image_ids'] ?? [];
+            if (is_string($imageIds)) {
+                $imageIds = json_decode($imageIds, true) ?: [];
+            }
+            $sent = null;
+
+            if (!empty($imageIds) && count($imageIds) > 1) {
+                // Media Group (album) - multiple images
+                $media = [];
+                foreach ($imageIds as $index => $imgId) {
+                    $url = wp_get_attachment_url((int) $imgId);
+                    if ($url) {
+                        $media[] = [
+                            'type' => 'photo',
+                            'media' => $url,
+                            'caption' => ($index === 0) ? $text : '',
+                            'parse_mode' => 'HTML',
+                        ];
+                    }
+                }
+                if (!empty($media)) {
+                    $sent = $this->telegram->sendMediaGroup([
+                        'chat_id' => $channelId,
+                        'media' => $media,
+                    ]);
+                }
+            } elseif (!empty($imageIds)) {
+                // Single image
+                $url = wp_get_attachment_url((int) $imageIds[0]);
+                if ($url) {
+                    $sent = $this->telegram->sendPhoto([
+                        'chat_id' => $channelId,
+                        'photo' => $url,
+                        'caption' => $text,
+                        'parse_mode' => 'HTML',
+                    ]);
+                }
+            }
+
+            if ($sent === null) {
+                // Text only
+                $sent = $this->telegram->sendMessage(['chat_id' => $channelId, 'text' => $text, 'parse_mode' => 'HTML']);
+            }
+
             $this->posts->update($postId, [
                 'status'       => 'published',
                 'published_at' => current_time('mysql', 1),
@@ -92,8 +135,8 @@ class ContentService
             ]);
             $this->logger->info('Post published', ['post_id' => $postId, 'scope' => 'publish']);
 
-            $messageId = (int) ($sent['message_id'] ?? 0);
-            $username = $sent['chat']['username'] ?? null;
+            $messageId = (int) (($sent[0]['message_id'] ?? $sent['message_id'] ?? 0));
+            $username = $sent[0]['chat']['username'] ?? ($sent['chat']['username'] ?? null);
             $link = $username ? 'https://t.me/' . $username . '/' . $messageId : null;
             return ['success' => true, 'message_id' => $messageId, 'link' => $link];
         } catch (\Exception $e) {

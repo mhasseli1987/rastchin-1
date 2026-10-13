@@ -8,14 +8,16 @@ use ENZO\Logging\Logger;
 defined('ABSPATH') || exit;
 
 /**
- * Telegram Bot API adapter (SPECIFICATION.md:292-325).
- * Verbs-only: getMe/getChat/sendMessage/sendPhoto/editMessageText/testConnection.
+ * Telegram & Bale Bot API adapter.
+ * Supports both Telegram (api.telegram.org) and Bale (tapi.bale.ai).
+ * Verbs: getMe/getChat/sendMessage/sendPhoto/sendMediaGroup/editMessageText/testConnection.
  */
 class BotApiTelegramProvider implements TelegramProviderInterface
 {
     private HttpClientInterface $http;
     private Logger $logger;
     private string $apiBase = 'https://api.telegram.org/bot';
+    private string $platform = 'telegram'; // 'telegram' or 'bale'
 
     public function __construct(HttpClientInterface $http, Logger $logger)
     {
@@ -23,14 +25,23 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         $this->logger = $logger;
     }
 
-    /**
-     * Singleton access point for dependency injection.
-     * Use BotApiTelegramProvider::getInstance() to ensure consistent instances.
-     */
+    /** Singleton access point for dependency injection. */
     public static function getInstance(): self
     {
-        $container = \ENZO\Core\Container::instance();
+        $container = \\ENZO\\Core\\Container::instance();
         return $container->make(self::class);
+    }
+
+    public function setPlatform(string $platform): void
+    {
+        $platform = strtolower(trim($platform));
+        if ($platform === 'bale') {
+            $this->apiBase = 'https://tapi.bale.ai/bot';
+            $this->platform = 'bale';
+        } else {
+            $this->apiBase = 'https://api.telegram.org/bot';
+            $this->platform = 'telegram';
+        }
     }
 
     private function endpoint(string $method, ?string $token = null): string
@@ -38,18 +49,18 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         if ($token === null) {
             $token = $this->getActiveToken();
         }
-        // Telegram requires bot<token> with NO separator: bot123456:AAH.../method
+        // Telegram/Bale requires bot<token> with NO separator: bot123456:AAH.../method
         return $this->apiBase . $token . '/' . $method;
     }
 
     private function getActiveToken(): string
     {
         // SecretStore lookup — never logged.
-        $container = \ENZO\Core\Container::instance();
-        $store = $container->make(\ENZO\Contracts\SecretStoreInterface::class);
+        $container = \\ENZO\\Core\\Container::instance();
+        $store = $container->make(\\ENZO\\Contracts\\SecretStoreInterface::class);
         $token = $store->get('telegram_bot_token');
         if ($token === null || $token === '') {
-            throw new \RuntimeException('Telegram bot token not configured.');
+            throw new \\RuntimeException('Telegram/Bale bot token not configured.');
         }
         return $token;
     }
@@ -62,7 +73,7 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         ]);
         $data = json_decode($resp['body'], true);
         if (!is_array($data) || empty($data['ok'])) {
-            throw new \RuntimeException('getMe failed: ' . ($data['description'] ?? 'unknown'));
+            throw new \\RuntimeException('getMe failed: ' . ($data['description'] ?? 'unknown'));
         }
         return $data['result'];
     }
@@ -77,7 +88,7 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         ]);
         $data = json_decode($resp['body'], true);
         if (!is_array($data) || empty($data['ok'])) {
-            throw new \RuntimeException('getChat failed: ' . ($data['description'] ?? 'unknown'));
+            throw new \\RuntimeException('getChat failed: ' . ($data['description'] ?? 'unknown'));
         }
         return $data['result'];
     }
@@ -109,7 +120,7 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         ]);
         $decoded = json_decode($resp['body'], true);
         if (!is_array($decoded) || empty($decoded['ok'])) {
-            throw new \RuntimeException('sendMessage failed: ' . ($decoded['description'] ?? 'unknown'));
+            throw new \\RuntimeException('sendMessage failed: ' . ($decoded['description'] ?? 'unknown'));
         }
         return $decoded['result'];
     }
@@ -135,7 +146,33 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         ]);
         $decoded = json_decode($resp['body'], true);
         if (!is_array($decoded) || empty($decoded['ok'])) {
-            throw new \RuntimeException('sendPhoto failed: ' . ($decoded['description'] ?? 'unknown'));
+            throw new \\RuntimeException('sendPhoto failed: ' . ($decoded['description'] ?? 'unknown'));
+        }
+        return $decoded['result'];
+    }
+
+    public function sendMediaGroup(array $payload): array
+    {
+        $data = [
+            'chat_id' => $payload['chat_id'],
+            'media' => $payload['media'], // array of media objects
+        ];
+        if (!empty($payload['disable_notification'])) {
+            $data['disable_notification'] = $payload['disable_notification'];
+        }
+        if (!empty($payload['reply_to_message_id'])) {
+            $data['reply_to_message_id'] = $payload['reply_to_message_id'];
+        }
+
+        $resp = $this->http->request($this->endpoint('sendMediaGroup'), [
+            'method' => 'POST',
+            'headers' => ['Content-Type' => 'application/json'],
+            'body' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            'timeout' => 60,
+        ]);
+        $decoded = json_decode($resp['body'], true);
+        if (!is_array($decoded) || empty($decoded['ok'])) {
+            throw new \\RuntimeException('sendMediaGroup failed: ' . ($decoded['description'] ?? 'unknown'));
         }
         return $decoded['result'];
     }
@@ -159,7 +196,7 @@ class BotApiTelegramProvider implements TelegramProviderInterface
         ]);
         $decoded = json_decode($resp['body'], true);
         if (!is_array($decoded) || empty($decoded['ok'])) {
-            throw new \RuntimeException('editMessageText failed: ' . ($decoded['description'] ?? 'unknown'));
+            throw new \\RuntimeException('editMessageText failed: ' . ($decoded['description'] ?? 'unknown'));
         }
         return $decoded['result'];
     }
@@ -173,8 +210,9 @@ class BotApiTelegramProvider implements TelegramProviderInterface
                 'message' => 'اتصال برقرار شد.',
                 'bot_username' => $me['username'] ?? null,
                 'bot_id' => $me['id'] ?? null,
+                'platform' => $this->platform,
             ];
-        } catch (\Exception $e) {
+        } catch (\\Exception $e) {
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
