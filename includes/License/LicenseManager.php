@@ -68,12 +68,6 @@ class LicenseManager
         update_option(self::OPTION_KEY, $lic, false);
     }
 
-    /** Update-check endpoint — overridable for self-hosted license servers. */
-    public static function updateCheckUrl(): string
-    {
-        return (string) apply_filters('enzo_license_update_check_url', self::DEFAULT_UPDATE_CHECK_URL);
-    }
-
     /** @return array<string,mixed> */
     public static function status(): array
     {

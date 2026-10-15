@@ -99,5 +99,27 @@ class SettingsRegistrar
             'group'     => 'license',
             'description' => 'Grace period after license failure (D-10 fail-open).',
         ]);
+
+        $registry->register('enzo_local_ai_enabled', [
+            'default'   => '0',
+            'type'      => 'boolean',
+            'sanitize'  => 'rest_sanitize_boolean',
+            'group'     => 'ai',
+            'description' => 'Enable Local AI Server (Self-Install feature).',
+        ]);
+        $registry->register('enzo_local_ai_port', [
+            'default'   => '31415',
+            'type'      => 'integer',
+            'sanitize'  => 'absint',
+            'group'     => 'ai',
+            'description' => 'Port for Local AI Server (default: 31415).',
+        ]);
+        $registry->register('enzo_local_ai_endpoint', [
+            'default'   => '',
+            'type'      => 'string',
+            'sanitize'  => 'sanitize_text_field',
+            'group'     => 'ai',
+            'description' => 'Custom endpoint for Local AI Server (overrides auto-discovered).',
+        ]);
     }
 }

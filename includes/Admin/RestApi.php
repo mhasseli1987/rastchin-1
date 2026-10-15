@@ -3,7 +3,9 @@ namespace ENZO\Admin;
 
 use ENZO\Core\Container; // real namespace: Container lives in Core (not ENZO\\)
 use ENZO\AI\AIProviderRegistry;
+use ENZO\AI\LocalAiProxy;
 use ENZO\Contracts\AI\AIProviderInterface;
+use ENZO\Contracts\AI\AIRequest;
 use ENZO\Contracts\Log\LoggerInterface;
 use ENZO\Contracts\SecretStoreInterface;
 use ENZO\Contracts\Telegram\TelegramProviderInterface;
@@ -43,6 +45,11 @@ class RestApi
             [$aiNs, '/providers/(?P<id>\d+)/test', 'POST', 'aiTestProvider'],
             [$aiNs, '/providers/(?P<id>\d+)/models', 'GET', 'aiListModels'],
             [$aiNs, '/generate', 'POST', 'aiGenerate'],
+            // Local AI Proxy (Self-Install feature)
+            [$aiNs, '/local/status', 'GET', 'localAiStatus'],
+            [$aiNs, '/local/install', 'POST', 'localAiInstall'],
+            [$aiNs, '/local/chat/completions', 'POST', 'localAiChatCompletions'],
+            [$aiNs, '/local/models', 'GET', 'localAiListModels'],
             // NOTE: register_rest_route() silently rejects an empty route
             // string, so collection endpoints must use '/name' under $base
             // (registering them under "$base/name" with route '' registered nothing).
@@ -481,6 +488,222 @@ class RestApi
             'tokens_used'     => $result->tokensUsed,
             'stored_post_id'  => (int) ($result->context['stored_post_id'] ?? 0),
         ]);
+    }
+
+    // ------------------------------------------------------------ Local AI Proxy (Self-Install)
+
+    /**
+     * Check if local AI proxy is enabled/installed.
+     */
+    public static function localAiStatus(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $enabled = get_option('enzo_local_ai_enabled', false);
+        $port = get_option('enzo_local_ai_port', 31415);
+        $endpoint = rest_url('enzo/v1/ai/local/chat/completions');
+        
+        return self::ok([
+            'enabled' => (bool) $enabled,
+            'port' => (int) $port,
+            'endpoint' => $endpoint,
+            'models_endpoint' => rest_url('enzo/v1/ai/local/models'),
+            'message' => $enabled ? 'سرور AI محلی فعال است' : 'سرور AI محلی نصب نشده است',
+        ]);
+    }
+
+    /**
+     * Enable/install the local AI proxy.
+     * This is the "Self-Install" button handler.
+     */
+    public static function localAiInstall(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $b = self::body($r);
+        $port = (int) ($b['port'] ?? 31415);
+        
+        // Validate port
+        if ($port < 1024 || $port > 65535) {
+            return self::fail('پورت باید بین ۱۰۲۴ و ۶۵۵۳۵ باشد.', 400, 'invalid_port');
+        }
+        
+        // Enable local AI proxy
+        update_option('enzo_local_ai_enabled', true, false);
+        update_option('enzo_local_ai_port', $port, false);
+        
+        // Register the local AI provider in the providers table
+        global $wpdb;
+        $table = $wpdb->prefix . 'enzo_providers';
+        
+        // Check if local provider already exists
+        $existing = $wpdb->get_row($wpdb->prepare(
+            "SELECT id FROM $table WHERE name = %s LIMIT 1",
+            'Local AI Proxy (Self-Installed)'
+        ), ARRAY_A);
+        
+        $endpoint = rest_url('enzo/v1/ai/local/chat/completions');
+        $config = [
+            'baseUrl' => $endpoint,
+            'model' => 'llama3',
+        ];
+        
+        if ($existing) {
+            $wpdb->update($table, [
+                'config_json' => wp_json_encode($config),
+                'is_default' => 1,
+            ], ['id' => $existing['id']]);
+            $id = $existing['id'];
+        } else {
+            // Unset other defaults
+            $wpdb->query($wpdb->prepare("UPDATE $table SET is_default = 0 WHERE type = %s", 'ai'));
+            
+            $wpdb->insert($table, [
+                'type' => 'ai',
+                'driver' => 'openai_compatible',
+                'name' => 'Local AI Proxy (Self-Installed)',
+                'is_default' => 1,
+                'config_json' => wp_json_encode($config),
+                'created_at' => current_time('mysql', 1),
+            ]);
+            $id = (int) $wpdb->insert_id;
+        }
+        
+        self::container()->make(LoggerInterface::class)->info('Local AI Proxy self-installed', [
+            'scope' => 'ai',
+            'provider_id' => $id,
+            'port' => $port,
+            'endpoint' => $endpoint,
+        ]);
+        
+        return self::ok([
+            'success' => true,
+            'provider_id' => $id,
+            'endpoint' => $endpoint,
+            'port' => $port,
+            'message' => 'سرور AI محلی با موفقیت نصب و فعال شد! این اکنون به‌عنوان Provider پیش‌فرض تنظیم شده است.',
+        ], 201);
+    }
+
+    /**
+     * OpenAI-compatible /v1/chat/completions endpoint.
+     * Proxies to LocalAiProxy which tries free providers.
+     */
+    public static function localAiChatCompletions(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $enabled = get_option('enzo_local_ai_enabled', false);
+        if (!$enabled) {
+            return self::fail('سرور AI محلی فعال نیست. ابتدا دکمه «نصب خودکار» را بزنید.', 403, 'not_enabled');
+        }
+        
+        $b = self::body($r);
+        $messages = $b['messages'] ?? [];
+        $model = $b['model'] ?? 'llama3';
+        $temperature = (float) ($b['temperature'] ?? 0.5);
+        $maxTokens = (int) ($b['max_tokens'] ?? 2000);
+        $stream = (bool) ($b['stream'] ?? false);
+        
+        if (empty($messages)) {
+            return self::fail('messages الزامی است.', 400, 'empty_messages');
+        }
+        
+        // Convert OpenAI messages to our format
+        $lastUserMsg = '';
+        $systemPrompt = '';
+        foreach ($messages as $msg) {
+            if (($msg['role'] ?? '') === 'system') {
+                $systemPrompt = $msg['content'] ?? '';
+            } elseif (($msg['role'] ?? '') === 'user') {
+                $lastUserMsg = $msg['content'] ?? '';
+            }
+        }
+        
+        if ($lastUserMsg === '') {
+            return self::fail('پیام کاربر خالی است.', 400, 'empty_user_message');
+        }
+        
+        // Build request for LocalAiProxy
+        $request = new \ENZO\Contracts\AI\AIRequest(
+            operations: ['generate'],
+            messages: [['role' => 'user', 'content' => $lastUserMsg]],
+            config: [
+                'model' => $model,
+                'temperature' => $temperature,
+                'maxTokens' => $maxTokens,
+                'systemPrompt' => $systemPrompt,
+            ]
+        );
+        
+        /** @var LocalAiProxy $proxy */
+        $proxy = self::container()->make(LocalAiProxy::class);
+        $result = $proxy->generate($request);
+        
+        if (!$result->success) {
+            return self::fail(
+                $result->errorMessage ?? 'تولید محتوا ناموفق بود.',
+                400,
+                $result->errorCode ?? 'ai_failed'
+            );
+        }
+        
+        // Return OpenAI-compatible response
+        $response = [
+            'id' => 'chatcmpl-' . bin2hex(random_bytes(8)),
+            'object' => 'chat.completion',
+            'created' => time(),
+            'model' => $result->model,
+            'choices' => [[
+                'index' => 0,
+                'message' => [
+                    'role' => 'assistant',
+                    'content' => $result->content,
+                ],
+                'finish_reason' => 'stop',
+            ]],
+            'usage' => [
+                'prompt_tokens' => 0,
+                'completion_tokens' => $result->tokensUsed,
+                'total_tokens' => $result->tokensUsed,
+            ],
+        ];
+        
+        if ($stream) {
+            // For streaming, we'd need a different response format
+            // For now, return non-streaming
+        }
+        
+        $resp = rest_ensure_response($response);
+        $resp->set_status(200);
+        return $resp;
+    }
+
+    /**
+     * OpenAI-compatible /v1/models endpoint.
+     */
+    public static function localAiListModels(\WP_REST_Request $r): \WP_REST_Response
+    {
+        $enabled = get_option('enzo_local_ai_enabled', false);
+        if (!$enabled) {
+            return self::fail('سرور AI محلی فعال نیست.', 403, 'not_enabled');
+        }
+        
+/** @var LocalAiProxy $proxy */
+        $proxy = self::container()->make(LocalAiProxy::class);
+        $models = $proxy->listModels([]);
+
+        $data = [];
+        foreach ($models as $model) {
+            $data[] = [
+                'id' => $model,
+                'object' => 'model',
+                'created' => time(),
+                'owned_by' => 'local-ai-proxy',
+            ];
+        }
+
+        // Return raw OpenAI-compatible response (not wrapped)
+        $resp = rest_ensure_response([
+            'object' => 'list',
+            'data' => $data,
+        ]);
+        $resp->set_status(200);
+        return $resp;
     }
 
     // ------------------------------------------------------------------ Posts

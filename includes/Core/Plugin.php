@@ -15,6 +15,7 @@ use ENZO\Core\SettingsRegistrar;
 use ENZO\Services\ContentService;
 use ENZO\AI\AIProviderRegistry;
 use ENZO\AI\OpenAICompatibleProvider;
+use ENZO\AI\LocalAiProxy;
 use ENZO\Telegram\BotApiTelegramProvider;
 use ENZO\Contracts\Telegram\TelegramProviderInterface;
 use ENZO\Contracts\AI\AIProviderInterface;
@@ -83,6 +84,14 @@ class Plugin
             return $reg;
         });
 
+        // Local AI Proxy (Self-Install feature)
+        $container->singleton(LocalAiProxy::class, function ($c) {
+            return new LocalAiProxy(
+                $c->make(HttpClientInterface::class),
+                $c->make(LoggerInterface::class)
+            );
+        });
+
         // Default AI provider behind the interface (registry's default()).
         $container->singleton(AIProviderInterface::class, fn($c) => $c->make(AIProviderRegistry::class)->default());
 
@@ -102,7 +111,8 @@ class Plugin
         $container->singleton(ContentService::class, fn($c) =>
             new ContentService(
                 $c->make(TelegramProviderInterface::class),
-                $c->make(AIProviderRegistry::class)->default(),
+                // Use LocalAiProxy if available, otherwise default AI provider
+                $c->make(LocalAiProxy::class),
                 $c->make(LoggerInterface::class),
                 $c->make(PostRepository::class)
             )

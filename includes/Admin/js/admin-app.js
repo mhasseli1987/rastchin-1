@@ -482,6 +482,8 @@
     var msg = useState(null);
     var edit = useState(null);
     var testing = useState(0);
+    var localStatus = useAsync(function () { return unwrap(api('/ai/local/status')); }, []);
+    var localBusy = useState(false);
 
     function openNew() { edit[1]({ id: 0, name: '', baseUrl: 'https://api.openai.com/v1/chat/completions', apiKey: '', model: 'gpt-4o-mini', is_default: false }); }
     function openEdit(row) {
@@ -524,9 +526,27 @@
       e.createElement(PageHeader, {
         title: 'سرویس‌های AI',
         desc: 'هر سرویس سازگار با OpenAI را وصل کنید — کلید API رمزنگاری‌شده ذخیره می‌شود و هرگز نمایش داده نمی‌شود',
-        actions: e.createElement(c.Button, { variant: 'primary', onClick: openNew }, 'افزودن سرویس'),
+        actions: e.createElement(Fragment, null,
+          e.createElement(c.Button, { variant: 'primary', onClick: openNew }, 'افزودن سرویس'),
+          localStatus.data && localStatus.data.enabled
+            ? e.createElement(Badge, { label: 'سرور محلی فعال ✓', cls: 'badge-green' })
+            : e.createElement(c.Button, { variant: 'secondary', isBusy: localBusy[0], onClick: function () {
+                localBusy[1](true);
+                unwrap(api('/ai/local/install', { method: 'POST', body: JSON.stringify({ port: 31415 }) }))
+                  .then(function (d) {
+                    msg[1]({ type: 'success', text: d.message || 'سرور محلی نصب شد.' });
+                    localStatus.reload();
+                    localBusy[1](false);
+                  })
+                  .catch(function (err) { msg[1]({ type: 'error', text: err.message }); localBusy[1](false); });
+              } }, 'نصب خودکار سرور محلی')
+        )
       }),
       e.createElement(Msg, { msg: msg[0], clear: function () { msg[1](null); } }),
+      localStatus.data && localStatus.data.enabled && e.createElement('div', { className: 'enzo-alert enzo-alert-info' },
+        e.createElement('b', null, 'سرور محلی فعال:'), ' پورت ' + (localStatus.data.port || 31415) + ' — آدرس: ',
+        e.createElement('code', null, localStatus.data.endpoint || ''),
+        ' — این سرویس به‌عنوان Provider پیش‌رض تنظیم شده است.'),
       list.loading ? e.createElement(Loading)
         : rows.length === 0
           ? e.createElement(Empty, { icon: 'admin-network', text: 'هنوز سرویسی تنظیم نشده است. برای تولید محتوا یکی اضافه کنید.' })
