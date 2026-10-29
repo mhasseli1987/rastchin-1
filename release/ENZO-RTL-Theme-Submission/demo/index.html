@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>انزو — تولید و انتشار هوشمند محتوای تلگرام از وردپرس | دموی آنلاین</title>
-<meta name="description" content="انزو (ENZO): افزونه وردپرس تولید محتوا با هوش مصنوعی، تأیید انسانی، زمان‌بندی و صف انتشار اتمیک برای کانال تلگرام — تمام‌فارسی و راست‌چین.">
+<title>ENZO | اتوماسیون محتوا برای پیام‌رسان‌های ایرانی در وردپرس</title>
+<meta name="description" content="پیش‌نمایش فارسی افزونه ENZO نسخه ۱.۰.۰: ۸ عملیات هوش مصنوعی، تلگرام، بله، ایتا، روبیکا، تأیید انسانی، زمان‌بندی و ارسال آلبوم عکس.">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -48,6 +48,8 @@
   .feature .icon { font-size:30px; margin-bottom:10px; }
   .feature h3 { font-size:17px; margin-bottom:6px; }
   .feature p { font-size:14px; color:#64748b; }
+  .platform-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .platform-list span { display:inline-block; padding:4px 10px; border-radius:999px; color:#0f766e; background:#ccfbf1; font-size:12px; font-weight:700; }
 
   /* gallery */
   .gallery { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
@@ -136,8 +138,8 @@
 <header class="hero">
   <div class="container">
     <div>
-      <h1>محتوای کانال تلگرام‌ات را<br>به <span class="accent">هوش مصنوعی</span> بسپار،<br>تأیید نهایی با خودت</h1>
-      <p class="lead">انزو یک افزونه وردپرس است: با هر سرویس AI سازگار OpenAI محتوا تولید، بازنویسی، خلاصه و ترجمه می‌کند؛ پیش‌نمایش را به تأیید تو می‌گذارد و سر وقتِ مقرر با صف انتشار اتمیک در کانال منتشر می‌کند. تمام‌فارسی و راست‌چین.</p>
+      <h1>محتوای شما،<br>در <span class="accent">پیام‌رسان دلخواهتان</span><br>با تأیید نهایی خودتان</h1>
+      <p class="lead">ENZO نسخهٔ ۱.۰.۰، تولید و بازبینی محتوا را در وردپرس به انتشار زمان‌بندی‌شده وصل می‌کند. برای تلگرام، بله، ایتا یا روبیکا محتوا آماده کنید؛ ۸ عملیات هوش مصنوعی، عکس و آلبوم، و تأیید انسانی پیش از انتشار.</p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#demo">🚀 تست آنلاین بدون نصب</a>
         <a class="btn btn-ghost" href="#shots">مشاهده تصاویر</a>
@@ -150,14 +152,15 @@
 <section id="features">
   <div class="container">
     <h2 class="title">چرا انزو؟</h2>
-    <p class="subtitle">همه‌چیز داخل پیشخوان وردپرس — بدون خروج از سایت</p>
+    <p class="subtitle">گردش کار محتوا از تولید تا بازبینی و انتشار در پیشخوان وردپرس</p>
     <div class="features">
-      <div class="feature"><div class="icon">🤖</div><h3>۶ عملیات هوش مصنوعی</h3><p>تولید محتوا، بازنویسی، خلاصه‌سازی، ترجمه، تیتر و کپشن — با هر سرویس سازگار OpenAI: OpenAI، OpenRouter، Groq و…</p></div>
-      <div class="feature"><div class="icon">👀</div><h3>تأیید انسانی الزامی</h3><p>پیش‌نمایش تلگرامیِ واقعی قبل از انتشار؛ ویرایش مستقیم متن و تنها با تأیید تو مرحله بعد.</p></div>
-      <div class="feature"><div class="icon">⏱</div><h3>زمان‌بندی و صف اتمیک</h3><p>صف انتشار با قفل اتمیک و retry هوشمند — بدون انتشار تکراری حتی اگر سرور وسط کار بیفتد.</p></div>
-      <div class="feature"><div class="icon">🖼</div><h3>عکس + کپشن در یک پیام</h3><p>ارسال تصویر شاخص همراه متن در یک پیام تلگرام.</p></div>
-      <div class="feature"><div class="icon">🔒</div><h3>امنیت سخت‌گیرانه</h3><p>توکن و کلیدها با XChaCha20-Poly1305 رمزنگاری می‌شوند؛ SSRF Gate روی همه ترافیک خروجی؛ لاگ‌ها بدون مقادیر حساس.</p></div>
-      <div class="feature"><div class="icon">🇮🇷</div><h3>تمام‌فارسی و راست‌چین</h3><p>رابط مدیریت کامل فارسی؛ تاریخ شمسی؛ مستندات فارسی؛ نصب در ۵ دقیقه.</p></div>
+      <div class="feature"><div class="icon">🤖</div><h3>۸ عملیات هوش مصنوعی</h3><p>تولید، بازنویسی، خلاصه، تیتر، کپشن، ترجمه، بهینه‌سازی SEO و ساخت هشتگ. اتصال به سرویس‌های سازگار با OpenAI.</p></div>
+      <div class="feature"><div class="icon">📡</div><h3>برای پیام‌رسان‌های ایرانی</h3><p>تلگرام، بله، ایتا و روبیکا در افزونه پشتیبانی می‌شوند. در هر لحظه یک پلتفرم ربات را در تنظیمات انتخاب می‌کنید:</p><div class="platform-list"><span>تلگرام</span><span>بله</span><span>ایتا</span><span>روبیکا</span></div></div>
+      <div class="feature"><div class="icon">👀</div><h3>بازبینی پیش از انتشار</h3><p>پیش‌نمایش و امکان ویرایش متن؛ انتشار پس از تأیید یا زمان‌بندی شما انجام می‌شود.</p></div>
+      <div class="feature"><div class="icon">⏱</div><h3>زمان‌بندی و صف انتشار</h3><p>صف با اجرای اتمیک، تلاش مجدد خودکار و امکان اجرای دوباره یا لغو کارها.</p></div>
+      <div class="feature"><div class="icon">🖼</div><h3>عکس یا آلبوم عکس</h3><p>ارسال یک تصویر با کپشن یا چند تصویر در قالب یک آلبوم، از کتابخانه رسانه وردپرس.</p></div>
+      <div class="feature"><div class="icon">🔒</div><h3>نگهداری امن کلیدها</h3><p>توکن ربات و کلید سرویس هوش مصنوعی رمزنگاری می‌شوند و در لاگ‌ها پنهان می‌مانند.</p></div>
+      <div class="feature"><div class="icon">🇮🇷</div><h3>رابط فارسی و راست‌چین</h3><p>مدیریت محتوا، کانال‌ها، سرویس‌های هوش مصنوعی و صف انتشار از پیشخوان وردپرس.</p></div>
     </div>
   </div>
 </section>
@@ -165,25 +168,26 @@
 <section id="shots" style="background:#fff;">
   <div class="container">
     <h2 class="title">یک نگاه به پیشخوان</h2>
-    <p class="subtitle">اسکرین‌شات‌های واقعی محصول (نسخه ۱.۱.۰)</p>
+    <p class="subtitle">نماهایی از رابط مدیریت افزونه؛ نسخه محصول ۱.۰.۰ است.</p>
     <div class="gallery">
       <figure><img src="shots/01-dashboard.jpg" alt="داشبورد" loading="lazy"><figcaption>داشبورد: نمای کلی کانال‌ها، پست‌ها، صف و لاگ‌ها</figcaption></figure>
-      <figure><img src="shots/02-telegram.jpg" alt="اتصال تلگرام" loading="lazy"><figcaption>اتصال ربات تلگرام با اعتبارسنجی و تست اتصال</figcaption></figure>
+      <figure><img src="shots/02-telegram.jpg" alt="تنظیم پلتفرم پیام‌رسان و اتصال ربات" loading="lazy"><figcaption>انتخاب پلتفرم پیام‌رسان و تنظیم ربات</figcaption></figure>
       <figure><img src="shots/03-ai.jpg" alt="سرویس‌های AI" loading="lazy"><figcaption>هر سرویس سازگار OpenAI — کلیدها رمزنگاری‌شده ذخیره می‌شوند</figcaption></figure>
       <figure><img src="shots/04-generate.jpg" alt="تولید با AI" loading="lazy"><figcaption>تولید/بازنویسی/خلاصه/ترجمه با ویرایش مستقیم خروجی</figcaption></figure>
       <figure><img src="shots/05-posts.jpg" alt="پست‌ها" loading="lazy"><figcaption>گردش کار: پیش‌نویس ← تأیید شما ← زمان‌بندی یا انتشار فوری</figcaption></figure>
       <figure><img src="shots/06-queue.jpg" alt="صف انتشار" loading="lazy"><figcaption>صف اتمیک با اجرای دستی، تلاش مجدد و لغو</figcaption></figure>
-      <figure><img src="shots/08-preview.jpg" alt="پیش‌نمایش تلگرام" loading="lazy"><figcaption>پیش‌نمایش پیام تلگرام + هشدار سقف ۴۰۹۶ کاراکتر</figcaption></figure>
-      <figure><img src="shots/07-workflow.jpg" alt="گردش کار" loading="lazy"><figcaption>گردش کار ۴ مرحله‌ای — هیچ‌چیز بدون تأیید شما منتشر نمی‌شود</figcaption></figure>
+      <figure><img src="shots/08-preview.jpg" alt="پیش‌نمایش تلگرام" loading="lazy"><figcaption>پیش‌نمایش پیام در پیام‌رسان انتخابی</figcaption></figure>
+      <figure><img src="shots/07-workflow.jpg" alt="گردش کار" loading="lazy"><figcaption>گردش کار: تولید، بازبینی، تأیید و زمان‌بندی انتشار</figcaption></figure>
+      <figure><img src="shots/infographic-1000.jpg" alt="مراحل کار با افزونه ENZO" loading="lazy"><figcaption>مراحل راه‌اندازی و انتشار محتوا در ENZO</figcaption></figure>
     </div>
   </div>
 </section>
 
 <section id="demo" class="demo-wrap">
   <div class="container">
-    <h2 class="title" style="color:#fff">تست آنلاین</h2>
-    <p class="subtitle" style="color:#b8c8d8">نسخه نمایشی پنل مدیریت — همین‌جا کلیک کن و ور برو</p>
-    <div class="demo-note">⚠️ این دمو شبیه‌سازی‌شده و بدون اتصال واقعی به تلگرام/AI است؛ داده‌ها نمایشی‌اند. محصول اصلی داخل پیشخوان وردپرس شما اجرا می‌شود.</div>
+    <h2 class="title" style="color:#fff">پیش‌نمایش تعاملی</h2>
+    <p class="subtitle" style="color:#b8c8d8">با بخش‌های نمونه آشنا شوید و گردش کار را ببینید.</p>
+    <div class="demo-note">این پیش‌نمایش مستقل و شبیه‌سازی‌شده است؛ به حساب تلگرام، بله، ایتا، روبیکا یا سرویس AI وصل نمی‌شود. اطلاعات و خروجی‌ها نمونه‌اند. نسخه واقعی پس از نصب در وردپرس و واردکردن تنظیمات شما کار می‌کند.</div>
 
     <div class="demo-app">
       <div class="demo-side">
@@ -192,7 +196,7 @@
         <button data-view="gen">🤖 تولید با AI</button>
         <button data-view="posts">📋 پست‌ها</button>
         <button data-view="queue">⏱ صف انتشار</button>
-        <button data-view="tg">✈ تلگرام</button>
+        <button data-view="platforms">📡 پیام‌رسان‌ها</button>
       </div>
       <div class="demo-main" id="demoMain"></div>
     </div>
@@ -208,7 +212,9 @@
       <details><summary>آیا خودش بدون اجازه من پست منتشر می‌کند؟</summary><p>خیر. گردش کار انزو عمداً بر تأیید انسانی استوار است: خروجی AI پیش‌نویس ذخیره می‌شود و تنها پس از تأیید یا زمان‌بندیِ شما منتشر می‌گردد.</p></details>
       <details><summary>اگر سرور موقع انتشار قطع شود چه می‌شود؟</summary><p>صف انتشار اتمیک است: هر کار با قفل و TTL اجرا می‌شود و در صورت خطا با فاصله نمایی تا ۵ بار تلاش می‌کند. انتشار تکراری رخ نمی‌دهد.</p></details>
       <details><summary>توکن ربات و کلید API کجا ذخیره می‌شود؟</summary><p>در دیتابیس سایت خودتان، رمزنگاری‌شده با XChaCha20-Poly1305. در هیچ پاسخ REST، فرم یا لاگی نمایش داده نمی‌شوند (به‌صورت خودکار حذف/ماسک می‌شوند).</p></details>
-      <details><summary>هاست من به تلگرام دسترسی دارد؟</summary><p>میزبان باید بتواند به api.telegram.org و endpoint سرویس AI شما HTTPS خروجی بزند. اگر هاستتان محدود است، Base URL سرویس‌هایی مثل OpenRouter معمولاً در دسترس‌تر است.</p></details>
+      <details><summary>کدام پیام‌رسان‌ها پشتیبانی می‌شوند؟</summary><p>تلگرام، بله، ایتا و روبیکا. پلتفرم را از تنظیمات افزونه انتخاب می‌کنید و هر بار یک پیام‌رسان فعال است. این پیش‌نمایش اتصال واقعی به هیچ‌کدام ندارد. برای استفاده از نسخه اصلی، هاست وردپرس باید دسترسی HTTPS خروجی به API پیام‌رسان انتخابی و سرویس AI داشته باشد.</p></details>
+      <details><summary>آیا این صفحه واقعاً محتوا را منتشر می‌کند؟</summary><p>خیر. این صفحه فقط پیش‌نمایش تعاملی با داده‌های نمونه است. انتشار واقعی پس از نصب افزونه در وردپرس، تنظیم ربات و سرویس AI و تأیید شما انجام می‌شود.</p></details>
+      <details><summary>ارسال چند عکس هم ممکن است؟</summary><p>بله. در نسخه افزونه می‌توانید یک عکس با کپشن یا چند عکس را از کتابخانه رسانه انتخاب کنید؛ چند عکس به صورت آلبوم ارسال می‌شود.</p></details>
       <details><summary>نیازمندی‌ها؟</summary><p>وردپرس ۶.۵+ (تک‌سایت)، PHP 8.1+ با اکستنشن sodium، MySQL 5.7+ / MariaDB 10.3+.</p></details>
     </div>
   </div>
@@ -216,49 +222,48 @@
 
 <section class="cta">
   <div class="container">
-    <h2>آماده‌ای کانال تلگرامت خودکار شود؟</h2>
-    <p>نصب در ۵ دقیقه — بدون هیچ وابستگی خارجی، با حذف کامل در uninstall</p>
+    <h2>گردش کار محتوایتان را در وردپرس مدیریت کنید</h2>
+    <p>پس از نصب افزونه، ربات و سرویس AI خود را پیکربندی کنید؛ انتشار با بازبینی و تأیید شما انجام می‌شود.</p>
     <a class="btn btn-primary" href="https://rtl-theme.com" target="_blank" rel="noopener">خرید از RTL-Theme</a>
   </div>
 </section>
 
-<footer>انزو — AI Telegram Admin · نسخه ۱.۱.۰ · این صفحه دموی نمایشی است · <a href="https://github.com/mhasseli1987/enzo">مخزن پروژه</a></footer>
+<footer>ENZO — اتوماسیون محتوای وردپرس · نسخه محصول ۱.۰.۰ · این صفحه پیش‌نمایش تعاملی است · <a href="https://github.com/mhasseli1987/rastchin-1">مخزن پروژه</a></footer>
 
 <script>
 /* --- شبیه‌سازی دمو: داده نمایشی، بدون هیچ تماس شبکه‌ای --- */
-var CH = 'کانال رسمی سایت';
+var CH = 'کانال نمونه';
 function badge(t, c) { return '<span class="badge ' + c + '">' + t + '</span>'; }
 var V = {
   dash: function () {
     return '<h4>داشبورد</h4><div class="desc">نمای کلی وضعیت انزو — کانال‌ها، محتوا، صف انتشار و لاگ‌ها</div>'
       + '<div class="d-cards">'
-      + '<div class="d-card"><div class="v">۲</div><div class="l">کانال‌های متصل</div></div>'
-      + '<div class="d-card"><div class="v">۷</div><div class="l">پست‌ها <span style="color:#94a3b8;font-size:10px">پیش‌نویس ۲ · منتشرشده ۲</span></div></div>'
-      + '<div class="d-card"><div class="v">۸</div><div class="l">کارهای صف</div></div>'
-      + '<div class="d-card"><div class="v">۱۰</div><div class="l">لاگ‌ها</div></div>'
+      + '<div class="d-card"><div class="v">۴</div><div class="l">پلتفرم قابل انتخاب</div></div>'
+      + '<div class="d-card"><div class="v">۸</div><div class="l">عملیات هوش مصنوعی</div></div>'
+      + '<div class="d-card"><div class="v">✓</div><div class="l">تأیید انسانی پیش از انتشار</div></div>'
+      + '<div class="d-card"><div class="v">۱ + چند</div><div class="l">عکس تکی یا آلبوم</div></div>'
       + '</div><h4 style="margin-top:18px">لاگ‌های اخیر</h4>'
       + '<table class="d-tbl"><tr><th>سطح</th><th>بخش</th><th>پیام</th><th>زمان</th></tr>'
-      + '<tr><td>' + badge('اطلاعات', 'b-blue') + '</td><td><code>telegram</code></td><td>Telegram bot connected</td><td>۱۴۰۵/۰۷/۱۹ ۱۴:۵۹</td></tr>'
-      + '<tr><td>' + badge('اطلاعات', 'b-blue') + '</td><td><code>publish</code></td><td>Post published to channel</td><td>۱۴۰۵/۰۷/۱۹ ۱۴:۳۳</td></tr>'
-      + '<tr><td>' + badge('هشدار', 'b-yellow') + '</td><td><code>publish</code></td><td>Telegram sendPhoto retry scheduled</td><td>۱۴۰۵/۰۷/۱۹ ۱۴:۱۰</td></tr>'
-      + '<tr><td>' + badge('خطا', 'b-red') + '</td><td><code>publish</code></td><td>Telegram error 403: bot is not a member…</td><td>۱۴۰۵/۰۷/۱۹ ۱۳:۲۶</td></tr>'
+      + '<tr><td>' + badge('نمونه', 'b-blue') + '</td><td><code>content</code></td><td>پیش‌نویس برای بازبینی آماده شد</td><td>—</td></tr>'
+      + '<tr><td>' + badge('نمونه', 'b-blue') + '</td><td><code>review</code></td><td>محتوا پس از تأیید برای زمان‌بندی آماده است</td><td>—</td></tr>'
+      + '<tr><td>' + badge('نمونه', 'b-yellow') + '</td><td><code>queue</code></td><td>کار انتشار در صف زمان‌بندی قرار گرفت</td><td>—</td></tr>'
+      + '<tr><td>' + badge('اطلاع', 'b-gray') + '</td><td><code>demo</code></td><td>این داده‌ها صرفاً نمایشی هستند</td><td>—</td></tr>'
       + '</table>';
   },
   gen: function () {
-    return '<h4>AI تولید</h4><div class="desc">تولید، بازنویسی، خلاصه و ترجمه محتوا — خروجی به‌صورت خودکار پیش‌نویس ذخیره می‌شود (در دمو: شبیه‌سازی)</div>'
+    return '<h4>هوش مصنوعی</h4><div class="desc">۸ عملیات نمونه؛ اجرای واقعی به سرویس AI تنظیم‌شده در وردپرس نیاز دارد.</div>'
       + '<div class="d-form">'
-      + '<label>عملیات</label><select id="gOp"><option>تولید محتوا</option><option>بازنویسی</option><option>خلاصه‌سازی</option><option>ترجمه</option><option>تیتر</option><option>کپشن</option></select>'
-      + '<label>موضوع یا ورودی</label><textarea id="gIn" rows="3" placeholder="مثال: معرفی تخفیف ۲۰٪ محصولات پاییزی برای کانال فروشگاه"></textarea>'
-      + '<button class="btn" onclick="demoGenerate()">اجرا با AI</button>'
+      + '<label>عملیات</label><select id="gOp"><option>تولید محتوا</option><option>بازنویسی</option><option>خلاصه‌سازی</option><option>ساخت تیتر</option><option>نوشتن کپشن</option><option>ترجمه</option><option>بهینه‌سازی SEO</option><option>استخراج هشتگ</option></select>'
+      + '<label>موضوع یا متن نمونه</label><textarea id="gIn" rows="3" placeholder="مثال: معرفی تخفیف محصولات پاییزی برای فروشگاه محلی"></textarea>'
+      + '<button class="btn" onclick="demoGenerate()">مشاهده خروجی نمونه</button>'
       + '</div><div id="gOut" style="margin-top:16px"></div>';
   },
   posts: function () {
     return '<h4>پست‌ها</h4><div class="desc">گردش کار: پیش‌نویس ← تأیید شما ← زمان‌بندی یا انتشار فوری</div>'
       + '<table class="d-tbl"><tr><th>#</th><th>عنوان / متن</th><th>کانال</th><th>وضعیت</th><th>عملیات</th></tr>'
-      + '<tr><td><code>۷</code></td><td><b>معرفی نسخه جدید قالب فروشگاهی</b><br><span style="color:#64748b">۱۰ قابلیت تازه…</span></td><td>کانال رسمی</td><td>' + badge('پیش‌نویس', 'b-gray') + '</td><td><button class="d-btn" onclick="alert(\'در محصول واقعی: پیش‌نمایش تلگرامی + ویرایش\')">پیش‌نمایش</button></td></tr>'
-      + '<tr><td><code>۶</code></td><td><b>مقاله جدید: هوش مصنوعی در بازاریابی محتوا</b></td><td>کانال رسمی</td><td>' + badge('پیش‌نویس', 'b-gray') + '</td><td><button class="d-btn" onclick="alert(\'در محصول واقعی: تأیید ← زمان‌بندی یا انتشار فوری\')">تأیید</button></td></tr>'
-      + '<tr><td><code>۵</code></td><td><b>آموزش بکاپ‌گیری خودکار از دیتابیس</b></td><td>کانال رسمی</td><td>' + badge('منتشرشده', 'b-green') + '</td><td>—</td></tr>'
-      + '<tr><td><code>۳</code></td><td><b>راهنمای کامل اتصال درگاه بانکی جدید</b></td><td>کانال محصولات</td><td>' + badge('زمان‌بندی‌شده', 'b-purple') + '</td><td>' + badge('۱۴۰۵/۰۷/۲۰ ۲۰:۰۰', 'b-gray') + '</td></tr>'
+      + '<tr><td><code>۱</code></td><td><b>معرفی محصول پاییزی</b><br><span style="color:#64748b">۲ تصویر پیوست · نمونه آلبوم</span></td><td>کانال نمونه</td><td>' + badge('پیش‌نویس', 'b-gray') + '</td><td><button class="d-btn" onclick="alert(\'در نسخه اصلی، پیش‌نمایش و ویرایش در وردپرس انجام می‌شود.\')">پیش‌نمایش</button></td></tr>'
+      + '<tr><td><code>۲</code></td><td><b>راهنمای خرید محلی</b></td><td>کانال نمونه</td><td>' + badge('پیش‌نویس', 'b-gray') + '</td><td><button class="d-btn" onclick="alert(\'در نسخه اصلی، شما پیش از انتشار محتوا را تأیید می‌کنید.\')">بازبینی</button></td></tr>'
+      + '<tr><td><code>۳</code></td><td><b>خبرنامه هفتگی</b></td><td>کانال نمونه</td><td>' + badge('زمان‌بندی‌شده', 'b-purple') + '</td><td>' + badge('نمونه', 'b-gray') + '</td></tr>'
       + '</table>';
   },
   queue: function () {
@@ -271,13 +276,19 @@ var V = {
       + '</table>';
   },
   tg: function () {
-    return '<h4>تلگرام</h4><div class="desc">اتصال ربات تلگرام — توکن با رمزنگاری XChaCha20 ذخیره می‌شود (در دمو هیچ توکنی ذخیره نمی‌شود)</div>'
-      + '<div style="margin-bottom:14px">' + badge('✔ ربات متصل است: @mysite_admin_bot', 'b-green') + '</div>'
-      + '<div class="d-form"><label>Bot Token (از @BotFather)</label><input type="password" placeholder="123456789:AAH…" value="123456789:AA••••••••••••••••••••••••" disabled>'
-      + '<div style="font-size:11px;color:#64748b;margin-top:6px">در دمو غیرفعال است — توکن واقعی فقط روی سایت خودتان وارد می‌شود.</div></div>'
-      + '<div class="tg-card" style="margin-top:16px"><div class="tg-head"><div class="tg-av">ک</div><div><div style="font-weight:800;font-size:13px">' + CH + '</div><div style="font-size:11px;opacity:.8;direction:ltr;text-align:right">@mysite_news</div></div></div>'
-      + '<div class="tg-body">🔥 معرفی نسخه جدید قالب فروشگاهی — ۱۰ قابلیت تازه\n\nاین متن نمونه برای نمایش پیش‌نمایش تلگرامی در دمو است.</div>'
-      + '<div class="tg-foot"><span>زمان ارسال، سر وقت خودش</span><span>۸۸ کاراکتر</span></div></div>';
+    return '<h4>پیش‌نمایش پیام</h4><div class="desc">نمونه نمایشی پیش‌نمایش پست؛ هیچ پیامی ارسال نمی‌شود.</div>'
+      + '<div class="tg-card"><div class="tg-head"><div class="tg-av">ا</div><div><div style="font-weight:800;font-size:13px">' + CH + '</div><div style="font-size:11px;opacity:.8">پلتفرم انتخابی شما</div></div></div>'
+      + '<div class="tg-body">🍂 پیشنهاد تازه برای فصل پاییز\n\nمتن نهایی را پیش از زمان‌بندی بازبینی و تأیید کنید.\n\n#خرید_محلی #پیشنهاد_ویژه</div>'
+      + '<div class="tg-foot"><span>متن و رسانه نمونه</span><span>آلبوم: ۲ تصویر نمونه</span></div></div>';
+  },
+  platforms: function () {
+    return '<h4>پلتفرم ربات</h4><div class="desc">در نسخه اصلی، یکی از پلتفرم‌ها را از تنظیمات انتخاب می‌کنید؛ این پیش‌نمایش به APIها وصل نیست.</div>'
+      + '<div class="features" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'
+      + '<div class="d-card"><div class="v">✈</div><div class="l">تلگرام</div></div>'
+      + '<div class="d-card"><div class="v">ب</div><div class="l">بله</div></div>'
+      + '<div class="d-card"><div class="v">ا</div><div class="l">ایتا</div></div>'
+      + '<div class="d-card"><div class="v">ر</div><div class="l">روبیکا</div></div></div>'
+      + '<p class="desc" style="margin-top:16px">برای ارسال واقعی، ربات، دسترسی کانال و API پیام‌رسان انتخابی را در وردپرس تنظیم کنید.</p>';
   },
 };
 function show(id) {
@@ -290,12 +301,12 @@ function demoGenerate() {
   var op = document.getElementById('gOp').value;
   var out = document.getElementById('gOut');
   if (!input) { out.innerHTML = '<div class="badge b-red">متن ورودی خالی است.</div>'; return; }
-  out.innerHTML = '<div class="badge b-blue">در حال تولید…</div>';
+    out.innerHTML = '<div class="badge b-blue">در حال آماده‌سازی نمونه…</div>';
   setTimeout(function () {
-    out.innerHTML = '<div class="d-form"><label>خروجی شبیه‌سازی‌شده (' + op + ')</label><textarea rows="5" readonly>'
-      + '🔥 ' + input + '\n\nبه‌عنوان نمونه، این متن در نسخه واقعی توسط سرویس AI خودِ شما تولید می‌شود و همین‌جا قابل ویرایش است.'
-      + '\n\n✅ در محصول واقعی: خروجی بلافاصله به‌عنوان پیش‌نویس ذخیره و قابل تأیید/زمان‌بندی است.</textarea>'
-      + '<button class="btn" onclick="show(\'posts\')">رفتن به پست‌ها →</button></div>';
+    out.innerHTML = '<div class="d-form"><label>خروجی نمونهٔ «' + op + '» — تولید واقعی انجام نشد</label><textarea rows="5" readonly>'
+      + '✨ ' + input + '\n\nاین متن نمونه است. در نسخه نصب‌شده، خروجی بر اساس تنظیمات سرویس هوش مصنوعی شما ساخته و برای بازبینی آماده می‌شود.'
+      + '\n\nپس از تأیید شما می‌توان آن را زمان‌بندی کرد یا در صف انتشار گذاشت.</textarea>'
+      + '<button class="btn" onclick="show(\'posts\')">رفتن به نمونه پست‌ها ←</button></div>';
   }, 900);
 }
 document.querySelectorAll('.demo-side button[data-view]').forEach(function (b) {
